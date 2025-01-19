@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.viewModels.builder
 
+import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
@@ -12,7 +13,7 @@ import com.letthemcook.editor.domain.editor.components.BlockComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
-import com.letthemcook.editor.domain.editor.components.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
 import com.letthemcook.editor.domain.editor.components.containment.ComponentContainment
 import com.letthemcook.editor.domain.editor.components.prototype.definePointRelation
@@ -175,6 +176,7 @@ class BuilderViewModel : ViewModel() {
     }
 
     // TODO add settings to retain product on the block
+    // TODO add settings to show debug (helper) rectangles on containers
 
     private fun removeComponent(index: Int) {
         val componentToDelete = uiState.value.blockComponents[index]
@@ -336,7 +338,7 @@ class BuilderViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 canvasUiState = it.canvasUiState.copy(
-                    zoom = (it.canvasUiState.zoom * zoom).limit(0.75f, 2f)
+                    zoom = (it.canvasUiState.zoom * zoom).limit(0.5f, 2f)
                 )
             )
         }
@@ -415,9 +417,18 @@ class BuilderViewModel : ViewModel() {
 
                 closestBlockComponent?.definePointRelation(pointerMoveOffset.scaledAndTranslated())?.let { relation ->
                     when (closestBlockComponent) {
-                        is BlockComponent -> closestBlockComponent.shadeQuarterForNextFrame(relation)
-                        is HorizontalComposedComponent -> closestBlockComponent.shadeQuarterForNextFrame(relation)
-                        is VerticalComposedComponent -> closestBlockComponent.shadeQuarterForNextFrame(relation)
+                        is BlockComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
+                        is HorizontalComposedComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
+                        is VerticalComposedComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
                     }
                 }
 

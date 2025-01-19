@@ -12,6 +12,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextAlign
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
+import com.letthemcook.editor.domain.editor.components.containment.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.MIN_LINE_LENGTH
@@ -102,6 +103,9 @@ data class StartComponent(
             height = textLayout.size.height + DRAW_PADDING * 2 + MIN_LINE_LENGTH
         )
     }
+
+    override fun shadeQuarterForNextFrame(relation: Relation) = Unit
+    override fun highlightForNextFrame() = Unit
 
     // Components
 

@@ -12,8 +12,8 @@ import com.letthemcook.editor.domain.editor.components.containment.ComponentCont
 import com.letthemcook.editor.domain.editor.components.containment.Relation
 
 const val DRAW_PADDING = 12f
-const val MIN_LINE_LENGTH = 48f
-const val HORIZONTAL_COMPONENT_PADDING = 64f
+const val MIN_LINE_LENGTH = 64f
+const val HORIZONTAL_COMPONENT_PADDING = 96f
 const val SMOOTHEN_VALUE = 4f
 const val ROUNDED_RECT_CORNER_RADIUS = 32f
 

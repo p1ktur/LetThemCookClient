@@ -15,6 +15,7 @@ import com.letthemcook.editor.domain.editor.geometry.checkForContainment
 import com.letthemcook.editor.domain.editor.components.containment.ComponentContainment
 import com.letthemcook.editor.domain.editor.components.containment.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.MIN_LINE_LENGTH
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
@@ -57,6 +58,8 @@ data class BlockComponent(
 
     @Transient
     private var shadingQuarterForNextFrame: Relation? = null
+    @Transient
+    private var highlightingForNextFrame: Boolean = false
 
     // Graphics
 
@@ -99,7 +102,17 @@ data class BlockComponent(
         highlightColor: Color,
         positionXIsCentral: Boolean = false
     ) {
-        val color = if (isHighlighted) highlightColor else frameColor
+        val currentFrameColor = if (highlightingForNextFrame) {
+            highlightColor
+        } else {
+            frameColor
+        }
+        val currentContainerColor = if (highlightingForNextFrame) {
+            highlightingForNextFrame = false
+            highlightColor.copy(0.25f).compositeOver(containerColor)
+        } else {
+            containerColor
+        }
 
         val maxWidth = MIN_WIDTH.toInt() * 3
         var contentHeightSum = 0f
@@ -161,7 +174,7 @@ data class BlockComponent(
         )
 
         drawScope.drawRoundRect(
-            color = containerColor,
+            color = currentContainerColor,
             topLeft = position.copy(y = position.y + MIN_LINE_LENGTH),
             size = this.size.copy(
                 width = if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
@@ -171,14 +184,14 @@ data class BlockComponent(
             style = Fill
         )
         drawScope.drawRoundRect(
-            color = color,
+            color = currentFrameColor,
             topLeft = position.copy(y = position.y + MIN_LINE_LENGTH),
             size = this.size.copy(
                 width = if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
                 height = this.size.height - 2 * MIN_LINE_LENGTH
             ),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
-            style = Stroke(2f)
+            style = Stroke(4f)
         )
 
         shadingQuarterForNextFrame?.let { containment ->
@@ -235,7 +248,7 @@ data class BlockComponent(
                     topLeft = productCurrentPosition,
                     padding = DRAW_PADDING,
                     color = textColor,
-                    textColor = containerColor
+                    textColor = currentContainerColor
                 )
 
                 cachedDrawnProductLabelSizes.add(layout.size)
@@ -265,8 +278,12 @@ data class BlockComponent(
 //        }
     }
 
-    fun shadeQuarterForNextFrame(relation: Relation) {
+    override fun shadeQuarterForNextFrame(relation: Relation) {
         shadingQuarterForNextFrame = relation
+    }
+
+    override fun highlightForNextFrame() {
+        highlightingForNextFrame = true
     }
 
     fun calculateSize(

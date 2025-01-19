@@ -7,7 +7,7 @@ import com.letthemcook.editor.domain.editor.components.BlockComponent
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
-import com.letthemcook.editor.domain.editor.components.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
 
 data class BuilderUiState(
     // Products

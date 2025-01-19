@@ -22,6 +22,4 @@ interface ComposedComponent : Component {
         highlightColor: Color,
         positionXIsCentral: Boolean = false
     )
-
-    fun shadeQuarterForNextFrame(relation: Relation)
 }

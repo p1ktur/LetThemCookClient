@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.getLongTime
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropTarget
 import com.letthemcook.editor.domain.dragging.DraggingState
-import com.letthemcook.editor.domain.editor.components.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.components.BlockItem

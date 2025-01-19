@@ -1,4 +1,4 @@
-package com.letthemcook.editor.domain.editor.components
+package com.letthemcook.editor.domain.editor.components.unused
 
 import androidx.compose.ui.geometry.*
 import androidx.compose.ui.text.*
@@ -6,6 +6,7 @@ import androidx.compose.ui.text.style.*
 import androidx.compose.ui.unit.*
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.editor.domain.editor.components.BlockComponent
 import com.letthemcook.editor.domain.editor.components.BlockComponent.Companion.MIN_HEIGHT
 import com.letthemcook.editor.domain.editor.components.BlockComponent.Companion.MIN_WIDTH
 import com.letthemcook.editor.domain.editor.components.prototype.Component

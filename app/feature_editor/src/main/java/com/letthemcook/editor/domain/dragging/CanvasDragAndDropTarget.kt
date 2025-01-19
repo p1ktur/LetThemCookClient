@@ -7,7 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.editor.domain.editor.components.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
 class CanvasDragAndDropTarget(

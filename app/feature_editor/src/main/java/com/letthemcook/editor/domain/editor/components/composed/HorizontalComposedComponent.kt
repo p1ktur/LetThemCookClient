@@ -33,7 +33,6 @@ data class HorizontalComposedComponent(
     private var cachedComponentsHashcode: Int = 0
     private var cachedSize: Size = Size.Zero
 
-    @Transient
     private var shadingQuarterForNextFrame: Relation? = null
 
     // Graphics
@@ -54,11 +53,11 @@ data class HorizontalComposedComponent(
             position -= Offset(size.width / 2, 0f)
         }
 
-        drawScope.drawRect(
-            color = Color.Red.copy(alpha = 0.25f),
-            topLeft = position,
-            size = size
-        )
+//        drawScope.drawRect(
+//            color = Color.Red.copy(alpha = 0.25f),
+//            topLeft = position,
+//            size = size
+//        )
 
         drawScope.drawLine(
             color = frameColor,
@@ -74,7 +73,7 @@ data class HorizontalComposedComponent(
             strokeWidth = 4f
         )
 
-        var cursorPosition: Offset = position
+        var cursorPosition: Offset = position.copy(x = position.x + HORIZONTAL_COMPONENT_PADDING)
 
         //TODO pass custom MIN_LINE_LENGTH so that vertically blocks can be stretched
 
@@ -212,11 +211,16 @@ data class HorizontalComposedComponent(
         shadingQuarterForNextFrame = relation
     }
 
+    override fun highlightForNextFrame() {
+        components.forEach { it.highlightForNextFrame() }
+    }
+
     private fun calculateSize(): Size {
         return if (cachedComponentsHashcode == components.componentHashCodes()) {
             cachedSize
         } else {
-            val width = components.map { it.size.width }.reduce { acc, width -> acc + width } + (components.size - 1) * HORIZONTAL_COMPONENT_PADDING
+            // (components.size - 1 + 2)
+            val width = components.map { it.size.width }.reduce { acc, width -> acc + width } + (components.size + 1) * HORIZONTAL_COMPONENT_PADDING
             val height = getComponentsMaxHeight()
             val size = Size(width, height + 2 * MIN_LINE_LENGTH)
 

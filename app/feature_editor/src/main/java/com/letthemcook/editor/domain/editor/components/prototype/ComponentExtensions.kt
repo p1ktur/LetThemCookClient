@@ -1,10 +1,13 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
+import android.util.Log
 import android.util.Log.e
 import androidx.compose.ui.geometry.Offset
 import com.letthemcook.editor.domain.editor.components.BlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
+import com.letthemcook.editor.domain.editor.components.EmptyComponent.nextComponent
+import com.letthemcook.editor.domain.editor.components.EmptyComponent.prevComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
@@ -12,6 +15,8 @@ import com.letthemcook.editor.domain.editor.components.composed.VerticalComposed
 import com.letthemcook.editor.domain.editor.components.containment.ComponentContainment
 import com.letthemcook.editor.domain.editor.components.containment.Relation
 import com.letthemcook.editor.domain.editor.geometry.smoothen
+import com.letthemcook.editor.ui.drawing.HORIZONTAL_COMPONENT_PADDING
+import com.letthemcook.editor.ui.drawing.MIN_LINE_LENGTH
 
 // Graphics
 
@@ -63,7 +68,8 @@ fun Component.insertTopComponent(insertedComponent: Component) {
             }
         }
         is VerticalComposedComponent -> {
-            components.add(insertedComponent)
+            insertedComponent.parentComponent = this
+            components.add(0, insertedComponent)
         }
 //        is EndComponent -> {
 //            val convertedParent = parentComponent?.asComposed()
@@ -112,6 +118,7 @@ fun Component.insertBottomComponent(insertedComponent: Component) {
             }
         }
         is VerticalComposedComponent -> {
+            insertedComponent.parentComponent = this
             components.add(insertedComponent)
         }
         is StartComponent -> {
@@ -142,6 +149,7 @@ fun Component.insertLeftComponent(insertedComponent: Component) {
             insertedComponent.parentComponent = composedComponent
         }
         is HorizontalComposedComponent -> {
+            insertedComponent.parentComponent = this
             components.add(0, insertedComponent)
         }
     }
@@ -165,6 +173,7 @@ fun Component.insertRightComponent(insertedComponent: Component) {
             insertedComponent.parentComponent = composedComponent
         }
         is HorizontalComposedComponent -> {
+            insertedComponent.parentComponent = this
             components.add(insertedComponent)
         }
     }
@@ -230,6 +239,16 @@ fun Component.getDistanceSquaredFromCenter(point: Offset): Float {
     return (point - center).getDistanceSquared()
 }
 
+fun Component.pointInBounds(point: Offset): Boolean {
+    val horizontalPadding = if (this is ComposedComponent) HORIZONTAL_COMPONENT_PADDING else 0f
+    val verticalPadding = if (this is ComposedComponent) 0f else -MIN_LINE_LENGTH
+
+    val contains = point.x in (position.x - horizontalPadding..position.x + size.width + horizontalPadding) &&
+            point.y in (position.y - verticalPadding..position.y + size.height + verticalPadding)
+
+    return contains
+}
+
 fun Component.definePointRelation(pointPosition: Offset): Relation {
     val topLeft = position
     val bottomRight = position + Offset(size.width, size.height)
@@ -262,32 +281,42 @@ fun Component.definePointRelation(pointPosition: Offset): Relation {
 }
 
 fun List<Component>.getClosestToThePoint(point: Offset): Component? {
-    val openedComponents = mutableListOf<Component>()
-    openedComponents.addAll(this)
+    if (this.size == 1 && first() is BlockComponent) return first()
 
-    forEach { component ->
-        if (component is BlockComponent) {
-            var currentComponent = component.nextComponent
+    var currentComponent = find { it.pointInBounds(point) }
+    var foundComponent = false
 
-            while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-                openedComponents.add(currentComponent)
-                currentComponent = currentComponent.nextComponent
-            }
+    while (!foundComponent && currentComponent != null) {
+        val lastComponent = currentComponent
+        currentComponent = (currentComponent as? ComposedComponent)?.components?.find { it.pointInBounds(point) }
+
+        if (currentComponent == null) {
+            currentComponent = lastComponent
+            foundComponent = true
+        }
+
+        if (currentComponent is BlockComponent) {
+            foundComponent = true
         }
     }
 
-    // TODO comodification
+    return currentComponent
 
-    val potentialComponent = openedComponents.minByOrNull { it.getDistanceSquaredFromCenter(point) }
-
-    if (potentialComponent is ComposedComponent) {
-        val childPotentialComponent = potentialComponent.components.getClosestToThePoint(point)
-        if (childPotentialComponent != null && childPotentialComponent.getDistanceSquaredFromCenter(point) < 64000f) {
-            return childPotentialComponent
-        }
-    }
-
-    return potentialComponent
+//    val potentialComponent = minByOrNull { it.getDistanceSquaredFromCenter(point) }
+//    val isRootParent = potentialComponent is ComposedComponent && potentialComponent.parentComponent == null
+//
+//    if (potentialComponent is ComposedComponent) {
+//        val childPotentialComponent = potentialComponent.components.getClosestToThePoint(point)
+//        if (childPotentialComponent != null && childPotentialComponent.pointInBounds(point)) {
+//            return childPotentialComponent
+//        }
+//    }
+//
+//    return if (isRootParent && potentialComponent?.pointInBounds(point) == true) {
+//        (potentialComponent as ComposedComponent).components.getClosestToThePoint(point)
+//    } else {
+//        potentialComponent
+//    }
 }
 
 fun List<Component>.componentHashCodes(): Int {

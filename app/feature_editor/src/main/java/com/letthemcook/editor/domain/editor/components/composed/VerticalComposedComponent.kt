@@ -53,11 +53,11 @@ data class VerticalComposedComponent(
             position -= Offset(size.width / 2, 0f)
         }
 
-        drawScope.drawRect(
-            color = Color.Blue.copy(alpha = 0.25f),
-            topLeft = position,
-            size = size
-        )
+//        drawScope.drawRect(
+//            color = Color.Blue.copy(alpha = 0.25f),
+//            topLeft = position,
+//            size = size
+//        )
 
         drawScope.drawLine(
             color = frameColor,
@@ -178,6 +178,10 @@ data class VerticalComposedComponent(
 
     override fun shadeQuarterForNextFrame(relation: Relation) {
         shadingQuarterForNextFrame = relation
+    }
+
+    override fun highlightForNextFrame() {
+        components.forEach { it.highlightForNextFrame() }
     }
 
     private fun calculateSize(): Size {
