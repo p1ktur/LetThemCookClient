@@ -42,6 +42,15 @@ android {
 }
 
 dependencies {
+    // Modules
+    implementation(project(":app:core"))
+    implementation(project(":app:theme"))
+    implementation(project(":app:feature_auth"))
+    implementation(project(":app:feature_profile"))
+    implementation(project(":app:feature_feed"))
+    implementation(project(":app:feature_recipe"))
+    implementation(project(":app:feature_editor"))
+
     // Common
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -86,4 +95,9 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Test
+    implementation(libs.junit)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.junit)
 }

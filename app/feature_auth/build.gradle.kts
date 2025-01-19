@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidKotlin)
     alias(libs.plugins.androidComposeCompiler)
     alias(libs.plugins.serializationJson)
-    alias(libs.plugins.devToolsKsp)
 }
 
 android {
@@ -39,6 +38,10 @@ android {
 }
 
 dependencies {
+    // Modules
+    implementation(project(":app:core"))
+    implementation(project(":app:theme"))
+
     // Common
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -71,4 +74,9 @@ dependencies {
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Test
+    implementation(libs.junit)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.junit)
 }
