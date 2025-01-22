@@ -25,6 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.letthemcook.core.domain.format.toHoursString
+import com.letthemcook.core.domain.format.toMinutesString
+import com.letthemcook.core.domain.format.toSecondsString
+import com.letthemcook.editor.domain.editor.components.block.BlockComponent
+import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
@@ -32,18 +37,75 @@ import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.SingleLineTextField
 import kotlin.math.roundToInt
 
+sealed interface BlockEditorState {
+    data object Hidden : BlockEditorState
+    data object Creating : BlockEditorState
+    data class EditingUnusedBlock(val component: UnusedBlockComponent) : BlockEditorState
+    data class EditingBlock(val component: BlockComponent) : BlockEditorState
+}
+
 @Composable
-fun BlockCreatorPopup(
+fun BlockEditorPopup(
+    state: BlockEditorState,
     anchorPosition: Offset,
     anchorSize: IntSize,
-    onCreate: (String, String, Int, Int, Int) -> Unit,
+    onEdit: (String, String, Int, Int, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val nameText: TextFieldState = remember { TextFieldState() }
-    val descriptionText: TextFieldState = remember { TextFieldState() }
-    val timeHoursText: TextFieldState = remember { TextFieldState() }
-    val timeMinutesText: TextFieldState = remember { TextFieldState() }
-    val timeSecondsText: TextFieldState = remember { TextFieldState() }
+    if (state == BlockEditorState.Hidden) return
+
+    val title = when (state) {
+        BlockEditorState.Hidden -> ""
+        BlockEditorState.Creating -> "Create new block"
+        is BlockEditorState.EditingBlock -> "Edit block"
+        is BlockEditorState.EditingUnusedBlock -> "Edit block"
+    }
+
+    val nameText: TextFieldState = remember(state) {
+        val text = when (state) {
+            BlockEditorState.Hidden -> ""
+            BlockEditorState.Creating -> ""
+            is BlockEditorState.EditingBlock -> state.component.name
+            is BlockEditorState.EditingUnusedBlock -> state.component.name
+        }
+        TextFieldState(text)
+    }
+    val descriptionText: TextFieldState = remember(state) {
+        val text = when (state) {
+            BlockEditorState.Hidden -> ""
+            BlockEditorState.Creating -> ""
+            is BlockEditorState.EditingBlock -> state.component.description
+            is BlockEditorState.EditingUnusedBlock -> state.component.description
+        }
+        TextFieldState(text)
+    }
+    val timeHoursText: TextFieldState = remember(state) {
+        val text = when (state) {
+            BlockEditorState.Hidden -> ""
+            BlockEditorState.Creating -> ""
+            is BlockEditorState.EditingBlock -> state.component.time.toHoursString()
+            is BlockEditorState.EditingUnusedBlock -> state.component.time.toHoursString()
+        }
+        TextFieldState(text)
+    }
+    val timeMinutesText: TextFieldState = remember(state) {
+        val text = when (state) {
+            BlockEditorState.Hidden -> ""
+            BlockEditorState.Creating -> ""
+            is BlockEditorState.EditingBlock -> state.component.time.toMinutesString()
+            is BlockEditorState.EditingUnusedBlock -> state.component.time.toMinutesString()
+        }
+        TextFieldState(text)
+    }
+    val timeSecondsText: TextFieldState = remember(state) {
+        val text = when (state) {
+            BlockEditorState.Hidden -> ""
+            BlockEditorState.Creating -> ""
+            is BlockEditorState.EditingBlock -> state.component.time.toSecondsString()
+            is BlockEditorState.EditingUnusedBlock -> state.component.time.toSecondsString()
+        }
+        TextFieldState(text)
+    }
 
     val popupPositionProvider = remember {
         object : PopupPositionProvider {
@@ -86,7 +148,7 @@ fun BlockCreatorPopup(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Create new block",
+                text = title,
                 style = LocalAppTheme.current.typography.bodyLarge
             )
             //TODO name cannot be empty so show error
@@ -109,7 +171,7 @@ fun BlockCreatorPopup(
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = 16.dp),
                     state = timeHoursText,
                     labelText = "Hours",
                     backgroundColor = LocalAppTheme.current.screenTwo
@@ -117,7 +179,7 @@ fun BlockCreatorPopup(
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = 16.dp),
                     state = timeMinutesText,
                     labelText = "Minutes",
                     backgroundColor = LocalAppTheme.current.screenTwo
@@ -125,7 +187,7 @@ fun BlockCreatorPopup(
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = 16.dp),
                     state = timeSecondsText,
                     labelText = "Seconds",
                     backgroundColor = LocalAppTheme.current.screenTwo
@@ -139,12 +201,12 @@ fun BlockCreatorPopup(
                     text = "Create",
                     onClick = {
                         try {
-                            onCreate(
-                                nameText.toString(),
-                                descriptionText.toString(),
-                                timeHoursText.toString().toInt(),
-                                timeMinutesText.toString().toInt(),
-                                timeSecondsText.toString().toInt()
+                            onEdit(
+                                nameText.text.toString(),
+                                descriptionText.text.toString(),
+                                timeHoursText.text.toString().toInt(),
+                                timeMinutesText.text.toString().toInt(),
+                                timeSecondsText.text.toString().toInt()
                             )
 
                             nameText.clearText()

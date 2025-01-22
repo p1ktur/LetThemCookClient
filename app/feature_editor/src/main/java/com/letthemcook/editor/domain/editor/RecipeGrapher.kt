@@ -8,20 +8,18 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import com.letthemcook.editor.domain.editor.components.BlockComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
-import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
-import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
+import com.letthemcook.editor.domain.editor.components.prototype.drawOn
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 
-class RecipeGrapher {
-
+object RecipeGrapher {
     fun drawRecipeGraph(
         // Data
         startComponent: StartComponent,
+        centralComponent: Component,
         endComponent: EndComponent,
         // Graphics
         drawScope: DrawScope,
@@ -34,7 +32,7 @@ class RecipeGrapher {
         textColor: Color,
         highlightColor: Color
     ) {
-        if (startComponent.nextComponent is EndComponent) {
+        if (centralComponent is EmptyComponent) {
             val circleTextLayout = textMeasurer.measure(
                 text = "Drag Block Here",
                 style = titleTextStyle
@@ -96,94 +94,41 @@ class RecipeGrapher {
                 textStyle = titleTextStyle
             )
         } else {
-            getAndDrawGraph(
-                startComponent = startComponent,
-                onDrawComponent = { position, component ->
-                    component.position = position
+            startComponent.drawOn(
+                drawScope = drawScope,
+                textMeasurer = textMeasurer,
+                textColor = textColor,
+                containerColor = containerColor,
+                frameColor = frameColor,
+                textStyle = titleTextStyle
+            )
 
-                    when (component) {
-                        is BlockComponent -> {
-                            component.drawOn(
-                                drawScope = drawScope,
-                                textMeasurer = textMeasurer,
-                                nameTextStyle = nameTextStyle,
-                                contentTextStyle = contentTextStyle,
-                                frameColor = frameColor,
-                                containerColor = containerColor,
-                                textColor = textColor,
-                                highlightColor = highlightColor,
-                                positionXIsCentral = true
-                            )
-                        }
-                        is HorizontalComposedComponent -> {
-                            component.drawOn(
-                                drawScope = drawScope,
-                                textMeasurer = textMeasurer,
-                                nameTextStyle = nameTextStyle,
-                                contentTextStyle = contentTextStyle,
-                                frameColor = frameColor,
-                                containerColor = containerColor,
-                                textColor = textColor,
-                                highlightColor = highlightColor,
-                                positionXIsCentral = true
-                            )
-                        }
-                        is VerticalComposedComponent -> {
-                            component.drawOn(
-                                drawScope = drawScope,
-                                textMeasurer = textMeasurer,
-                                nameTextStyle = nameTextStyle,
-                                contentTextStyle = contentTextStyle,
-                                frameColor = frameColor,
-                                containerColor = containerColor,
-                                textColor = textColor,
-                                highlightColor = highlightColor,
-                                positionXIsCentral = true
-                            )
-                        }
-                        is StartComponent -> {
-                            component.drawOn(
-                                drawScope = drawScope,
-                                textMeasurer = textMeasurer,
-                                textColor = textColor,
-                                containerColor = containerColor,
-                                frameColor = frameColor,
-                                textStyle = titleTextStyle
-                            )
-                        }
-                        is EndComponent -> {
-                            component.drawOn(
-                                drawScope = drawScope,
-                                textMeasurer = textMeasurer,
-                                textColor = textColor,
-                                containerColor = containerColor,
-                                frameColor = frameColor,
-                                textStyle = titleTextStyle,
-                                positionXIsCentral = true
-                            )
-                        }
-                    }
-                }
+            var cursorPosition: Offset = startComponent.position + Offset(startComponent.size.width / 2, startComponent.size.height)
+
+            centralComponent.position = cursorPosition
+            centralComponent.drawOn(
+                drawScope = drawScope,
+                textMeasurer = textMeasurer,
+                nameTextStyle = nameTextStyle,
+                contentTextStyle = contentTextStyle,
+                frameColor = frameColor,
+                containerColor = containerColor,
+                textColor = textColor,
+                highlightColor = highlightColor,
+                positionXIsCentral = true
+            )
+
+            cursorPosition += Offset(0f, centralComponent.size.height)
+            endComponent.position = cursorPosition
+            endComponent.drawOn(
+                drawScope = drawScope,
+                textMeasurer = textMeasurer,
+                textColor = textColor,
+                containerColor = containerColor,
+                frameColor = frameColor,
+                textStyle = titleTextStyle,
+                positionXIsCentral = true
             )
         }
-    }
-
-    private inline fun getAndDrawGraph(
-        startComponent: StartComponent,
-        onDrawComponent: (Offset, Component) -> Unit
-    ) {
-//        Log.d("TAG", "NEW SESSION ${startComponent.getChainUntilEnd()}")
-        onDrawComponent(startComponent.position, startComponent)
-
-        var currentComponent = startComponent.nextComponent
-        var cursorPosition: Offset = startComponent.position + Offset(startComponent.size.width / 2, startComponent.size.height)
-
-        while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-            onDrawComponent(cursorPosition, currentComponent)
-            cursorPosition += Offset(0f, currentComponent.size.height)
-            currentComponent = currentComponent.nextComponent
-        }
-
-        onDrawComponent(cursorPosition, currentComponent)
     }
 }

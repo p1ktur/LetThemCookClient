@@ -6,22 +6,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.editor.domain.editor.components.BlockComponent
-import com.letthemcook.editor.domain.editor.components.EmptyComponent
-import com.letthemcook.editor.domain.editor.components.EndComponent
-import com.letthemcook.editor.domain.editor.components.containment.Relation
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.componentHashCodes
-import com.letthemcook.editor.ui.drawing.HORIZONTAL_COMPONENT_PADDING
-import com.letthemcook.editor.ui.drawing.MIN_LINE_LENGTH
+import com.letthemcook.editor.domain.editor.components.prototype.drawOn
+import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
-import kotlinx.serialization.Transient
 import kotlin.math.max
 
 data class HorizontalComposedComponent(
     override val components: MutableList<Component>,
-    override var prevComponent: Component,
-    override var nextComponent: Component,
     override var parentComponent: ComposedComponent? = null
 ) : ComposedComponent {
 
@@ -36,7 +30,6 @@ data class HorizontalComposedComponent(
     private var shadingQuarterForNextFrame: Relation? = null
 
     // Graphics
-    // TODO optimize
 
     override fun drawOn(
         drawScope: DrawScope,
@@ -54,7 +47,7 @@ data class HorizontalComposedComponent(
         }
 
 //        drawScope.drawRect(
-//            color = Color.Red.copy(alpha = 0.25f),
+//            color = Color.Red.copy(alpha = 0.15f),
 //            topLeft = position,
 //            size = size
 //        )
@@ -62,20 +55,21 @@ data class HorizontalComposedComponent(
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2),
-            end = position.copy(x = position.x + size.width / 2, y = position.y + MIN_LINE_LENGTH),
+            end = position.copy(x = position.x + size.width / 2, y = position.y + COMPONENT_PADDING),
             strokeWidth = 4f
         )
 
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2, y = position.y + size.height),
-            end = position.copy(x = position.x + size.width / 2, y = position.y + size.height - MIN_LINE_LENGTH),
+            end = position.copy(x = position.x + size.width / 2, y = position.y + size.height - COMPONENT_PADDING),
             strokeWidth = 4f
         )
 
-        var cursorPosition: Offset = position.copy(x = position.x + HORIZONTAL_COMPONENT_PADDING)
-
-        //TODO pass custom MIN_LINE_LENGTH so that vertically blocks can be stretched
+        var cursorPosition = Offset(
+            x = position.x + COMPONENT_PADDING,
+            y = position.y
+        )
 
         components.forEach { component ->
             component.centerChild(cursorPosition, size.height)
@@ -84,99 +78,29 @@ data class HorizontalComposedComponent(
 
             drawScope.drawLine(
                 color = frameColor,
-                start = cursorPosition.copy(x = lineX, y = cursorPosition.y + MIN_LINE_LENGTH),
+                start = cursorPosition.copy(x = lineX, y = cursorPosition.y + COMPONENT_PADDING),
                 end = component.position.copy(x = lineX),
                 strokeWidth = 4f
             )
             drawScope.drawLine(
                 color = frameColor,
                 start = component.position.copy(x = lineX, y = component.position.y + component.size.height),
-                end = cursorPosition.copy(x = lineX, y = position.y + size.height - MIN_LINE_LENGTH),
+                end = cursorPosition.copy(x = lineX, y = position.y + size.height - COMPONENT_PADDING),
                 strokeWidth = 4f
             )
 
-            when (component) {
-                is BlockComponent -> {
-//                    var currentComponent = component
-//                    var localCursorPosition = component.position
-//
-//                    while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-//                        currentComponent.position = localCursorPosition
-//
-//                        when (currentComponent) {
-//                            is BlockComponent -> currentComponent.drawOn(
-//                                drawScope = drawScope,
-//                                textMeasurer = textMeasurer,
-//                                nameTextStyle = nameTextStyle,
-//                                contentTextStyle = contentTextStyle,
-//                                frameColor = frameColor,
-//                                containerColor = containerColor,
-//                                textColor = textColor,
-//                                highlightColor = highlightColor
-//                            )
-//                            is HorizontalComposedComponent -> currentComponent.drawOn(
-//                                drawScope = drawScope,
-//                                textMeasurer = textMeasurer,
-//                                nameTextStyle = nameTextStyle,
-//                                contentTextStyle = contentTextStyle,
-//                                frameColor = frameColor,
-//                                containerColor = containerColor,
-//                                textColor = textColor,
-//                                highlightColor = highlightColor
-//                            )
-//                            is VerticalComposedComponent -> currentComponent.drawOn(
-//                                drawScope = drawScope,
-//                                textMeasurer = textMeasurer,
-//                                nameTextStyle = nameTextStyle,
-//                                contentTextStyle = contentTextStyle,
-//                                frameColor = frameColor,
-//                                containerColor = containerColor,
-//                                textColor = textColor,
-//                                highlightColor = highlightColor
-//                            )
-//                        }
-//
-//                        localCursorPosition += Offset(0f, currentComponent.size.height)
-//                        currentComponent = currentComponent.nextComponent
-//                    }
-                    component.drawOn(
-                        drawScope = drawScope,
-                        textMeasurer = textMeasurer,
-                        nameTextStyle = nameTextStyle,
-                        contentTextStyle = contentTextStyle,
-                        frameColor = frameColor,
-                        containerColor = containerColor,
-                        textColor = textColor,
-                        highlightColor = highlightColor
-                    )
-                }
-                is HorizontalComposedComponent -> {
-                    component.drawOn(
-                        drawScope = drawScope,
-                        textMeasurer = textMeasurer,
-                        nameTextStyle = nameTextStyle,
-                        contentTextStyle = contentTextStyle,
-                        frameColor = frameColor,
-                        containerColor = containerColor,
-                        textColor = textColor,
-                        highlightColor = highlightColor
-                    )
-                }
-                is VerticalComposedComponent -> {
-                    component.drawOn(
-                        drawScope = drawScope,
-                        textMeasurer = textMeasurer,
-                        nameTextStyle = nameTextStyle,
-                        contentTextStyle = contentTextStyle,
-                        frameColor = frameColor,
-                        containerColor = containerColor,
-                        textColor = textColor,
-                        highlightColor = highlightColor
-                    )
-                }
-            }
+            component.drawOn(
+                drawScope = drawScope,
+                textMeasurer = textMeasurer,
+                nameTextStyle = nameTextStyle,
+                contentTextStyle = contentTextStyle,
+                frameColor = frameColor,
+                containerColor = containerColor,
+                textColor = textColor,
+                highlightColor = highlightColor
+            )
 
-            cursorPosition += Offset(component.size.width + HORIZONTAL_COMPONENT_PADDING, 0f)
+            cursorPosition += Offset(component.size.width + COMPONENT_PADDING, 0f)
         }
 
         val commonHorizontalLineStartX = components.first().position.x + components.first().size.width / 2
@@ -184,14 +108,14 @@ data class HorizontalComposedComponent(
 
         drawScope.drawLine(
             color = frameColor,
-            start = position.copy(x = commonHorizontalLineStartX, y = position.y + MIN_LINE_LENGTH),
-            end = position.copy(x = commonHorizontalLineEndX, y = position.y + MIN_LINE_LENGTH),
+            start = position.copy(x = commonHorizontalLineStartX, y = position.y + COMPONENT_PADDING),
+            end = position.copy(x = commonHorizontalLineEndX, y = position.y + COMPONENT_PADDING),
             strokeWidth = 4f
         )
         drawScope.drawLine(
             color = frameColor,
-            start = position.copy(x = commonHorizontalLineStartX, y = position.y + size.height - MIN_LINE_LENGTH),
-            end = position.copy(x = commonHorizontalLineEndX, y = position.y + size.height - MIN_LINE_LENGTH),
+            start = position.copy(x = commonHorizontalLineStartX, y = position.y + size.height - COMPONENT_PADDING),
+            end = position.copy(x = commonHorizontalLineEndX, y = position.y + size.height - COMPONENT_PADDING),
             strokeWidth = 4f
         )
 
@@ -220,9 +144,9 @@ data class HorizontalComposedComponent(
             cachedSize
         } else {
             // (components.size - 1 + 2)
-            val width = components.map { it.size.width }.reduce { acc, width -> acc + width } + (components.size + 1) * HORIZONTAL_COMPONENT_PADDING
+            val width = components.map { it.size.width }.reduce { acc, width -> acc + width } + (components.size + 1) * COMPONENT_PADDING
             val height = getComponentsMaxHeight()
-            val size = Size(width, height + 2 * MIN_LINE_LENGTH)
+            val size = Size(width, height + 2 * COMPONENT_PADDING)
 
             cachedComponentsHashcode = components.componentHashCodes()
             cachedSize = size
@@ -234,39 +158,17 @@ data class HorizontalComposedComponent(
     private fun getComponentsMaxHeight(): Float {
         var maxHeight = 0f
 
-        components.forEachIndexed { index, component ->
-            when (component) {
-                is BlockComponent -> {
-                    var currentComponent = component
-                    var accumulatedHeight = currentComponent.size.height
-
-                    while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-                        currentComponent = currentComponent.nextComponent
-                        accumulatedHeight += currentComponent.size.height
-                    }
-
-                    maxHeight = max(maxHeight, accumulatedHeight)
-                }
-                is HorizontalComposedComponent -> maxHeight = max(maxHeight, component.size.height)
-                is VerticalComposedComponent -> maxHeight = max(maxHeight, component.size.height)
-            }
+        components.forEach { component ->
+            maxHeight = max(maxHeight, component.size.height)
         }
 
         return maxHeight
     }
 
     private fun Component.centerChild(cursorPosition: Offset, maxHeight: Float) {
-        var childHeight = 0f
-        var currentComponent = this
-
-        while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-            childHeight += currentComponent.size.height
-            currentComponent = currentComponent.nextComponent
-        }
-
         position = Offset(
             x = cursorPosition.x,
-            y = cursorPosition.y + (maxHeight - childHeight) / 2
+            y = cursorPosition.y + (maxHeight - this.size.height) / 2
         )
     }
 
@@ -285,7 +187,6 @@ data class HorizontalComposedComponent(
         if (components.componentHashCodes() != other.components.componentHashCodes()) return false
         if (position != other.position) return false
         if (size != other.size) return false
-        if (nextComponent.hashCode() != other.nextComponent.hashCode()) return false
 
         return true
     }
@@ -294,7 +195,6 @@ data class HorizontalComposedComponent(
         var result = components.hashCode()
         result = 31 * result + position.hashCode()
         result = 31 * result + size.hashCode()
-        result = 31 * result + nextComponent.hashCode()
         return result
     }
 }

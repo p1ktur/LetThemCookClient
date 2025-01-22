@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.editor.domain.editor.components.containment.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 
 interface ComposedComponent : Component {

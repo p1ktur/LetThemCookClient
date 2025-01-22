@@ -1,4 +1,4 @@
-package com.letthemcook.editor.domain.editor.deleteIcon
+package com.letthemcook.editor.domain.editor.canvasButtons
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Remove
@@ -26,15 +26,14 @@ data class DeleteIcon(
         @Composable
         fun rememberDeleteIcon(uiState: BuilderUiState): DeleteIcon {
             val density = LocalDensity.current
+            val size = remember { Size(36f * density.density, 36f * density.density) }
 
-            val deleteIconSize = remember { Size(36f * density.density, 36f * density.density) }
-            val deleteIconPosition = remember(uiState.canvasUiState.size) {
-                Offset(uiState.canvasUiState.size.width - deleteIconSize.width - 16f, 16f)
-            }
             return DeleteIcon(
                 icon = rememberVectorPainter(Icons.Outlined.Remove),
-                size = deleteIconSize,
-                position = deleteIconPosition
+                size = size,
+                position = remember(uiState.canvasUiState.size) {
+                    Offset(uiState.canvasUiState.size.width - size.width - 16f, 16f)
+                }
             )
         }
     }
@@ -55,7 +54,7 @@ data class DeleteIcon(
                 center = Offset(this@DeleteIcon.size.width / 2, this@DeleteIcon.size.height / 2),
                 color = contentColor.copy(alpha = alpha),
                 radius = this@DeleteIcon.size.width / 2,
-                style = Stroke(2f)
+                style = Stroke(4f)
             )
             translate(top = this@DeleteIcon.size.height * 0.125f, left = this@DeleteIcon.size.width * 0.125f) {
                 with (icon) {

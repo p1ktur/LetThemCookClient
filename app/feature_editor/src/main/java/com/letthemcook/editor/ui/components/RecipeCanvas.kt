@@ -1,11 +1,9 @@
 package com.letthemcook.editor.ui.components
 
-import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.runtime.Composable
@@ -18,26 +16,29 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.editor.domain.editor.RecipeGrapher
+import com.letthemcook.editor.domain.editor.canvasButtons.DeleteIcon.Companion.rememberDeleteIcon
 import com.letthemcook.editor.domain.editor.geometry.zoom
-import com.letthemcook.editor.domain.editor.deleteIcon.DeleteIcon.Companion.rememberDeleteIcon
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
-import com.letthemcook.editor.ui.components.DeleteIconPointerDataWrapper.isPointerOn
+import com.letthemcook.editor.ui.components.CanvasButtonsPointerManager.isPointerOnDeleteIcon
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.drawCenterHelper
 import com.letthemcook.editor.ui.drawing.drawGrid
 import com.letthemcook.editor.ui.drawing.drawProductLabel
 import com.letthemcook.theme.base.LocalAppTheme
 
-object DeleteIconPointerDataWrapper {
-    var isPointerOn = false
+object CanvasButtonsPointerManager {
+    var isPointerOnDeleteIcon = false
 }
+
+// TODO check if blocks are visible and the draw them
 
 @Composable
 fun RecipeCanvas(
@@ -47,12 +48,13 @@ fun RecipeCanvas(
     blockComponentTitleTextStyle: TextStyle,
     blockComponentNameTextStyle: TextStyle,
     blockComponentContentTextStyle: TextStyle,
-    onUiAction: (BuilderUiAction) -> Unit
+    onUiAction: (BuilderUiAction) -> Any?
 ) {
     // Canvas
     val highlightColor = LocalAppTheme.current.highlightColor
     val backgroundColor = LocalAppTheme.current.canvasBackground
     val gridColor = LocalAppTheme.current.canvasGrid
+    val buttonsContentColor = LocalAppTheme.current.text
     // Component
     val frameColor = LocalAppTheme.current.text
     val containerColor = LocalAppTheme.current.container
@@ -69,12 +71,11 @@ fun RecipeCanvas(
                                 y in deleteIcon.position.y..deleteIcon.position.y + deleteIcon.size.height
                     }
         }.apply {
-            isPointerOn = value
+            isPointerOnDeleteIcon = value
         }
     }
-    val deleteIconContentColor = LocalAppTheme.current.text
     val deleteIconContainerColor by animateColorAsState(
-        targetValue = if (pointerIsOverDeleteIcon) LocalAppTheme.current.highlightColor else LocalAppTheme.current.screenOne,
+        targetValue = if (pointerIsOverDeleteIcon) LocalAppTheme.current.badHighlightColor else LocalAppTheme.current.screenOne,
         label = "Delete Icon Highlighting"
     )
     val deleteIconAlpha by animateFloatAsState(
@@ -82,39 +83,44 @@ fun RecipeCanvas(
         label = "Delete Icon Appearance"
     )
 
-    // Grapher
-    val recipeGrapher = remember { RecipeGrapher() }
-
     Canvas(
         modifier = modifier
             .pointerInput(uiState.blockComponents) {
                 awaitEachGesture {
-                    val pointerInputChange = awaitFirstDown()
-                    onUiAction(BuilderUiAction.PointerDown(pointerInputChange.position))
-
                     do {
                         val event: PointerEvent = awaitPointerEvent()
+                        val position = event.changes.first().position
 
-                        if (event.changes.size > 1) {
-                            onUiAction(BuilderUiAction.PointerZoom(event.calculateZoom()))
-                        } else {
-                            val pan = event.calculatePan()
-                            if (pan != Offset.Zero) {
-                                onUiAction(
-                                    BuilderUiAction.PointerMove(
-                                        event.changes.first().position,
-                                        event.calculatePan()
-                                    )
+                        when (event.type) {
+                            PointerEventType.Press -> onUiAction(
+                                BuilderUiAction.PointerDown(
+                                    position
                                 )
-                            }
-                        }
+                            )
 
-                        event.changes.forEach {
-                            if (it.positionChange() != Offset.Zero) it.consume()
+                            PointerEventType.Move -> {
+                                if (event.changes.size > 1) {
+                                    onUiAction(BuilderUiAction.PointerZoom(event.calculateZoom()))
+                                } else {
+                                    val pan = event.calculatePan()
+                                    if (pan != Offset.Zero) {
+                                        onUiAction(
+                                            BuilderUiAction.PointerMove(
+                                                event.changes.first().position,
+                                                pan
+                                            )
+                                        )
+                                    }
+                                }
+
+                                event.changes.forEach {
+                                    if (it.positionChange() != Offset.Zero) it.consume()
+                                }
+                            }
                         }
                     } while (event.changes.any { it.pressed })
 
-                    if (isPointerOn) {
+                    if (isPointerOnDeleteIcon) {
                         onUiAction(BuilderUiAction.RemoveComponent(uiState.blockComponents.lastIndex))
                     }
                     onUiAction(BuilderUiAction.PointerRelease)
@@ -147,9 +153,12 @@ fun RecipeCanvas(
                         strokeWidth = 1.5f / uiState.canvasUiState.zoom
                     )
 
-                    recipeGrapher.drawRecipeGraph(
+                    RecipeGrapher.drawRecipeGraph(
+                        // Data
                         startComponent = uiState.startComponent,
+                        centralComponent = uiState.centralComponent,
                         endComponent = uiState.endComponent,
+                        // Graphics
                         drawScope = this,
                         textMeasurer = textMeasurer,
                         titleTextStyle = blockComponentTitleTextStyle,
@@ -182,13 +191,30 @@ fun RecipeCanvas(
                             )
                         }
                     }
+
+                    if (uiState.componentFocus == BuilderUiState.ComponentFocus.BLOCK) run {
+                        uiState.blockComponents.last().drawDraggableOn(
+                            drawScope = this,
+                            textMeasurer = textMeasurer,
+                            nameTextStyle = blockComponentNameTextStyle,
+                            contentTextStyle = blockComponentContentTextStyle,
+                            frameColor = frameColor,
+                            containerColor = containerColor,
+                            textColor = componentTextColor,
+                            centerPosition = uiState.scaleAndTranslate(
+                                position = uiState.canvasUiState.pointerMoveOffset ?:
+                                uiState.canvasUiState.pointerDownOffset ?:
+                                return@run
+                            )
+                        )
+                    }
                 }
             }
         }
 
         deleteIcon.drawOn(
             drawScope = this,
-            contentColor = deleteIconContentColor,
+            contentColor = buttonsContentColor,
             containerColor = deleteIconContainerColor,
             alpha = deleteIconAlpha
         )

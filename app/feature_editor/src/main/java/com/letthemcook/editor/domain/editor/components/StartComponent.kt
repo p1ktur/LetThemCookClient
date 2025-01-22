@@ -12,19 +12,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextAlign
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
-import com.letthemcook.editor.domain.editor.components.containment.Relation
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
-import com.letthemcook.editor.ui.drawing.MIN_LINE_LENGTH
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
 
 data class StartComponent(
     override var size: Size = Size.Zero,
-    override var position: Offset = Offset.Zero,
-    override var nextComponent: Component
+    override var position: Offset = Offset.Zero
 ) : Component {
 
-    override var prevComponent: Component = this
     override var parentComponent: ComposedComponent? = null
 
     override var containedPointerPosition: Offset? = null
@@ -49,19 +47,18 @@ data class StartComponent(
 
         if (sizeWasZero) {
             size = Size(
-                width = textLayout.size.width + DRAW_PADDING * 4,
-                height = textLayout.size.height + DRAW_PADDING * 2 + MIN_LINE_LENGTH
+                width = textLayout.size.width + DRAW_PADDING * 8,
+                height = textLayout.size.height + DRAW_PADDING * 4 + COMPONENT_PADDING
             )
-//            position -= Offset(size.width / 2, size.height / 2)
         } else if (positionXIsCentral) {
-//            position -= Offset(size.width / 2, 0f)
+            position -= Offset(size.width / 2, 0f)
         }
 
         val afterLinePosition = position.copy(y = position.y)
 
         drawScope.drawLine(
             color = frameColor,
-            start = position.copy(x = position.x + size.width / 2, y = position.y + size.height - MIN_LINE_LENGTH),
+            start = position.copy(x = position.x + size.width / 2, y = position.y + size.height - COMPONENT_PADDING),
             end = position.copy(x = position.x + size.width / 2, y = position.y + size.height),
             strokeWidth = 4f
         )
@@ -69,23 +66,23 @@ data class StartComponent(
         drawScope.drawRoundRect(
             color = containerColor,
             topLeft = afterLinePosition,
-            size = size.copy(height = size.height - MIN_LINE_LENGTH),
+            size = size.copy(height = size.height - COMPONENT_PADDING),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS,ROUNDED_RECT_CORNER_RADIUS),
             style = Fill
         )
         drawScope.drawRoundRect(
             color = textColor,
             topLeft = afterLinePosition,
-            size = size.copy(height = size.height - MIN_LINE_LENGTH),
+            size = size.copy(height = size.height - COMPONENT_PADDING),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS,ROUNDED_RECT_CORNER_RADIUS),
-            style = Stroke(2f)
+            style = Stroke(4f)
         )
         drawScope.drawText(
             textLayoutResult = textLayout,
             color = textColor,
             topLeft = Offset(
-                x = afterLinePosition.x + DRAW_PADDING * 2,
-                y = afterLinePosition.y + DRAW_PADDING
+                x = afterLinePosition.x + DRAW_PADDING * 4,
+                y = afterLinePosition.y + DRAW_PADDING * 2
             )
         )
     }
@@ -99,27 +96,13 @@ data class StartComponent(
             style = textStyle.copy(textAlign = TextAlign.Center)
         )
         return Size(
-            width = textLayout.size.width + DRAW_PADDING * 4,
-            height = textLayout.size.height + DRAW_PADDING * 2 + MIN_LINE_LENGTH
+            width = textLayout.size.width + DRAW_PADDING * 8,
+            height = textLayout.size.height + DRAW_PADDING * 4 + COMPONENT_PADDING
         )
     }
 
     override fun shadeQuarterForNextFrame(relation: Relation) = Unit
     override fun highlightForNextFrame() = Unit
-
-    // Components
-
-    fun getChainUntilEnd(): List<Component> {
-        val components = mutableListOf<Component>()
-        var currentComponent = nextComponent
-
-        while (currentComponent !is EndComponent && currentComponent !is EmptyComponent) {
-            components.add(currentComponent)
-            currentComponent = currentComponent.nextComponent
-        }
-
-        return components
-    }
 
     // Other
 

@@ -5,16 +5,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import com.letthemcook.editor.domain.editor.components.containment.ComponentContainment
-import com.letthemcook.editor.domain.editor.components.containment.Relation
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 
 const val DRAW_PADDING = 12f
-const val MIN_LINE_LENGTH = 64f
-const val HORIZONTAL_COMPONENT_PADDING = 96f
-const val SMOOTHEN_VALUE = 4f
+const val COMPONENT_PADDING = 96f
 const val ROUNDED_RECT_CORNER_RADIUS = 32f
 
 fun DrawScope.drawCenterHelper(
@@ -113,13 +108,13 @@ fun DrawScope.drawRoundRectQuarter(
     val brush = getRoundedRectQuarterBrush(position, size, relation, color)
 
     val center = position.plus(Offset(size.width / 2, size.height / 2))
-    val topLeft = position.plus(Offset(0f, MIN_LINE_LENGTH))
-    val topRight = position.plus(Offset(size.width , MIN_LINE_LENGTH))
-    val bottomLeft = position.plus(Offset(0f, size.height - MIN_LINE_LENGTH))
-    val bottomRight = position.plus(Offset(size.width, size.height - MIN_LINE_LENGTH))
+    val topLeft = position.plus(Offset(0f, COMPONENT_PADDING))
+    val topRight = position.plus(Offset(size.width , COMPONENT_PADDING))
+    val bottomLeft = position.plus(Offset(0f, size.height - COMPONENT_PADDING))
+    val bottomRight = position.plus(Offset(size.width, size.height - COMPONENT_PADDING))
 
     when (relation) {
-        is ComponentContainment.Left -> {
+        Relation.Left -> {
             drawPath(
                 path = Path().apply {
                     moveTo(topLeft.x, topLeft.y)
@@ -130,7 +125,7 @@ fun DrawScope.drawRoundRectQuarter(
                 brush = brush
             )
         }
-        is ComponentContainment.Top -> {
+        Relation.Top -> {
             drawPath(
                 path = Path().apply {
                     moveTo(topLeft.x, topLeft.y)
@@ -141,7 +136,7 @@ fun DrawScope.drawRoundRectQuarter(
                 brush = brush
             )
         }
-        is ComponentContainment.Right -> {
+        Relation.Right -> {
             drawPath(
                 path = Path().apply {
                     moveTo(topRight.x, topRight.y)
@@ -152,7 +147,7 @@ fun DrawScope.drawRoundRectQuarter(
                 brush = brush
             )
         }
-        is ComponentContainment.Bottom -> {
+        Relation.Bottom -> {
             drawPath(
                 path = Path().apply {
                     moveTo(bottomLeft.x, bottomLeft.y)
@@ -176,26 +171,25 @@ private fun getRoundedRectQuarterBrush(
     val paddingPercentOther = 1f - paddingPercent
 
     return when (relation) {
-        is ComponentContainment.Left -> Brush.horizontalGradient(
+        Relation.Left -> Brush.horizontalGradient(
             colors = listOf(color, Color.Transparent),
             startX = position.x + size.width / 2,
             endX = position.x + size.width * paddingPercent
         )
-        is ComponentContainment.Top -> Brush.verticalGradient(
+        Relation.Top -> Brush.verticalGradient(
             colors = listOf(color, Color.Transparent),
             startY = position.y + size.height / 2,
-            endY = position.y + (size.height - 2 * MIN_LINE_LENGTH) * paddingPercent + MIN_LINE_LENGTH
+            endY = position.y + (size.height - 2 * COMPONENT_PADDING) * paddingPercent + COMPONENT_PADDING
         )
-        is ComponentContainment.Right -> Brush.horizontalGradient(
+        Relation.Right -> Brush.horizontalGradient(
             colors = listOf(color, Color.Transparent),
             startX = position.x + size.width / 2,
             endX = position.x + size.width * paddingPercentOther
         )
-        is ComponentContainment.Bottom -> Brush.verticalGradient(
+        Relation.Bottom -> Brush.verticalGradient(
             colors = listOf(color, Color.Transparent),
             startY = position.y + size.height / 2,
-            endY = position.y + (size.height - 2 * MIN_LINE_LENGTH) * paddingPercentOther + MIN_LINE_LENGTH
+            endY = position.y + (size.height - 2 * COMPONENT_PADDING) * paddingPercentOther + COMPONENT_PADDING
         )
-        else -> SolidColor(color)
     }
 }

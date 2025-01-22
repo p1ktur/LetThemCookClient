@@ -4,31 +4,39 @@ import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.domain.list.forEachReversed
 import com.letthemcook.core.domain.list.forEachReversedIndexed
 import com.letthemcook.core.domain.list.swapWithLast
 import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.editor.domain.dragging.DraggingState
-import com.letthemcook.editor.domain.editor.components.BlockComponent
-import com.letthemcook.editor.domain.editor.components.prototype.Component
-import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
-import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.BlockComponent
+import com.letthemcook.editor.domain.editor.components.block.BlockContainment
+import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
+import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
-import com.letthemcook.editor.domain.editor.components.containment.ComponentContainment
+import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.definePointRelation
-import com.letthemcook.editor.domain.editor.components.prototype.getClosestToThePoint
+import com.letthemcook.editor.domain.editor.components.prototype.findInHierarchy
+import com.letthemcook.editor.domain.editor.components.prototype.getPointerContainer
 import com.letthemcook.editor.domain.editor.components.prototype.insertBottomComponent
 import com.letthemcook.editor.domain.editor.components.prototype.insertLeftComponent
 import com.letthemcook.editor.domain.editor.components.prototype.insertRightComponent
 import com.letthemcook.editor.domain.editor.components.prototype.insertTopComponent
-import com.letthemcook.editor.domain.editor.components.prototype.moveTo
-import com.letthemcook.editor.domain.editor.components.prototype.removeComponent
+import com.letthemcook.editor.domain.editor.components.prototype.pointInBounds
+import com.letthemcook.editor.domain.editor.components.prototype.removeFromHierarchy
 import com.letthemcook.editor.domain.editor.geometry.limit
-import com.letthemcook.editor.domain.editor.geometry.zoom
+import com.letthemcook.editor.ui.components.popups.BlockEditorState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.koin.core.KoinApplication.Companion.init
 
 class BuilderViewModel : ViewModel() {
 
@@ -37,14 +45,15 @@ class BuilderViewModel : ViewModel() {
 
     private var retainProductOnBlock = false
 
-    // Components without Start and End components
-    private val components: List<Component> get() = uiState.value.startComponent.getChainUntilEnd()
+    private val components get() = listOf(uiState.value.centralComponent)
+
+    private var pointerDownJob: Job? = null
 
     init {
         //TODO load recipes from followed users
     }
 
-    fun onUiAction(action: BuilderUiAction) {
+    fun onUiAction(action: BuilderUiAction): Any? {
         when (action) {
             BuilderUiAction.NavigateBack -> Unit
             BuilderUiAction.NavigateToTutorial -> Unit
@@ -54,12 +63,14 @@ class BuilderViewModel : ViewModel() {
             BuilderUiAction.SaveChanges -> Unit
 
             // Products
-            is BuilderUiAction.AddProduct -> addProduct(action.product, action.position)
+            is BuilderUiAction.AddProduct -> return addProduct(action.product, action.position)
 
             // Components
             is BuilderUiAction.AddUnusedComponent -> addUnusedComponent(action.unusedBlockComponent)
-            is BuilderUiAction.AddComponent -> addComponent(action.unusedBlockComponent, action.position, action.size)
-            is BuilderUiAction.UpdateComponentData -> updateComponent(action.updater)
+            is BuilderUiAction.UpdateUnusedComponent -> updateUnusedComponent(action.oldComponent, action.newComponent)
+
+            is BuilderUiAction.AddComponent -> addComponent(action.unusedBlockComponent, action.blockComponent, action.position)
+            is BuilderUiAction.UpdateComponent -> updateComponent(action.oldComponent, action.newComponent)
             is BuilderUiAction.RemoveComponent -> removeComponent(action.index)
 
             // Canvas actions
@@ -67,13 +78,23 @@ class BuilderViewModel : ViewModel() {
 
             // Pointer actions
             is BuilderUiAction.PointerDown -> pointerDown(action.offset)
-            is BuilderUiAction.PointerMove -> pointerMove(action.offset, action.deltaOffset, action.draggingState)
+            is BuilderUiAction.PointerMove -> pointerMove(action.offset, action.deltaOffset)
             is BuilderUiAction.PointerRelease -> pointerRelease()
             is BuilderUiAction.PointerZoom -> pointerZoom(action.zoom)
+
+            // Dragging
+            is BuilderUiAction.SetDraggingState -> setDraggingState(action.state)
+
+            // Block Editor
+            is BuilderUiAction.SetBlockEditorState -> setBlockEditorState(action.state)
         }
+
+        return null
     }
 
     // ACTIONS
+    // Common
+
     private fun fetchData() {
 //        if (serverRepository.authenticatedType.value is AuthType.Student) return
 //
@@ -91,11 +112,13 @@ class BuilderViewModel : ViewModel() {
 //        }
     }
 
-    private fun addProduct(product: ProductItemData, position: Offset): Boolean {
+    // Products
+
+    private fun addProduct(product: ProductItemData, position: Offset): BlockComponent? {
         uiState.value.blockComponents.forEachReversed { it ->
-            when (it.containsPointer(position.scaledAndTranslated(), false)) {
-                ComponentContainment.None -> Unit
-                ComponentContainment.Whole, is ComponentContainment.ProductLabel -> {
+            when (it.containsPointer(scaleAndTranslate(position), false)) {
+                BlockContainment.None -> Unit
+                BlockContainment.Whole, is BlockContainment.ProductLabel -> {
                     _uiState.update {
                         it.copy(
                             unusedProducts = it.unusedProducts.minus(product)
@@ -103,106 +126,149 @@ class BuilderViewModel : ViewModel() {
                     }
                     it.productNames.add(product)
                     updateCanvasCounter()
-                    return true
+                    return it
                 }
-                is ComponentContainment.Left -> Unit
-                is ComponentContainment.Top -> Unit
-                is ComponentContainment.Right -> Unit
-                is ComponentContainment.Bottom -> Unit
             }
         }
 
-        return false
+        return null
     }
+
+    // Components
 
     private fun addUnusedComponent(unusedBlockComponent: UnusedBlockComponent) {
         _uiState.update {
             it.copy(
-                unusedBlockComponents = it.unusedBlockComponents + unusedBlockComponent,
+                unusedBlockComponents = it.unusedBlockComponents + unusedBlockComponent
+            )
+        }
+    }
+
+    private fun updateUnusedComponent(oldComponent: UnusedBlockComponent, newComponent: UnusedBlockComponent) {
+        val oldComponentIndex = uiState.value.unusedBlockComponents.indexOf(oldComponent)
+
+        _uiState.update {
+            it.copy(
+                unusedBlockComponents = it.unusedBlockComponents.toMutableList().apply {
+                    set(oldComponentIndex, newComponent)
+                }
+            )
+        }
+    }
+
+    private fun addComponent(unusedBlockComponent: UnusedBlockComponent, blockComponent: BlockComponent, position: Offset) {
+        val component = when (uiState.value.centralComponent) {
+            is ComposedComponent -> components.getPointerContainer(scaleAndTranslate(position))
+            else -> uiState.value.centralComponent
+        } ?: uiState.value.centralComponent
+
+        when (component) {
+            is BlockComponent, is ComposedComponent -> {
+                val relation = component.definePointRelation(scaleAndTranslate(position))
+
+                val newComponent = when (relation) {
+                    Relation.Left -> {
+                        component.insertLeftComponent(blockComponent)
+                    }
+                    Relation.Top -> {
+                        component.insertTopComponent(blockComponent)
+                    }
+                    Relation.Right -> {
+                        component.insertRightComponent(blockComponent)
+                    }
+                    Relation.Bottom -> {
+                        component.insertBottomComponent(blockComponent)
+                    }
+                }
+
+                if (uiState.value.centralComponent == component) {
+                    newComponent?.let { com ->
+                        _uiState.update {
+                            it.copy(
+                                centralComponent = com
+                            )
+                        }
+                    }
+                }
+            }
+            is EmptyComponent -> {
+                _uiState.update {
+                    it.copy(
+                        centralComponent = blockComponent
+                    )
+                }
+            }
+        }
+
+        _uiState.update {
+            it.copy(
+                blockComponents = it.blockComponents + blockComponent,
+                unusedBlockComponents = it.unusedBlockComponents.minus(unusedBlockComponent),
                 canvasCounter = it.canvasCounter + 1
             )
         }
     }
 
-    private fun addComponent(unusedBlockComponent: UnusedBlockComponent, position: Offset, size: Size) {
-        val blockComponent = BlockComponent(
-            name = unusedBlockComponent.name,
-            description = unusedBlockComponent.description,
-            time = unusedBlockComponent.time,
-            productNames = unusedBlockComponent.productNames,
-            prevComponent = EmptyComponent,
-            nextComponent = EmptyComponent,
-            size = size
-        )
+    private fun updateComponent(oldComponent: BlockComponent, newComponent: UnusedBlockComponent) {
+        val oldComponentIndex = uiState.value.blockComponents.indexOf(oldComponent)
 
-        try {
-            if (components.isNotEmpty()) {
-                val closestBlockComponent = components.getClosestToThePoint(position.scaledAndTranslated())
-
-                closestBlockComponent?.definePointRelation(position.scaledAndTranslated())?.let { relation ->
-                    when (relation) {
-                        is ComponentContainment.Left -> {
-                            closestBlockComponent.insertLeftComponent(blockComponent)
-                        }
-                        is ComponentContainment.Top -> {
-                            closestBlockComponent.insertTopComponent(blockComponent)
-                        }
-                        is ComponentContainment.Right -> {
-                            closestBlockComponent.insertRightComponent(blockComponent)
-                        }
-                        is ComponentContainment.Bottom -> {
-                            closestBlockComponent.insertBottomComponent(blockComponent)
-                        }
-                    }
-                }
-            } else {
-                uiState.value.startComponent.insertBottomComponent(blockComponent)
-            }
+        (components.findInHierarchy(oldComponent) as? BlockComponent)?.let { component ->
+            component.name = newComponent.name
+            component.time = newComponent.time
+            component.description = newComponent.description
 
             _uiState.update {
                 it.copy(
-                    blockComponents = it.blockComponents + blockComponent,
-                    unusedBlockComponents = it.unusedBlockComponents.minus(unusedBlockComponent),
-                    canvasCounter = it.canvasCounter + 1
+                    blockComponents = it.blockComponents.toMutableList().apply {
+                        set(oldComponentIndex, component)
+                    }
                 )
             }
-        } catch (_: Exception) { }
-    }
-
-    private fun updateComponent(updater: BlockComponent.() -> Unit) {
-        uiState.value.blockComponents.last().apply(updater)
-
-        updateCanvasCounter()
+        }
     }
 
     // TODO add settings to retain product on the block
     // TODO add settings to show debug (helper) rectangles on containers
 
     private fun removeComponent(index: Int) {
-        val componentToDelete = uiState.value.blockComponents[index]
-
-        // TODO connect two component which were around this one
+        val componentToRemove = uiState.value.blockComponents[index]
 
         if (!retainProductOnBlock) {
             _uiState.update {
                 it.copy(
-                    unusedProducts = it.unusedProducts + componentToDelete.productNames
+                    unusedProducts = it.unusedProducts + componentToRemove.productNames
                 )
             }
-            componentToDelete.productNames.clear()
+            componentToRemove.productNames.clear()
         }
 
         _uiState.update {
             it.copy(
-                unusedBlockComponents = it.unusedBlockComponents + componentToDelete.toUnusedBlockComponent(),
-                blockComponents = it.blockComponents.minus(componentToDelete)
+                unusedBlockComponents = it.unusedBlockComponents + componentToRemove.toUnusedBlockComponent(),
+                blockComponents = it.blockComponents.minus(componentToRemove)
             )
         }
 
-        componentToDelete.removeComponent()
+        if (uiState.value.centralComponent == componentToRemove) {
+            _uiState.update {
+                it.copy(
+                    centralComponent = EmptyComponent
+                )
+            }
+        } else {
+            componentToRemove.removeFromHierarchy { newComponent ->
+                _uiState.update {
+                    it.copy(
+                        centralComponent = newComponent
+                    )
+                }
+            }
+        }
 
         updateCanvasCounter()
     }
+
+    // Canvas actions
 
     private fun updateCanvasSize(size: Size) {
         _uiState.update {
@@ -217,6 +283,8 @@ class BuilderViewModel : ViewModel() {
         updateCanvasCounter()
     }
 
+    // Pointer actions
+
     private fun pointerDown(offset: Offset) {
         _uiState.update {
             it.copy(
@@ -227,64 +295,37 @@ class BuilderViewModel : ViewModel() {
             )
         }
 
-        uiState.value.blockComponents.forEachReversedIndexed { index, it ->
-            when (val containment = it.containsPointer(offset.scaledAndTranslated(), true)) {
-                ComponentContainment.None -> Unit
-                ComponentContainment.Whole -> {
-                    clickOnComponent(index)
-                    return
-                }
-                is ComponentContainment.ProductLabel -> {
-                    val product = it.productNames.removeAt(containment.index)
+        pointerDownJob = viewModelScope.launch {
+            delay(200)
 
-                    _uiState.update {
-                        it.copy(
-                            movedProducts = it.movedProducts + product
-                        )
+            uiState.value.blockComponents.forEachReversedIndexed { index, it ->
+                when (val containment = it.containsPointer(scaleAndTranslate(offset), true)) {
+                    BlockContainment.None -> Unit
+                    BlockContainment.Whole -> {
+                        pressOnComponent(index)
+                        return@launch
                     }
-                    return
+                    is BlockContainment.ProductLabel -> {
+                        val product = it.productNames.removeAt(containment.index)
+
+                        _uiState.update {
+                            it.copy(
+                                movedProducts = it.movedProducts + product
+                            )
+                        }
+                        return@launch
+                    }
                 }
-                is ComponentContainment.Left -> Unit
-                is ComponentContainment.Top -> Unit
-                is ComponentContainment.Right -> Unit
-                is ComponentContainment.Bottom -> Unit
             }
+
+            clearComponentFocus()
         }
-
-//        if (uiState.value.startComponent.containsPointerWhole(offset.scaledAndTranslated(), true)) {
-//            _uiState.update {
-//                it.copy(
-//                    componentFocus = BuilderUiState.ComponentFocus.START,
-//                    canvasCounter = it.canvasCounter + 1
-//                )
-//            }
-//            return
-//        }
-//
-//        if (uiState.value.endComponent.containsPointerWhole(offset.scaledAndTranslated(), true)) {
-//            _uiState.update {
-//                it.copy(
-//                    componentFocus = BuilderUiState.ComponentFocus.END,
-//                    canvasCounter = it.canvasCounter + 1
-//                )
-//            }
-//            return
-//        }
-
-//        uiState.value.blockConnections.forEachReversedIndexed { index, it ->
-//            when (val containment = it.containsPointer(offset.scaledAndTranslated())) {
-//                ConnectionContainmentResult.None -> Unit
-//                else -> {
-//                    clickOnConnection(index, containment)
-//                    return
-//                }
-//            }
-//        }
-
-        clearAllFocuses()
     }
 
-    private fun pointerMove(offset: Offset, deltaOffset: Offset, draggingState: DraggingState) {
+    private fun pointerMove(offset: Offset, deltaOffset: Offset) {
+        pointerDownJob?.cancel()
+        pointerDownJob = null
+
         _uiState.update {
             it.copy(
                 canvasUiState = it.canvasUiState.copy(
@@ -294,32 +335,75 @@ class BuilderViewModel : ViewModel() {
             )
         }
 
-        processPointerMovement(draggingState)
+        processPointerMovement()
     }
 
     private fun pointerRelease() {
-        if (uiState.value.movedProducts.isNotEmpty()) {
-            val movedProduct = uiState.value.movedProducts.last()
-            val productAdded = addProduct(
-                movedProduct,
-                uiState.value.canvasUiState.pointerMoveOffset ?:
-                uiState.value.canvasUiState.pointerDownOffset ?:
-                Offset.Zero
-            )
+        if (pointerDownJob?.isActive == true) {
+            uiState.value.canvasUiState.pointerDownOffset?.let { pointerDownOffset ->
+                val containerBlockComponent = components.getPointerContainer(
+                    point = scaleAndTranslate(pointerDownOffset),
+                    onlyBlocks = true,
+                    strict = true
+                )
 
-            if (!productAdded) {
+                if (containerBlockComponent != null && containerBlockComponent is BlockComponent) {
+                    setBlockEditorState(BlockEditorState.EditingBlock(containerBlockComponent))
+                }
+
+                pointerDownJob?.cancel()
+                pointerDownJob = null
+                return
+            }
+        }
+
+        pointerDownJob?.cancel()
+        pointerDownJob = null
+
+        when {
+            uiState.value.movedProducts.isNotEmpty() -> {
+                val movedProduct = uiState.value.movedProducts.last()
+                val productAdded = addProduct(
+                    product = movedProduct,
+                    position = uiState.value.canvasUiState.pointerMoveOffset ?:
+                    uiState.value.canvasUiState.pointerDownOffset ?:
+                    Offset.Zero
+                ) != null
+
+                if (!productAdded) {
+                    _uiState.update {
+                        it.copy(
+                            unusedProducts = it.unusedProducts + movedProduct
+                        )
+                    }
+                }
                 _uiState.update {
                     it.copy(
-                        unusedProducts = it.unusedProducts + movedProduct
+                        movedProducts = emptyList()
                     )
                 }
             }
-            _uiState.update {
-                it.copy(
-                    movedProducts = emptyList()
-                )
+            uiState.value.componentFocus == BuilderUiState.ComponentFocus.BLOCK && uiState.value.blockComponents.isNotEmpty() -> {
+                val pointerMoveOffset = uiState.value.canvasUiState.pointerMoveOffset ?: Offset.Zero
+                val containerBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset), true)
+
+                if (containerBlockComponent != null && containerBlockComponent != uiState.value.blockComponents.last()) {
+                    val relation = containerBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
+
+                    uiState.value.blockComponents.last().removeFromHierarchy { newComponent ->
+                        _uiState.update {
+                            it.copy(
+                                centralComponent = newComponent
+                            )
+                        }
+                    }
+
+                    changeComponentPosition(containerBlockComponent, relation)
+                }
             }
         }
+
+        uiState.value.blockComponents.forEach { it.removeHighlight() }
 
         _uiState.update {
             it.copy(
@@ -331,27 +415,83 @@ class BuilderViewModel : ViewModel() {
             )
         }
 
-        clearComponentFocuses()
+        clearComponentFocus()
     }
 
     private fun pointerZoom(zoom: Float) {
         _uiState.update {
             it.copy(
                 canvasUiState = it.canvasUiState.copy(
-                    zoom = (it.canvasUiState.zoom * zoom).limit(0.5f, 2f)
+                    zoom = (it.canvasUiState.zoom * zoom).limit(0.8f, 1.8f)
                 )
             )
         }
     }
 
-    // NOT ACTIONS
+    // Dragging actions
 
-    private fun clickOnComponent(index: Int) {
+    private fun setDraggingState(state: DraggingState) {
+        _uiState.update {
+            it.copy(
+                draggingState = state
+            )
+        }
+
+        updateCanvasCounter()
+    }
+
+    // Block Editor
+
+    private fun setBlockEditorState(state: BlockEditorState) {
+        _uiState.update {
+            it.copy(
+                blockEditorState = state
+            )
+        }
+    }
+
+    // NOT ACTIONS
+    // Components
+
+    private fun changeComponentPosition(target: Component, relation: Relation) {
+        if (uiState.value.blockComponents.isEmpty()) return
+        val blockToInsert = uiState.value.blockComponents.last()
+
+        if (target is BlockComponent) {
+            val newComponent = when (relation) {
+                Relation.Left -> {
+                    target.insertLeftComponent(blockToInsert)
+                }
+                Relation.Top -> {
+                    target.insertTopComponent(blockToInsert)
+                }
+                Relation.Right -> {
+                    target.insertRightComponent(blockToInsert)
+                }
+                Relation.Bottom -> {
+                    target.insertBottomComponent(blockToInsert)
+                }
+            }
+
+            if (uiState.value.centralComponent == target) {
+                newComponent?.let { com ->
+                    _uiState.update {
+                        it.copy(
+                            centralComponent = com
+                        )
+                    }
+                }
+            }
+        }
+
+        updateCanvasCounter()
+    }
+
+    private fun pressOnComponent(index: Int) {
         _uiState.update {
             it.copy(
                 blockComponents = it.blockComponents.toMutableList().swapWithLast(index),
                 componentFocus = BuilderUiState.ComponentFocus.BLOCK,
-                canvasCounter = it.canvasCounter + 1,
                 canvasUiState = it.canvasUiState.copy(
                     pointerMoveDeltaOffset = null,
                     pointerMoveOffset = null
@@ -359,8 +499,10 @@ class BuilderViewModel : ViewModel() {
             )
         }
 
-        processPointerMovement()
+        uiState.value.blockComponents.last().highlight()
     }
+
+    // Canvas
 
     private fun updateCanvasOffset(offset: Offset) {
         _uiState.update {
@@ -380,61 +522,38 @@ class BuilderViewModel : ViewModel() {
         }
     }
 
+    // Pointer
 
-    private fun clearAllFocuses() {
-        uiState.value.blockComponents.forEach { it.clearHighlight() }
-
-        _uiState.update {
-            it.copy(
-                componentFocus = BuilderUiState.ComponentFocus.NONE
-            )
-        }
-
-        processPointerMovement()
-    }
-
-    private fun clearComponentFocuses() {
-        _uiState.update {
-            it.copy(
-                componentFocus = BuilderUiState.ComponentFocus.NONE
-            )
-        }
-
-        processPointerMovement()
-    }
-
-    // TODO leave phantom and be able to drag blocks as it is unused
-    // TODO also if i want to leave block where it is i can see such possibility by highlighting whole phantom
-
-    private fun processPointerMovement(draggingState: DraggingState = DraggingState.NONE) {
+    private fun processPointerMovement() {
         val pointerDownOffset = uiState.value.canvasUiState.pointerDownOffset ?: uiState.value.canvasUiState.center
-        val pointerMoveOffset = uiState.value.canvasUiState.pointerMoveOffset ?: uiState.value.canvasUiState.center
-        val pointerMoveDeltaOffset = uiState.value.canvasUiState.pointerMoveDeltaOffset ?: return
+        val pointerMoveOffset = uiState.value.canvasUiState.pointerMoveOffset ?: pointerDownOffset
+        val pointerMoveDeltaOffset = uiState.value.canvasUiState.pointerMoveDeltaOffset
 
         when {
-            draggingState == DraggingState.BLOCK -> {
-                val closestBlockComponent = components.getClosestToThePoint(pointerMoveOffset.scaledAndTranslated())
+            uiState.value.draggingState == DraggingState.BLOCK -> {
+                val closestBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset)) ?: uiState.value.centralComponent
+                val relation = closestBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
 
-                closestBlockComponent?.definePointRelation(pointerMoveOffset.scaledAndTranslated())?.let { relation ->
-                    when (closestBlockComponent) {
-                        is BlockComponent -> {
-                            closestBlockComponent.shadeQuarterForNextFrame(relation)
-                            closestBlockComponent.highlightForNextFrame()
-                        }
-                        is HorizontalComposedComponent -> {
-                            closestBlockComponent.shadeQuarterForNextFrame(relation)
-                            closestBlockComponent.highlightForNextFrame()
-                        }
-                        is VerticalComposedComponent -> {
-                            closestBlockComponent.shadeQuarterForNextFrame(relation)
-                            closestBlockComponent.highlightForNextFrame()
-                        }
+                when (closestBlockComponent) {
+                    is BlockComponent -> {
+                        closestBlockComponent.shadeQuarterForNextFrame(relation)
+                        closestBlockComponent.highlightForNextFrame()
+                    }
+                    is HorizontalComposedComponent -> {
+                        closestBlockComponent.shadeQuarterForNextFrame(relation)
+                        closestBlockComponent.highlightForNextFrame()
+                    }
+                    is VerticalComposedComponent -> {
+                        closestBlockComponent.shadeQuarterForNextFrame(relation)
+                        closestBlockComponent.highlightForNextFrame()
                     }
                 }
 
+                updateCanvasCounter()
                 return
             }
-            draggingState == DraggingState.PRODUCT -> {
+            uiState.value.draggingState == DraggingState.PRODUCT -> {
+                updateCanvasCounter()
                 return
             }
             uiState.value.movedProducts.isNotEmpty() -> {
@@ -443,25 +562,32 @@ class BuilderViewModel : ViewModel() {
             }
             uiState.value.componentFocus != BuilderUiState.ComponentFocus.NONE -> {
                 when (uiState.value.componentFocus) {
-                    BuilderUiState.ComponentFocus.BLOCK -> if (uiState.value.blockComponents.isNotEmpty()) {
-                        uiState.value.blockComponents.last().moveTo(pointerMoveOffset.scaledAndTranslated())
-                        updateCanvasCounter()
-                        return
-                    }
-                    BuilderUiState.ComponentFocus.START -> {
-                        uiState.value.startComponent.moveTo(pointerMoveOffset.scaledAndTranslated())
-                        updateCanvasCounter()
-                        return
-                    }
-                    BuilderUiState.ComponentFocus.END -> {
-                        uiState.value.endComponent.moveTo(pointerMoveOffset.scaledAndTranslated())
-                        updateCanvasCounter()
-                        return
+                    BuilderUiState.ComponentFocus.BLOCK -> {
+                        uiState.value.blockComponents.last().removeHighlight()
+
+                        val containerBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset), true)
+                            ?: uiState.value.centralComponent
+
+                        if (containerBlockComponent == uiState.value.blockComponents.last()) {
+                            if (containerBlockComponent.pointInBounds(pointerMoveOffset)) {
+                                containerBlockComponent.highlightForNextFrame()
+                            }
+                        } else {
+                            val relation = containerBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
+
+                            if (containerBlockComponent is BlockComponent) {
+                                containerBlockComponent.shadeQuarterForNextFrame(relation)
+                                containerBlockComponent.highlightForNextFrame()
+                            }
+                        }
                     }
                     BuilderUiState.ComponentFocus.NONE -> Unit
                 }
+
+                updateCanvasCounter()
+                return
             }
-            else -> {
+            else -> if (pointerMoveDeltaOffset != Offset.Zero && pointerMoveDeltaOffset != null) {
                 val canvasOffset = uiState.value.canvasUiState.cachedOffset +
                         (pointerMoveOffset - pointerDownOffset).div(uiState.value.canvasUiState.zoom)
 
@@ -469,40 +595,20 @@ class BuilderViewModel : ViewModel() {
             }
         }
 
-        if (pointerMoveDeltaOffset == Offset.Zero) {
-            uiState.value.blockComponents.forEachReversedIndexed { index, it ->
-                when (it.containsPointer(pointerDownOffset.scaledAndTranslated(), false)) {
-                    ComponentContainment.None -> Unit
-                    ComponentContainment.Whole -> {
-                        uiState.value.blockComponents.forEachIndexed { i, com -> if (i != index) com.clearHighlight() }
-                        updateCanvasCounter()
-                        return
-                    }
-                    is ComponentContainment.ProductLabel -> Unit
-                    is ComponentContainment.Left -> Unit
-                    is ComponentContainment.Top -> Unit
-                    is ComponentContainment.Right -> Unit
-                    is ComponentContainment.Bottom -> Unit
-                }
-            }
-        }
-
-//            uiState.value.blockConnections.forEachReversedIndexed { index, it ->
-//                when (val containment = it.containsPointer(pointerDownOffset.scaledAndTranslated())) {
-//                    ConnectionContainmentResult.None -> Unit
-//                    ConnectionContainmentResult.Whole -> {
-//                        uiState.value.blockConnections.forEachIndexed { i, con -> if (i != index) con.clearHighlight() }
-//                        uiState.value.blockComponents.forEach { com -> com.clearHighlight() }
-//                        updateCanvasCounter()
-//                        return
-//                    }
-//                }
-//            }
-
         updateCanvasCounter()
     }
 
-    private fun Offset.scaledAndTranslated(): Offset {
-        return zoom(uiState.value.canvasUiState.center, uiState.value.canvasUiState.zoom) - uiState.value.canvasUiState.offset
+    // Other
+
+    private fun clearComponentFocus() {
+        _uiState.update {
+            it.copy(
+                componentFocus = BuilderUiState.ComponentFocus.NONE
+            )
+        }
+
+//        processPointerMovement()
     }
+
+    private fun scaleAndTranslate(position: Offset): Offset = uiState.value.scaleAndTranslate(position)
 }

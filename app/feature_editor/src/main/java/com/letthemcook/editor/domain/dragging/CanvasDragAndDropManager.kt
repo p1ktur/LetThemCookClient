@@ -7,25 +7,25 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.editor.domain.editor.components.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.BlockComponent
+import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
-class CanvasDragAndDropTarget(
+class CanvasDragAndDropManager(
     private val canvasGlobalPosition: Offset,
     private val unusedProducts: List<ProductItemData>,
     private val unusedBlockComponents: List<UnusedBlockComponent>,
     private val textMeasurer: TextMeasurer,
-    private val blockComponentNameTextStyle: TextStyle,
-    private val blockComponentContentTextStyle: TextStyle,
-    private val onUiAction: (BuilderUiAction) -> Unit
+    private val nameTextStyle: TextStyle,
+    private val contentTextStyle: TextStyle,
+    private val onUiAction: (BuilderUiAction) -> Any?
 ) : DragAndDropTarget {
 
     private var currentPointerPosition: Offset = Offset.Zero
 
-    var draggingState: DraggingState = DraggingState.NONE
-
     override fun onEnded(event: DragAndDropEvent) {
-        draggingState = DraggingState.NONE
+        onUiAction(BuilderUiAction.SetDraggingState(DraggingState.NONE))
+        super.onEnded(event)
     }
 
     override fun onDrop(event: DragAndDropEvent): Boolean {
@@ -44,7 +44,9 @@ class CanvasDragAndDropTarget(
 
                 productId?.let {
                     unusedProducts.find { it.id == productId }?.let {
-                        onUiAction(BuilderUiAction.AddProduct(it, position))
+                        val productBlock = onUiAction(BuilderUiAction.AddProduct(it, position)) as? BlockComponent
+
+                        productBlock?.calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
                     }
                 }
             }
@@ -53,13 +55,15 @@ class CanvasDragAndDropTarget(
 
                 blockHashcode?.let {
                     unusedBlockComponents.find { it.hashCode() == blockHashcode }?.let {
-                        val size = it.calculateSize(textMeasurer, blockComponentNameTextStyle, blockComponentContentTextStyle)
-                        onUiAction(BuilderUiAction.AddComponent(it, position, size))
+                        val component = it.toBlockComponent(textMeasurer, nameTextStyle, contentTextStyle)
+                        onUiAction(BuilderUiAction.AddComponent(it, component, position))
                     }
                 }
+
             }
         }
 
+        onUiAction(BuilderUiAction.SetDraggingState(DraggingState.NONE))
         return true
     }
 
@@ -74,6 +78,7 @@ class CanvasDragAndDropTarget(
 
         currentPointerPosition = position
 
-        onUiAction(BuilderUiAction.PointerMove(currentPointerPosition, deltaPosition, draggingState))
+        onUiAction(BuilderUiAction.PointerMove(currentPointerPosition, deltaPosition))
+        super.onMoved(event)
     }
 }
