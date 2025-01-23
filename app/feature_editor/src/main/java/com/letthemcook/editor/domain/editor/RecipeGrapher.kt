@@ -13,6 +13,7 @@ import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 
 object RecipeGrapher {
@@ -21,6 +22,7 @@ object RecipeGrapher {
         startComponent: StartComponent,
         centralComponent: Component,
         endComponent: EndComponent,
+        canvasUiState: BuilderUiState.CanvasUiState,
         // Graphics
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
@@ -54,7 +56,8 @@ object RecipeGrapher {
                 textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
-                textStyle = titleTextStyle
+                textStyle = titleTextStyle,
+                canvasUiState = canvasUiState
             )
             drawScope.drawLine(
                 color = frameColor,
@@ -91,7 +94,8 @@ object RecipeGrapher {
                 textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
-                textStyle = titleTextStyle
+                textStyle = titleTextStyle,
+                canvasUiState = canvasUiState
             )
         } else {
             startComponent.drawOn(
@@ -100,7 +104,8 @@ object RecipeGrapher {
                 textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
-                textStyle = titleTextStyle
+                textStyle = titleTextStyle,
+                canvasUiState = canvasUiState
             )
 
             var cursorPosition: Offset = startComponent.position + Offset(startComponent.size.width / 2, startComponent.size.height)
@@ -115,7 +120,8 @@ object RecipeGrapher {
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
-                positionXIsCentral = true
+                positionXIsCentral = true,
+                canvasUiState = canvasUiState
             )
 
             cursorPosition += Offset(0f, centralComponent.size.height)
@@ -127,7 +133,8 @@ object RecipeGrapher {
                 containerColor = containerColor,
                 frameColor = frameColor,
                 textStyle = titleTextStyle,
-                positionXIsCentral = true
+                positionXIsCentral = true,
+                canvasUiState = canvasUiState
             )
         }
     }

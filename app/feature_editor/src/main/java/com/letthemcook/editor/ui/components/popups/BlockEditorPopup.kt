@@ -61,6 +61,13 @@ fun BlockEditorPopup(
         is BlockEditorState.EditingUnusedBlock -> "Edit block"
     }
 
+    val buttonText = when (state) {
+        BlockEditorState.Hidden -> ""
+        BlockEditorState.Creating -> "Create"
+        is BlockEditorState.EditingBlock -> "Edit"
+        is BlockEditorState.EditingUnusedBlock -> "Edit"
+    }
+
     val nameText: TextFieldState = remember(state) {
         val text = when (state) {
             BlockEditorState.Hidden -> ""
@@ -198,7 +205,7 @@ fun BlockEditorPopup(
                 horizontalArrangement = Arrangement.Center
             ) {
                 TextButton(
-                    text = "Create",
+                    text = buttonText,
                     onClick = {
                         try {
                             onEdit(

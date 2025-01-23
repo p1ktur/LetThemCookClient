@@ -6,10 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.componentHashCodes
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
 import kotlin.math.max
@@ -40,7 +41,8 @@ data class VerticalComposedComponent(
         containerColor: Color,
         textColor: Color,
         highlightColor: Color,
-        positionXIsCentral: Boolean
+        positionXIsCentral: Boolean,
+        canvasUiState: BuilderUiState.CanvasUiState
     ) {
         if (positionXIsCentral) {
             position -= Offset(size.width / 2, 0f)
@@ -82,7 +84,8 @@ data class VerticalComposedComponent(
                 frameColor = frameColor,
                 containerColor = containerColor,
                 textColor = textColor,
-                highlightColor = highlightColor
+                highlightColor = highlightColor,
+                canvasUiState = canvasUiState
             )
 
             cursorPosition += Offset(0f, component.size.height)
@@ -121,6 +124,12 @@ data class VerticalComposedComponent(
 
             size
         }
+    }
+
+    override fun tryRecalculateSize() {
+        components.forEach { it.tryRecalculateSize() }
+
+        calculateSize()
     }
 
     private fun getComponentsMaxWidth(): Float {

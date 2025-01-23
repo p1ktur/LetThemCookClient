@@ -8,3 +8,10 @@ fun Offset.zoom(center: Offset, zoom: Float): Offset {
 
     return Offset(x, y)
 }
+
+fun Offset.unZoom(center: Offset, zoom: Float): Offset {
+    val x = (this.x - center.x) * zoom + center.x
+    val y = (this.y - center.y) * zoom + center.y
+
+    return Offset(x, y)
+}

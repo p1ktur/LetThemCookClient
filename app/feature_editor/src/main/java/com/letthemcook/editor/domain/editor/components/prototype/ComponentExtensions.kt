@@ -1,6 +1,5 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
-import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -10,8 +9,8 @@ import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
-import java.nio.file.Files.find
 
 // Graphics
 
@@ -24,7 +23,8 @@ fun Component.drawOn(
     containerColor: Color,
     textColor: Color,
     highlightColor: Color,
-    positionXIsCentral: Boolean = false
+    positionXIsCentral: Boolean = false,
+    canvasUiState: BuilderUiState.CanvasUiState
 ) {
     when (this) {
         is BlockComponent -> {
@@ -37,7 +37,8 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
-                positionXIsCentral = positionXIsCentral
+                positionXIsCentral = positionXIsCentral,
+                canvasUiState = canvasUiState
             )
         }
         is HorizontalComposedComponent -> {
@@ -50,7 +51,8 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
-                positionXIsCentral = positionXIsCentral
+                positionXIsCentral = positionXIsCentral,
+                canvasUiState = canvasUiState
             )
         }
         is VerticalComposedComponent -> {
@@ -63,10 +65,35 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
-                positionXIsCentral = positionXIsCentral
+                positionXIsCentral = positionXIsCentral,
+                canvasUiState = canvasUiState
             )
         }
     }
+}
+
+fun Component.isVisible(canvasUiState: BuilderUiState.CanvasUiState): Boolean {
+    val canvasTopLeft = Offset.Zero
+    val canvasBottomRight = Offset(canvasUiState.size.width, canvasUiState.size.height)
+
+    val canvasLeft = canvasTopLeft.x
+    val canvasRight = canvasBottomRight.x
+    val canvasTop = canvasTopLeft.y
+    val canvasBottom = canvasBottomRight.y
+
+    val topLeft = canvasUiState.undoScaleAndTranslate(position)
+    val topRight = canvasUiState.undoScaleAndTranslate(position + Offset(size.width, 0f))
+    val bottomLeft = canvasUiState.undoScaleAndTranslate(position + Offset(0f, size.height))
+    val bottomRight = canvasUiState.undoScaleAndTranslate(position + Offset(size.width, size.height))
+
+    var verticesCounter = 0
+
+    if (topLeft.x in canvasLeft..canvasRight && topLeft.y in canvasTop..canvasBottom) verticesCounter++
+    if (topRight.x in canvasLeft..canvasRight && topRight.y in canvasTop..canvasBottom) verticesCounter++
+    if (bottomLeft.x in canvasLeft..canvasRight && bottomLeft.y in canvasTop..canvasBottom) verticesCounter++
+    if (bottomRight.x in canvasLeft..canvasRight && bottomRight.y in canvasTop..canvasBottom) verticesCounter++
+
+    return verticesCounter > 0
 }
 
 // Components
@@ -228,6 +255,14 @@ fun List<Component>.findInHierarchy(target: Component): Component? {
     }
 
     return null
+}
+
+fun List<Component>.doForEveryChild(action: Component.() -> Unit) {
+    forEach { it.action() }
+
+    val childrenList = map { it.asComposed()?.components }
+
+    childrenList.forEach { it?.doForEveryChild(action) }
 }
 
 // Geometry

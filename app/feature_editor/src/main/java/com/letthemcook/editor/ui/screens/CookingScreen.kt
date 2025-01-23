@@ -129,13 +129,11 @@ fun CookingScreen(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (uiState.resultsAmount > 0) {
-                        item {
-                            Text(
-                                text = "Results: ${uiState.resultsAmount}",
-                                style = LocalAppTheme.current.typography.bodyLarge
-                            )
-                        }
+                    item {
+                        Text(
+                            text = "Results: ${uiState.resultsAmount}",
+                            style = LocalAppTheme.current.typography.bodyLarge
+                        )
                     }
                     itemsIndexed(uiState.searchedRecipes, key = { _, it -> it.id }) { index, recipeItemData ->
 

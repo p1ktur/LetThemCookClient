@@ -16,6 +16,7 @@ object EmptyComponent : Component {
 
     override fun shadeQuarterForNextFrame(relation: Relation) = Unit
     override fun highlightForNextFrame() = Unit
+    override fun tryRecalculateSize() = Unit
 
     // Other
 

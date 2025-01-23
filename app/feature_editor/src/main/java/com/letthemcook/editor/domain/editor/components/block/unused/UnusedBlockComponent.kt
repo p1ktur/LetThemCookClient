@@ -15,10 +15,6 @@ data class UnusedBlockComponent(
 ) {
     // Other
 
-    fun toBlockComponent(): BlockComponent {
-        return BlockComponent(name, description, time, productNames)
-    }
-
     fun toBlockComponent(
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,

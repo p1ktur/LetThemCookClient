@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 
 interface ComposedComponent : Component {
 
@@ -19,6 +20,7 @@ interface ComposedComponent : Component {
         containerColor: Color,
         textColor: Color,
         highlightColor: Color,
-        positionXIsCentral: Boolean = false
+        positionXIsCentral: Boolean = false,
+        canvasUiState: BuilderUiState.CanvasUiState
     )
 }

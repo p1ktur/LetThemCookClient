@@ -14,6 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.prototype.isVisible
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
@@ -36,8 +38,11 @@ data class EndComponent(
         containerColor: Color,
         frameColor: Color,
         textStyle: TextStyle,
-        positionXIsCentral: Boolean = false
+        positionXIsCentral: Boolean = false,
+        canvasUiState: BuilderUiState.CanvasUiState
     ) {
+        if (!isVisible(canvasUiState)) return
+
         val sizeWasZero = size == Size.Zero
 
         val textLayout = textMeasurer.measure(
@@ -100,6 +105,8 @@ data class EndComponent(
             height = textLayout.size.height + DRAW_PADDING * 4 + COMPONENT_PADDING
         )
     }
+
+    override fun tryRecalculateSize() = Unit
 
     override fun shadeQuarterForNextFrame(relation: Relation) = Unit
     override fun highlightForNextFrame() = Unit

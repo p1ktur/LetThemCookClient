@@ -18,10 +18,12 @@ import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.core.domain.serialization.OffsetSerializer
 import com.letthemcook.core.domain.serialization.SizeSerializer
-import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
-import com.letthemcook.editor.domain.editor.components.prototype.Relation
-import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
+import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
+import com.letthemcook.editor.domain.editor.components.prototype.isVisible
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
@@ -63,6 +65,13 @@ data class BlockComponent(
     @Transient
     private var highlighting: Boolean = false
 
+    @Transient
+    private var localTextMeasurer: TextMeasurer? = null
+    @Transient
+    private var localNameTextStyle: TextStyle? = null
+    @Transient
+    private var localContentTextStyle: TextStyle? = null
+
     // Graphics
 
     fun drawOn(
@@ -74,8 +83,11 @@ data class BlockComponent(
         containerColor: Color,
         textColor: Color,
         highlightColor: Color,
-        positionXIsCentral: Boolean = false
+        positionXIsCentral: Boolean = false,
+        canvasUiState: BuilderUiState.CanvasUiState
     ) {
+        if (!isVisible(canvasUiState)) return
+
         val currentFrameColor = if (highlightingForNextFrame || highlighting) {
             highlightColor
         } else {
@@ -341,7 +353,7 @@ data class BlockComponent(
             )
             cachedDrawnProductLabelSizes.clear()
 
-            productTextLayouts.forEachIndexed { index, layout ->
+            productTextLayouts.forEach { layout ->
                 drawScope.drawProductLabel(
                     textLayout = layout,
                     topLeft = productCurrentPosition,
@@ -361,6 +373,10 @@ data class BlockComponent(
         nameTextStyle: TextStyle,
         contentTextStyle: TextStyle
     ): Size {
+        localTextMeasurer = textMeasurer
+        localNameTextStyle = nameTextStyle
+        localContentTextStyle = contentTextStyle
+
         var contentHeightSum = 0f
         var productsContentHeightSum = 0f
         var productsTopWidth = 0f
@@ -411,6 +427,20 @@ data class BlockComponent(
         return size
     }
 
+    override fun tryRecalculateSize() {
+        val textMeasurer = localTextMeasurer
+        val nameTextStyle = localNameTextStyle
+        val contentTextStyle = localContentTextStyle
+
+        if (textMeasurer == null) return
+        if (nameTextStyle == null) return
+        if (contentTextStyle == null) return
+
+        try {
+            calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+        } catch (_: Exception) {}
+    }
+
     override fun shadeQuarterForNextFrame(relation: Relation) {
         shadingQuarterForNextFrame = relation
     }
@@ -433,7 +463,8 @@ data class BlockComponent(
         var containment: BlockContainment = BlockContainment.None
 
         if (productNames.isNotEmpty()) {
-            var productCurrentPosition = position.plus(Offset(size.width - DRAW_PADDING * 2, DRAW_PADDING))
+            val productsTopWidth = cachedDrawnProductLabelSizes.maxOf { it.width }
+            var productCurrentPosition = position.plus(Offset(size.width - DRAW_PADDING * 2 - productsTopWidth, DRAW_PADDING + COMPONENT_PADDING))
 
             for (index in productNames.indices) {
                 val widthRange = productCurrentPosition.x..productCurrentPosition.x + cachedDrawnProductLabelSizes[index].width + DRAW_PADDING * 4

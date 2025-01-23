@@ -13,6 +13,7 @@ interface Component {
     var containedPointerPosition: Offset?
 
     fun shadeQuarterForNextFrame(relation: Relation)
-
     fun highlightForNextFrame()
+
+    fun tryRecalculateSize()
 }

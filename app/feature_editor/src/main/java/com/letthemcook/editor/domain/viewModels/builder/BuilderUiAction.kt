@@ -25,7 +25,7 @@ sealed interface BuilderUiAction {
 
     data class AddComponent(val unusedBlockComponent: UnusedBlockComponent, val blockComponent: BlockComponent, val position: Offset) : BuilderUiAction
     data class UpdateComponent(val oldComponent: BlockComponent, val newComponent: UnusedBlockComponent) : BuilderUiAction
-    data class RemoveComponent(val index: Int) : BuilderUiAction
+    data object RemoveComponent : BuilderUiAction
 
     // Canvas actions
     data class UpdateCanvasSize(val size: Size) : BuilderUiAction

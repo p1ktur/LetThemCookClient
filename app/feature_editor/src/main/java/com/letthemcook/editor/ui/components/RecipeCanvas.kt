@@ -24,6 +24,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.editor.domain.editor.RecipeGrapher
 import com.letthemcook.editor.domain.editor.canvasButtons.DeleteIcon.Companion.rememberDeleteIcon
+import com.letthemcook.editor.domain.editor.components.prototype.ComponentFocus
 import com.letthemcook.editor.domain.editor.geometry.zoom
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
@@ -61,10 +62,10 @@ fun RecipeCanvas(
     val componentTextColor = LocalAppTheme.current.text
     // Delete Icon
     val deleteIcon = rememberDeleteIcon(uiState)
-    val deleteIconIsVisible = remember(uiState.componentFocus) { uiState.componentFocus == BuilderUiState.ComponentFocus.BLOCK }
+    val deleteIconIsVisible = remember(uiState.componentFocus) { uiState.componentFocus is ComponentFocus.Block }
     val pointerIsOverDeleteIcon by remember(uiState.canvasUiState.pointerMoveOffset, uiState.componentFocus) {
         derivedStateOf {
-            uiState.componentFocus == BuilderUiState.ComponentFocus.BLOCK &&
+            uiState.componentFocus is ComponentFocus.Block &&
                     uiState.canvasUiState.pointerMoveOffset != null &&
                     uiState.canvasUiState.pointerMoveOffset.run {
                         x in deleteIcon.position.x..deleteIcon.position.x + deleteIcon.size.width &&
@@ -85,7 +86,7 @@ fun RecipeCanvas(
 
     Canvas(
         modifier = modifier
-            .pointerInput(uiState.blockComponents) {
+            .pointerInput(Unit) {
                 awaitEachGesture {
                     do {
                         val event: PointerEvent = awaitPointerEvent()
@@ -120,9 +121,7 @@ fun RecipeCanvas(
                         }
                     } while (event.changes.any { it.pressed })
 
-                    if (isPointerOnDeleteIcon) {
-                        onUiAction(BuilderUiAction.RemoveComponent(uiState.blockComponents.lastIndex))
-                    }
+                    if (isPointerOnDeleteIcon) onUiAction(BuilderUiAction.RemoveComponent)
                     onUiAction(BuilderUiAction.PointerRelease)
                 }
             }
@@ -158,6 +157,7 @@ fun RecipeCanvas(
                         startComponent = uiState.startComponent,
                         centralComponent = uiState.centralComponent,
                         endComponent = uiState.endComponent,
+                        canvasUiState = uiState.canvasUiState,
                         // Graphics
                         drawScope = this,
                         textMeasurer = textMeasurer,
@@ -170,13 +170,30 @@ fun RecipeCanvas(
                         highlightColor = highlightColor
                     )
 
-                    if (uiState.movedProducts.isNotEmpty()) {
-                        var labelDrawOffset = uiState.canvasUiState.pointerMoveOffset ?: uiState.canvasUiState.pointerDownOffset ?: Offset.Zero
-                        labelDrawOffset = labelDrawOffset.zoom(uiState.canvasUiState.center, uiState.canvasUiState.zoom) - uiState.canvasUiState.offset
+                    when (uiState.componentFocus) {
+                        ComponentFocus.None -> Unit
+                        is ComponentFocus.Block -> run {
+                            uiState.componentFocus.ref.drawDraggableOn(
+                                drawScope = this,
+                                textMeasurer = textMeasurer,
+                                nameTextStyle = blockComponentNameTextStyle,
+                                contentTextStyle = blockComponentContentTextStyle,
+                                frameColor = frameColor,
+                                containerColor = containerColor,
+                                textColor = componentTextColor,
+                                centerPosition = uiState.canvasUiState.scaleAndTranslate(
+                                    position = uiState.canvasUiState.pointerMoveOffset ?:
+                                    uiState.canvasUiState.pointerDownOffset ?:
+                                    return@run
+                                )
+                            )
+                        }
+                        is ComponentFocus.Product -> {
+                            var labelDrawOffset = uiState.canvasUiState.pointerMoveOffset ?: uiState.canvasUiState.pointerDownOffset ?: Offset.Zero
+                            labelDrawOffset = labelDrawOffset.zoom(uiState.canvasUiState.center, uiState.canvasUiState.zoom) - uiState.canvasUiState.offset
 
-                        uiState.movedProducts.forEach {
                             val productNameLayout = textMeasurer.measure(
-                                text = it.name,
+                                text = uiState.componentFocus.data.name,
                                 style = blockComponentContentTextStyle
                             )
 
@@ -190,23 +207,6 @@ fun RecipeCanvas(
                                 textColor = containerColor
                             )
                         }
-                    }
-
-                    if (uiState.componentFocus == BuilderUiState.ComponentFocus.BLOCK) run {
-                        uiState.blockComponents.last().drawDraggableOn(
-                            drawScope = this,
-                            textMeasurer = textMeasurer,
-                            nameTextStyle = blockComponentNameTextStyle,
-                            contentTextStyle = blockComponentContentTextStyle,
-                            frameColor = frameColor,
-                            containerColor = containerColor,
-                            textColor = componentTextColor,
-                            centerPosition = uiState.scaleAndTranslate(
-                                position = uiState.canvasUiState.pointerMoveOffset ?:
-                                uiState.canvasUiState.pointerDownOffset ?:
-                                return@run
-                            )
-                        )
                     }
                 }
             }
