@@ -1,4 +1,4 @@
-package com.letthemcook.editor.ui.components
+package com.letthemcook.editor.ui.components.canvas
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,7 +28,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.ComponentFocus
 import com.letthemcook.editor.domain.editor.geometry.zoom
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
-import com.letthemcook.editor.ui.components.CanvasButtonsPointerManager.isPointerOnDeleteIcon
+import com.letthemcook.editor.ui.components.canvas.CanvasButtonsPointerManager.isPointerOnDeleteIcon
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.drawCenterHelper
 import com.letthemcook.editor.ui.drawing.drawGrid
@@ -38,8 +38,6 @@ import com.letthemcook.theme.base.LocalAppTheme
 object CanvasButtonsPointerManager {
     var isPointerOnDeleteIcon = false
 }
-
-// TODO check if blocks are visible and the draw them
 
 @Composable
 fun RecipeCanvas(
@@ -53,6 +51,8 @@ fun RecipeCanvas(
 ) {
     // Canvas
     val highlightColor = LocalAppTheme.current.highlightColor
+    val warningHighlightColor = LocalAppTheme.current.warningHighlightColor
+    val goodHighlightColor = LocalAppTheme.current.goodHighlightColor
     val backgroundColor = LocalAppTheme.current.canvasBackground
     val gridColor = LocalAppTheme.current.canvasGrid
     val buttonsContentColor = LocalAppTheme.current.text
@@ -138,7 +138,7 @@ fun RecipeCanvas(
     ) {
         uiState.canvasCounter.let {
             drawGrid(
-                step = 48f * uiState.canvasUiState.zoom,
+                step = 48 * (1.5f + (uiState.canvasUiState.zoom) % 0.5f),
                 canvasZoom = uiState.canvasUiState.zoom,
                 canvasOffset = uiState.canvasUiState.offset,
                 backgroundColor = backgroundColor,
@@ -167,7 +167,9 @@ fun RecipeCanvas(
                         frameColor = frameColor,
                         containerColor = containerColor,
                         textColor = componentTextColor,
-                        highlightColor = highlightColor
+                        highlightColor = highlightColor,
+                        warningHighlightColor = warningHighlightColor,
+                        goodHighlightColor = goodHighlightColor,
                     )
 
                     when (uiState.componentFocus) {

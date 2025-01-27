@@ -12,7 +12,10 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,8 +31,10 @@ import androidx.compose.ui.window.PopupProperties
 import com.letthemcook.core.domain.format.toHoursString
 import com.letthemcook.core.domain.format.toMinutesString
 import com.letthemcook.core.domain.format.toSecondsString
+import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.ui.components.colorChooser.ColorChooser
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
@@ -49,10 +54,21 @@ fun BlockEditorPopup(
     state: BlockEditorState,
     anchorPosition: Offset,
     anchorSize: IntSize,
-    onEdit: (String, String, Int, Int, Int) -> Unit,
+    onEdit: (String, String, Int, Int, Int, ColorOption) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (state == BlockEditorState.Hidden) return
+
+    var colorOption by remember(state) {
+        mutableStateOf(
+            when (state) {
+                BlockEditorState.Hidden -> ColorOption.WHITE
+                BlockEditorState.Creating -> ColorOption.WHITE
+                is BlockEditorState.EditingBlock -> state.component.colorOption
+                is BlockEditorState.EditingUnusedBlock -> state.component.colorOption
+            }
+        )
+    }
 
     val title = when (state) {
         BlockEditorState.Hidden -> ""
@@ -152,11 +168,28 @@ fun BlockEditorPopup(
                 .background(LocalAppTheme.current.screenTwo, RoundedCornerShape(12.dp))
                 .border(1.dp, LocalAppTheme.current.text, RoundedCornerShape(12.dp))
                 .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = title,
-                style = LocalAppTheme.current.typography.bodyLarge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = title,
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                Text(
+                    text = colorOption.toString(),
+                    style = LocalAppTheme.current.typography.bodyMedium
+                )
+            }
+            ColorChooser(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                selectedOption = colorOption,
+                onOptionSelect = { colorOption = it }
             )
             //TODO name cannot be empty so show error
             SingleLineTextField(
@@ -213,7 +246,8 @@ fun BlockEditorPopup(
                                 descriptionText.text.toString(),
                                 timeHoursText.text.toString().toInt(),
                                 timeMinutesText.text.toString().toInt(),
-                                timeSecondsText.text.toString().toInt()
+                                timeSecondsText.text.toString().toInt(),
+                                colorOption
                             )
 
                             nameText.clearText()

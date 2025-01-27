@@ -96,6 +96,16 @@ class AppTheme(val theme: Theme) {
             Theme.LIGHT -> badHighlightColorLight
             Theme.DARK -> badHighlightColorDark
         }
+    val warningHighlightColor: Color
+        get() = when (theme) {
+            Theme.LIGHT -> warningHighlightColorLight
+            Theme.DARK -> warningHighlightColorDark
+        }
+    val goodHighlightColor: Color
+        get() = when (theme) {
+            Theme.LIGHT -> goodHighlightColorLight
+            Theme.DARK -> goodHighlightColorDark
+        }
     val canvasBackground: Color
         get() = when (theme) {
             Theme.LIGHT -> canvasBackgroundLight

@@ -18,29 +18,36 @@ import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.core.domain.serialization.OffsetSerializer
 import com.letthemcook.core.domain.serialization.SizeSerializer
+import com.letthemcook.editor.domain.cooking.BlockCookingState
+import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.isVisible
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
+import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
 import com.letthemcook.editor.ui.drawing.drawProductLabel
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
+import com.letthemcook.editor.ui.drawing.getBlockBodyBrush
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.math.max
 
 @Serializable
+@SerialName(value = "block")
 data class BlockComponent(
     // Data
     var name: String = "Recipe Block",
     var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
     var time: Long = 0L,
     val productNames: MutableList<ProductItemData> = mutableListOf(),
-    override var parentComponent: ComposedComponent? = null,
+    @Transient override var parentComponent: ComposedComponent? = null,
+    var cookingState: BlockCookingState = BlockCookingState.NOT_REACHED,
+    var colorOption: ColorOption = ColorOption.WHITE,
     // Graphics
     @Serializable(with = OffsetSerializer::class) override var position: Offset = Offset.Zero,
     @Serializable(with = SizeSerializer::class) override var size: Size = Size.Zero
@@ -52,6 +59,8 @@ data class BlockComponent(
 
         const val MIN_HEIGHT = 72f
     }
+
+    @Transient private val _time = time
 
     @Transient override var containedPointerPosition: Offset? = null
 
@@ -72,6 +81,9 @@ data class BlockComponent(
     @Transient
     private var localContentTextStyle: TextStyle? = null
 
+    @Transient
+    private var pretendCookingState: BlockCookingState? = null
+
     // Graphics
 
     fun drawOn(
@@ -83,8 +95,10 @@ data class BlockComponent(
         containerColor: Color,
         textColor: Color,
         highlightColor: Color,
+        warningHighlightColor: Color,
+        goodHighlightColor: Color,
         positionXIsCentral: Boolean = false,
-        canvasUiState: BuilderUiState.CanvasUiState
+        canvasUiState: CanvasUiState
     ) {
         if (!isVisible(canvasUiState)) return
 
@@ -96,8 +110,11 @@ data class BlockComponent(
         val currentContainerColor = if (highlightingForNextFrame || highlighting) {
             highlightingForNextFrame = false
             highlightColor.copy(0.25f).compositeOver(containerColor)
-        } else {
-            containerColor
+        } else when (cookingState) {
+            BlockCookingState.NOT_REACHED -> containerColor
+            BlockCookingState.WAITING -> warningHighlightColor
+            BlockCookingState.COOKING -> highlightColor.copy(0.25f).compositeOver(containerColor)
+            BlockCookingState.DONE -> goodHighlightColor
         }
 
         var contentHeightSum = 0f
@@ -165,7 +182,12 @@ data class BlockComponent(
         )
 
         drawScope.drawRoundRect(
-            color = currentContainerColor,
+            brush = getBlockBodyBrush(
+                containerColor = currentContainerColor,
+                otherColor = colorOption.color,
+                position = position,
+                size = size
+            ),
             topLeft = position.copy(y = position.y + COMPONENT_PADDING),
             size = this.size.copy(
                 width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
@@ -235,7 +257,7 @@ data class BlockComponent(
             )
             cachedDrawnProductLabelSizes.clear()
 
-            productTextLayouts.forEachIndexed { index, layout ->
+            productTextLayouts.forEach { layout ->
                 drawScope.drawProductLabel(
                     textLayout = layout,
                     topLeft = productCurrentPosition,
@@ -296,7 +318,12 @@ data class BlockComponent(
         }
 
         drawScope.drawRoundRect(
-            color = currentContainerColor,
+            brush = getBlockBodyBrush(
+                containerColor = currentContainerColor,
+                otherColor = colorOption.color.copy(alpha = alpha),
+                position = position,
+                size = size
+            ),
             topLeft = position,
             size = size.copy(
                 width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width
@@ -498,10 +525,26 @@ data class BlockComponent(
     // Component
 
     fun toUnusedBlockComponent(): UnusedBlockComponent {
-        return UnusedBlockComponent(name, description, time, productNames)
+        return UnusedBlockComponent(name, description, time, productNames, colorOption)
+    }
+
+    // Cooking
+
+    fun getPretendedState(): BlockCookingState {
+        val returnedState = pretendCookingState ?: cookingState
+        pretendCookingState = null
+        return returnedState
+    }
+
+    fun pretendCookingState(state: BlockCookingState) {
+        pretendCookingState = state
     }
 
     // Other
+
+    fun restoreTime() {
+        time = _time
+    }
 
     override fun toString(): String {
         return "BlockComponent(${hashCode()})"
@@ -514,18 +557,22 @@ data class BlockComponent(
         other as BlockComponent
 
         if (name != other.name) return false
+        if (description != other.description) return false
         if (productNames.hashCode() != other.productNames.hashCode()) return false
         if (position != other.position) return false
         if (size != other.size) return false
+        if (cookingState != other.cookingState) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
+        result = 31 * result + description.hashCode()
         result = 31 * result + productNames.hashCode()
         result = 31 * result + position.hashCode()
         result = 31 * result + size.hashCode()
+        result = 31 * result + cookingState.hashCode()
         return result
     }
 }

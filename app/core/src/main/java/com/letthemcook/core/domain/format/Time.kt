@@ -4,20 +4,43 @@ fun getLongTime(hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Long {
     return hours * 60 * 60 * 1000L + minutes * 60 * 1000L + seconds * 1000L
 }
 
-fun Long.toShortTimeString(): String {
+fun Long.isLongTime(): Boolean {
     val seconds = this / 1000
     val minutes = seconds / 60
     val hours = minutes / 60
+
+    return hours > 0
+}
+
+fun Long.toShortTimeString(canInstant: Boolean = true): String {
+    val seconds = this / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+
+    if (this == 0L && canInstant) return "Instant"
 
     val secondsText = (seconds % 60).appendToTwoPlaces()
     val minutesText = (minutes % 60).appendToTwoPlaces()
     val hoursText = hours.appendToTwoPlaces()
 
-    return if (hours > 0) {
-        "$hoursText:$minutesText:$secondsText"
-    } else {
-        "$minutesText:$secondsText"
+    return when {
+        hours > 0 -> "$hoursText:$minutesText:$secondsText"
+        else -> "$minutesText:$secondsText"
     }
+}
+
+fun Long.toTimeString(canInstant: Boolean = true): String {
+    val seconds = this / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+
+    if (this == 0L && canInstant) return "Instant"
+
+    val secondsText = (seconds % 60).appendToTwoPlaces()
+    val minutesText = (minutes % 60).appendToTwoPlaces()
+    val hoursText = hours.appendToTwoPlaces()
+
+    return "$hoursText:$minutesText:$secondsText"
 }
 
 fun Long.toSecondsString(): String {

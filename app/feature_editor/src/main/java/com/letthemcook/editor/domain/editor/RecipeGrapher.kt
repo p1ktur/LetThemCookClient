@@ -8,12 +8,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
+import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
+import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 
 object RecipeGrapher {
@@ -22,7 +22,7 @@ object RecipeGrapher {
         startComponent: StartComponent,
         centralComponent: Component,
         endComponent: EndComponent,
-        canvasUiState: BuilderUiState.CanvasUiState,
+        canvasUiState: CanvasUiState,
         // Graphics
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
@@ -32,23 +32,34 @@ object RecipeGrapher {
         frameColor: Color,
         containerColor: Color,
         textColor: Color,
-        highlightColor: Color
+        highlightColor: Color,
+        warningHighlightColor: Color,
+        goodHighlightColor: Color
     ) {
         if (centralComponent is EmptyComponent) {
+            startComponent.size = startComponent.calculateSize(textMeasurer, titleTextStyle)
+            endComponent.size = endComponent.calculateSize(textMeasurer, titleTextStyle)
+
+            startComponent.position = Offset(
+                x = drawScope.center.x - startComponent.size.width / 2f,
+                y = drawScope.size.height * 0.1f - startComponent.size.height / 2f
+            )
+            endComponent.position = Offset(
+                x = drawScope.center.x - endComponent.size.width / 2f,
+                y = drawScope.size.height * 0.9f - endComponent.size.height / 2f
+            )
+
             val circleTextLayout = textMeasurer.measure(
                 text = "Drag Block Here",
                 style = titleTextStyle
             )
 
-            val circleCenter = (startComponent.position + endComponent.position) / 2f +
-                    Offset(startComponent.size.width / 4, startComponent.size.height / 4) +
-                    Offset(endComponent.size.width / 4, endComponent.size.height / 4)
+            val componentsCenter = (startComponent.position + endComponent.position) / 2f
+            val circleCenter = Offset(
+                x = drawScope.center.x,
+                y = componentsCenter.y + (startComponent.size.height + endComponent.size.height) / 4f
+            )
             val circleRadius = circleTextLayout.size.width / 2 + DRAW_PADDING * 4
-
-            startComponent.position = Offset(drawScope.size.width / 2 , drawScope.size.height * 0.1f) +
-                    startComponent.calculateSize(textMeasurer, titleTextStyle).run { Offset(-width / 2f, -height / 2f) }
-            endComponent.position = Offset(drawScope.size.width / 2 , drawScope.size.height * 0.9f) +
-                    endComponent.calculateSize(textMeasurer, titleTextStyle).run { Offset(-width / 2f, -height / 2f) }
 
             startComponent.drawOn(
                 drawScope = drawScope,
@@ -80,7 +91,7 @@ object RecipeGrapher {
             drawScope.drawLine(
                 color = frameColor,
                 start = circleCenter.copy(circleCenter.x, circleCenter.y + circleRadius),
-                end = endComponent.position + Offset(endComponent.size.width / 2, 0f),
+                end = endComponent.position + Offset(endComponent.size.width / 2f, 0f),
                 strokeWidth = 4f
             )
             drawScope.drawText(
@@ -120,6 +131,8 @@ object RecipeGrapher {
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = true,
                 canvasUiState = canvasUiState
             )

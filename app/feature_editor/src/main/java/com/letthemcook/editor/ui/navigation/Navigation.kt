@@ -18,7 +18,7 @@ import org.koin.compose.koinInject
 
 sealed interface EditorNavRoutes {
     @Serializable data object Builder : EditorNavRoutes
-    @Serializable data object Cooking : EditorNavRoutes
+    @Serializable data class Cooking(val cookingData: String) : EditorNavRoutes
     @Serializable data object Tutorial : EditorNavRoutes
 }
 
@@ -35,6 +35,12 @@ fun NavGraphBuilder.addEditorRoutes(
                 when (action) {
                     BuilderUiAction.NavigateBack -> Unit
                     BuilderUiAction.NavigateToTutorial -> navController.navigate(EditorNavRoutes.Tutorial)
+                    BuilderUiAction.TryDemoCooking -> run {
+                        val cookingData = viewModel.onUiAction(action) as? String ?: return@run
+
+                        navController.navigate(EditorNavRoutes.Cooking(cookingData))
+                        return@run
+                    }
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
@@ -50,7 +56,6 @@ fun NavGraphBuilder.addEditorRoutes(
             onUiAction = { action ->
                 when (action) {
                     CookingUiAction.NavigateBack -> navController.navigateUp()
-                    is CookingUiAction.NavigateToRecipe -> Unit //TODO recipe route!!
                     else -> Unit
                 }
                 viewModel.onUiAction(action)

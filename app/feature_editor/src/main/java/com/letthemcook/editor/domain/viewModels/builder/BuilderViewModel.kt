@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.viewModels.builder
 
+import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
@@ -27,6 +28,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.insertTopCompon
 import com.letthemcook.editor.domain.editor.components.prototype.pointInBounds
 import com.letthemcook.editor.domain.editor.components.prototype.removeFromHierarchy
 import com.letthemcook.editor.domain.editor.geometry.limit
+import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,6 +60,7 @@ class BuilderViewModel : ViewModel() {
             // Common
             BuilderUiAction.FetchData -> fetchData()
             BuilderUiAction.SaveChanges -> Unit
+            BuilderUiAction.TryDemoCooking -> return prepareCookingData()
 
             // Products
             is BuilderUiAction.AddProduct -> return addProduct(action.product, action.position)
@@ -107,6 +110,14 @@ class BuilderViewModel : ViewModel() {
 //                }
 //            }
 //        }
+    }
+
+    private fun prepareCookingData(): String? {
+        return try {
+            RecipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     // Products
@@ -204,6 +215,7 @@ class BuilderViewModel : ViewModel() {
             component.name = newComponent.name
             component.time = newComponent.time
             component.description = newComponent.description
+            component.colorOption = newComponent.colorOption
         }
     }
 

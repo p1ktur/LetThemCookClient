@@ -5,7 +5,11 @@ import androidx.compose.ui.geometry.Size
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
+@SerialName(value = "empty")
 object EmptyComponent : Component {
     override var parentComponent: ComposedComponent? = null
     override var position: Offset = Offset.Zero

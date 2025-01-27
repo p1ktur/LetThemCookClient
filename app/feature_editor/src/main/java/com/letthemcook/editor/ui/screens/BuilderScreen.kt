@@ -12,6 +12,7 @@ import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +59,7 @@ import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockC
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.components.BlockItem
-import com.letthemcook.editor.ui.components.RecipeCanvas
+import com.letthemcook.editor.ui.components.canvas.RecipeCanvas
 import com.letthemcook.editor.ui.components.popups.BlockEditorPopup
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
 import com.letthemcook.editor.ui.modifier.rowScrollbar
@@ -245,7 +247,8 @@ fun BuilderScreen(
                                         },
                                     name = block.name,
                                     time = block.time,
-                                    description = block.description
+                                    description = block.description,
+                                    colorOption = block.colorOption
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -258,20 +261,22 @@ fun BuilderScreen(
                         .fillMaxWidth()
                         .clickable {
                             isBlocksMenuVisible = true
-                        },
+                        }
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp),
                         text = "Blocks menu",
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
                     Icon(
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .size(24.dp)
-                            .clip(CircleShape),
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .padding(2.dp),
                         imageVector = Icons.Default.ExpandMore,
                         contentDescription = "Expand Button",
                         tint = LocalAppTheme.current.text
@@ -280,30 +285,47 @@ fun BuilderScreen(
             }
         }
         HorizontalDivider(color = LocalAppTheme.current.text)
-        RecipeCanvas(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .clip(RectangleShape)
-                .dragAndDropTarget(
-                    shouldStartDragAndDrop = { event ->
-                        event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+        ) {
+            RecipeCanvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RectangleShape)
+                    .dragAndDropTarget(
+                        shouldStartDragAndDrop = { event ->
+                            event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                        },
+                        target = canvasDragAndDropManager
+                    )
+                    .onGloballyPositioned {
+                        canvasGlobalPosition = it.positionInWindow()
+                    }
+                    .onSizeChanged {
+                        canvasSize = it
                     },
-                    target = canvasDragAndDropManager
-                )
-                .onGloballyPositioned {
-                    canvasGlobalPosition = it.positionInWindow()
-                }
-                .onSizeChanged {
-                    canvasSize = it
+                uiState = uiState,
+                textMeasurer = textMeasurer,
+                blockComponentTitleTextStyle = blockComponentTitleTextStyle,
+                blockComponentNameTextStyle = blockComponentNameTextStyle,
+                blockComponentContentTextStyle = blockComponentContentTextStyle,
+                onUiAction = onUiAction
+            )
+            IconButton(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(40.dp)
+                    .align(Alignment.TopStart),
+                icon = Icons.Outlined.SoupKitchen,
+                containerColor = LocalAppTheme.current.screenOne,
+                onClick = {
+                    onUiAction(BuilderUiAction.TryDemoCooking)
                 },
-            uiState = uiState,
-            textMeasurer = textMeasurer,
-            blockComponentTitleTextStyle = blockComponentTitleTextStyle,
-            blockComponentNameTextStyle = blockComponentNameTextStyle,
-            blockComponentContentTextStyle = blockComponentContentTextStyle,
-            onUiAction = onUiAction
-        )
+                isOutlined = true
+            )
+        }
         BottomInsetSpacer(color = LocalAppTheme.current.screenThree)
     }
 
@@ -311,11 +333,12 @@ fun BuilderScreen(
         state = uiState.blockEditorState,
         anchorPosition = containerPosition,
         anchorSize = containerSize,
-        onEdit = { name, description, hours, minutes, seconds ->
+        onEdit = { name, description, hours, minutes, seconds, colorOption ->
             val newBlockComponent = UnusedBlockComponent(
                 name = name,
                 description = description,
-                time = getLongTime(hours, minutes, seconds)
+                time = getLongTime(hours, minutes, seconds),
+                colorOption = colorOption
             )
 
             when (uiState.blockEditorState) {

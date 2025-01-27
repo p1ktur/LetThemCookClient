@@ -15,6 +15,7 @@ sealed interface BuilderUiAction {
     // Common
     data object FetchData : BuilderUiAction
     data object SaveChanges : BuilderUiAction
+    data object TryDemoCooking : BuilderUiAction
 
     // Products
     data class AddProduct(val product: ProductItemData, val position: Offset) : BuilderUiAction

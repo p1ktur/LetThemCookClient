@@ -6,28 +6,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import com.letthemcook.core.domain.serialization.OffsetSerializer
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.componentHashCodes
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
+import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.math.max
 
+@Serializable
+@SerialName(value = "vertical_composed")
 data class VerticalComposedComponent(
     override val components: MutableList<Component>,
-    override var parentComponent: ComposedComponent? = null
+    @Transient override var parentComponent: ComposedComponent? = null
 ) : ComposedComponent {
 
+    @Transient
     override var containedPointerPosition: Offset? = null
 
+    @Serializable(with = OffsetSerializer::class)
     override var position: Offset = Offset.Zero
     override val size: Size get() = calculateSize()
 
+    @Transient
     private var cachedComponentsHashcode: Int = 0
+    @Transient
     private var cachedSize: Size = Size.Zero
-
+    @Transient
     private var shadingQuarterForNextFrame: Relation? = null
 
     // Graphics
@@ -41,8 +51,10 @@ data class VerticalComposedComponent(
         containerColor: Color,
         textColor: Color,
         highlightColor: Color,
+        warningHighlightColor: Color,
+        goodHighlightColor: Color,
         positionXIsCentral: Boolean,
-        canvasUiState: BuilderUiState.CanvasUiState
+        canvasUiState: CanvasUiState
     ) {
         if (positionXIsCentral) {
             position -= Offset(size.width / 2, 0f)
@@ -85,6 +97,8 @@ data class VerticalComposedComponent(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 canvasUiState = canvasUiState
             )
 

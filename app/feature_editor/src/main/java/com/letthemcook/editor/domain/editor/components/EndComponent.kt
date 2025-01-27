@@ -12,10 +12,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextAlign
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
-import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.Component
+import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.isVisible
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
+import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
@@ -39,7 +39,7 @@ data class EndComponent(
         frameColor: Color,
         textStyle: TextStyle,
         positionXIsCentral: Boolean = false,
-        canvasUiState: BuilderUiState.CanvasUiState
+        canvasUiState: CanvasUiState
     ) {
         if (!isVisible(canvasUiState)) return
 

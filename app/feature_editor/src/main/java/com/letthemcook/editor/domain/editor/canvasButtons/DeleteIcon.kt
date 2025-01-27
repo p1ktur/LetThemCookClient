@@ -32,7 +32,7 @@ data class DeleteIcon(
                 icon = rememberVectorPainter(Icons.Outlined.Remove),
                 size = size,
                 position = remember(uiState.canvasUiState.size) {
-                    Offset(uiState.canvasUiState.size.width - size.width - 16f, 16f)
+                    Offset(uiState.canvasUiState.size.width - size.width - 8f * density.density, 8f * density.density)
                 }
             )
         }

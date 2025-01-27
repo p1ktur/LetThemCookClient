@@ -1,15 +1,22 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
+import android.util.Log.i
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import com.letthemcook.editor.domain.cooking.BlockCookingState
+import com.letthemcook.editor.domain.cooking.CookingState
+import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
+import com.letthemcook.editor.domain.cooking.track.ParallelTrackData
+import com.letthemcook.editor.domain.cooking.track.SingleTrackData
+import com.letthemcook.editor.domain.cooking.track.TrackData
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
-import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
+import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
+import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 
 // Graphics
@@ -23,8 +30,10 @@ fun Component.drawOn(
     containerColor: Color,
     textColor: Color,
     highlightColor: Color,
+    warningHighlightColor: Color,
+    goodHighlightColor: Color,
     positionXIsCentral: Boolean = false,
-    canvasUiState: BuilderUiState.CanvasUiState
+    canvasUiState: CanvasUiState
 ) {
     when (this) {
         is BlockComponent -> {
@@ -37,6 +46,8 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
                 canvasUiState = canvasUiState
             )
@@ -51,6 +62,8 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
                 canvasUiState = canvasUiState
             )
@@ -65,6 +78,8 @@ fun Component.drawOn(
                 containerColor = containerColor,
                 textColor = textColor,
                 highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
                 canvasUiState = canvasUiState
             )
@@ -72,7 +87,7 @@ fun Component.drawOn(
     }
 }
 
-fun Component.isVisible(canvasUiState: BuilderUiState.CanvasUiState): Boolean {
+fun Component.isVisible(canvasUiState: CanvasUiState): Boolean {
     val canvasTopLeft = Offset.Zero
     val canvasBottomRight = Offset(canvasUiState.size.width, canvasUiState.size.height)
 
@@ -265,6 +280,266 @@ fun List<Component>.doForEveryChild(action: Component.() -> Unit) {
     childrenList.forEach { it?.doForEveryChild(action) }
 }
 
+fun Component.firstInHierarchy(): Component {
+    return when (this) {
+        is VerticalComposedComponent -> components.first().firstInHierarchy()
+        else -> this
+    }
+}
+
+fun Component.nextInHierarchy(): Component? {
+    return when (val parent = parentComponent) {
+        is HorizontalComposedComponent -> parent.nextInHierarchy()
+        is VerticalComposedComponent -> {
+            val thisIndex = parent.components.indexOf(this)
+
+            if (thisIndex < parent.components.lastIndex) {
+                parent.components[thisIndex + 1]
+            } else {
+                parent.nextInHierarchy()
+            }
+        }
+        else -> null
+    }
+}
+
+fun Component.previousInHierarchy(): Component? {
+    return when (val parent = parentComponent) {
+        is HorizontalComposedComponent -> parent.previousInHierarchy()
+        is VerticalComposedComponent -> {
+            val thisIndex = parent.components.indexOf(this)
+
+            if (thisIndex > 0) {
+                parent.components[thisIndex - 1]
+            } else {
+                parent.previousInHierarchy()
+            }
+        }
+        else -> null
+    }
+}
+
+// Cooking
+
+fun Component.restore(globalCookingState: CookingState, recurse: Boolean = true) {
+    when (this) {
+        is BlockComponent -> {
+            val previousInHierarchy = previousInHierarchy()
+            val parent = parentComponent
+
+            when {
+                globalCookingState == CookingState.NOT_STARTED -> cookingState = BlockCookingState.NOT_REACHED
+                cookingState == BlockCookingState.DONE -> cookingState = if (parent is HorizontalComposedComponent && recurse) {
+                    BlockCookingState.COOKING
+                } else {
+                    BlockCookingState.NOT_REACHED
+                }
+                previousInHierarchy != null -> cookingState = BlockCookingState.NOT_REACHED
+            }
+
+            restoreTime()
+
+            if (previousInHierarchy == null) return
+
+            when (parent) {
+                is HorizontalComposedComponent -> {
+                    if (cookingState == BlockCookingState.NOT_REACHED && recurse) {
+                        parent.restore(globalCookingState)
+                    }
+
+                    if (parent.components.all { it.isNotReached() }) {
+                        if (globalCookingState != CookingState.NOT_STARTED) previousInHierarchy.cook()
+                    }
+                }
+                is VerticalComposedComponent -> {
+                    val thisIndex = parent.components.indexOf(this)
+
+                    if (globalCookingState != CookingState.NOT_STARTED) {
+                        if (thisIndex > 0) {
+                            parent.components[thisIndex - 1].cook()
+                        } else {
+                            previousInHierarchy.cook()
+                        }
+                    }
+                }
+            }
+        }
+        is ComposedComponent -> {
+            if (parentComponent is HorizontalComposedComponent && recurse) {
+                parentComponent?.restore(globalCookingState)
+            } else {
+                components.forEach { it.restore(globalCookingState, false) }
+            }
+        }
+    }
+}
+
+fun Component.cook() {
+    if (canCook()) {
+        when (this) {
+            is BlockComponent -> cookingState = BlockCookingState.COOKING
+            is HorizontalComposedComponent -> components.forEach { it.cook() }
+            is VerticalComposedComponent -> if (components.all { it.isFinished() || it.isWaiting() }) {
+                components.last().cook()
+            } else {
+                components.firstOrNull { !it.isCooking() }?.cook()
+            }
+        }
+    }
+}
+
+fun Component.finish() {
+    when (this) {
+        is BlockComponent -> {
+            cookingState = BlockCookingState.DONE
+
+            val nextInHierarchy = nextInHierarchy() ?: return
+
+            when (val parent = parentComponent) {
+                is HorizontalComposedComponent -> {
+                    if (parent.components.all { it.isWaiting() || it.isFinished() }) {
+                        nextInHierarchy.cook()
+                    }
+                }
+                is VerticalComposedComponent -> {
+                    val thisIndex = parent.components.indexOf(this)
+
+                    if (thisIndex < parent.components.lastIndex) {
+                        parent.components[thisIndex + 1].cook()
+                    } else {
+                        nextInHierarchy.cook()
+                    }
+                }
+            }
+        }
+        is ComposedComponent -> components.forEach { it.finish() }
+    }
+}
+
+fun Component.isNotReached(): Boolean {
+    return when (this) {
+        is BlockComponent -> cookingState == BlockCookingState.NOT_REACHED
+        is ComposedComponent -> components.all { it.isNotReached() }
+        else -> false
+    }
+}
+
+fun Component.isCooking(): Boolean {
+    return when (this) {
+        is BlockComponent -> cookingState == BlockCookingState.COOKING
+        is ComposedComponent -> components.any { it.isCooking() }
+        else -> false
+    }
+}
+
+fun Component.isWaiting(): Boolean {
+    return when (this) {
+        is BlockComponent -> cookingState == BlockCookingState.WAITING
+        is ComposedComponent -> components.all { it.isWaiting() }
+        else -> false
+    }
+}
+
+fun Component.isFinished(): Boolean {
+    return when (this) {
+        is BlockComponent -> getPretendedState() == BlockCookingState.DONE
+        is ComposedComponent -> components.all { it.isFinished() }
+        else -> false
+    }
+}
+
+fun Component.canRestore(): Boolean {
+    return previousInHierarchy() != null || parentComponent is HorizontalComposedComponent
+}
+
+fun Component.canCook(): Boolean {
+    val previousInHierarchy = previousInHierarchy()
+    return previousInHierarchy == null || previousInHierarchy.isFinished()
+}
+
+fun Component.canFinish(): Boolean {
+    val parent = parentComponent
+
+    return when (this) {
+        is BlockComponent -> {
+            if (parent is HorizontalComposedComponent) {
+                if (parent.components.count { it.isWaiting() } < parent.components.size) {
+                    true
+                } else {
+                    nextInHierarchy() != null && parent.canFinish()
+                }
+            } else {
+                true
+            }
+        }
+        is HorizontalComposedComponent -> {
+            components.all { it.isWaiting() || it.isFinished() } && (parentComponent?.canFinish() ?: true)
+        }
+        is VerticalComposedComponent -> {
+            components.any { !it.isFinished() } || nextInHierarchy() != null
+        }
+        else -> false
+    }
+}
+
+// Other Cooking
+
+fun List<Component>.decreaseCookingTimer() {
+    doForEveryChild {
+        if (this is BlockComponent && cookingState == BlockCookingState.COOKING && time > 0L) {
+            time -= 1000L
+        }
+    }
+}
+
+fun Component.toTrackData(): TrackData {
+    return when (this) {
+        is BlockComponent -> SingleTrackData(this)
+        is VerticalComposedComponent -> {
+            val cookedChild = components.find { it.isCooking() || it.isWaiting() }
+
+            cookedChild?.toTrackData() ?: components.last().toTrackData()
+        }
+        is HorizontalComposedComponent -> {
+            ParallelTrackData(components.map { it.toTrackData() })
+        }
+        else -> EmptyTrackData
+    }
+}
+
+fun Component.getTotalTime(): Long {
+    return when (this) {
+        is BlockComponent -> time
+        is HorizontalComposedComponent -> components.maxOf { it.getTotalTime() }
+        is VerticalComposedComponent -> components.sumOf { it.getTotalTime() }
+        else -> 0L
+    }
+}
+
+fun Component.countFinishedAndTotal(): Pair<Int, Int> {
+    var cooked = 0
+    var total = 0
+
+    when (this) {
+        is BlockComponent -> {
+            if (isFinished()) cooked++
+            total++
+        }
+        is ComposedComponent -> {
+            val result = components.map {
+                it.countFinishedAndTotal()
+            }.reduce { acc, pair ->
+                acc.plus(pair)
+            }
+
+            cooked += result.first
+            total += result.second
+        }
+    }
+
+    return cooked to total
+}
+
 // Geometry
 
 fun Component.pointInBounds(point: Offset): Boolean {
@@ -352,4 +627,8 @@ fun List<Component>.componentHashCodes(): Int {
 
 fun Component.asComposed(): ComposedComponent? {
     return this as? ComposedComponent
+}
+
+fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
+    return first + other.first to second + other.second
 }

@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
+import com.letthemcook.editor.domain.editor.color.ColorOption
+import com.letthemcook.editor.ui.drawing.getBlockBodyBrush
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
@@ -24,6 +26,7 @@ fun BlockItem(
     name: String,
     time: Long,
     description: String,
+    colorOption: ColorOption,
     containerColor: Color = LocalAppTheme.current.container,
     borderColor: Color = LocalAppTheme.current.text,
     contentColor: Color = LocalAppTheme.current.text,
@@ -35,7 +38,7 @@ fun BlockItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(containerColor, RoundedCornerShape(16.dp))
+            .background(getBlockBodyBrush(containerColor, colorOption.color), RoundedCornerShape(16.dp))
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .run {
                 onClick?.let { clickable(onClick = it) } ?: this
