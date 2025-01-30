@@ -1,0 +1,9 @@
+package com.cooking.media.domain.viewModels.mediaViewer
+
+import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.data.file.File
+
+data class MediaViewerUiState(
+    val file: File,
+    val viewedMediaFile: MediaFile? = null
+)

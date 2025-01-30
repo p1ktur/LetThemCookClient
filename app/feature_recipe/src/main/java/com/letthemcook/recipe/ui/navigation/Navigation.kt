@@ -6,11 +6,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeViewModel
-import com.letthemcook.recipe.domain.viewModels.settings.EditedRecipeUiAction
-import com.letthemcook.recipe.domain.viewModels.settings.EditedRecipeViewModel
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeViewModel
 import com.letthemcook.recipe.ui.screens.RecipeScreen
 import com.letthemcook.recipe.ui.screens.EditedRecipeScreen
 import kotlinx.serialization.Serializable
@@ -26,7 +27,8 @@ fun NavGraphBuilder.addRecipeRoutes(
     navController: NavController,
     navBarRoutes: NavBarRoutes,
     editorRoute: Any,
-    cookingRoute: Any
+    cookingRoute: Any,
+    onViewMedia: (File) -> Unit
 ) {
     composable<RecipeNavRoutes.Recipe> { navBackStackEntry ->
         val route = navBackStackEntry.toRoute<RecipeNavRoutes.Recipe>()
@@ -71,6 +73,9 @@ fun NavGraphBuilder.addRecipeRoutes(
                     EditedRecipeUiAction.NavigateToProfile -> navController.navigateUp()
                     is EditedRecipeUiAction.NavigateToOtherProfile -> Unit // TODO implement logic!
                     EditedRecipeUiAction.StartEditing -> navController.navigate(editorRoute) // TODO implement logic!
+
+                    is EditedRecipeUiAction.ViewMediaFile -> onViewMedia(action.file)
+
                     else -> Unit
                 }
                 viewModel.onUiAction(action)

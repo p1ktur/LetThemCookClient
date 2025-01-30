@@ -16,8 +16,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.serialization.OffsetSerializer
-import com.letthemcook.core.domain.serialization.SizeSerializer
+import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
+import com.letthemcook.core.domain.dataConvertion.serialization.SizeSerializer
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
@@ -47,8 +48,9 @@ data class BlockComponent(
     val productNames: MutableList<ProductItemData> = mutableListOf(),
     @Transient override var parentComponent: ComposedComponent? = null,
     var cookingState: BlockCookingState = BlockCookingState.NOT_REACHED,
-    var colorOption: ColorOption = ColorOption.WHITE,
+    var file: File? = null,
     // Graphics
+    var colorOption: ColorOption = ColorOption.WHITE,
     @Serializable(with = OffsetSerializer::class) override var position: Offset = Offset.Zero,
     @Serializable(with = SizeSerializer::class) override var size: Size = Size.Zero
 ) : Component {

@@ -5,7 +5,7 @@ import com.letthemcook.theme.providers.ThemeStateProvider
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-val themeKoinModule = module {
+val koinThemeModule = module {
     single { ThemeStateProvider(androidContext()) }
     single { LanguageStateProvider(androidContext()) }
 }

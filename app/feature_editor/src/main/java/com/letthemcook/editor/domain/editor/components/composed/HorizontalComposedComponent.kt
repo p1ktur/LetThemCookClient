@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.serialization.OffsetSerializer
+import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.componentHashCodes

@@ -1,17 +1,26 @@
 package com.letthemcook.app
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.cooking.media.ui.navigation.MediaNavRoutes
+import com.cooking.media.ui.navigation.addMediaRoutes
 import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.editor.ui.navigation.EditorNavRoutes
 import com.letthemcook.editor.ui.navigation.addEditorRoutes
@@ -41,15 +50,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         val themeStateProvider by inject<ThemeStateProvider>()
         val languageStateProvider by inject<LanguageStateProvider>()
 
         setContent {
             val navController = rememberNavController()
+            val currentBackStackEntry by navController.currentBackStackEntryAsState()
+
             val theme by themeStateProvider.getTheme().collectAsState(Theme.LIGHT)
             val language by languageStateProvider.getLanguage().collectAsState(Language.ENGLISH)
+
+            val onViewMedia = remember {
+                fun (file: File) {
+                    navController.navigate(MediaNavRoutes.MediaViewer(file))
+                }
+            }
 
             LaunchedEffect(language) {
                 setLocale(
@@ -60,11 +76,24 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            LaunchedEffect(currentBackStackEntry) {
+                try {
+                    val route = currentBackStackEntry?.toRoute<MediaNavRoutes.MediaViewer>()
+
+                    if (route is MediaNavRoutes.MediaViewer) {
+                        enableEdgeToEdge(
+                            statusBarStyle = SystemBarStyle.dark(Color.BLACK)
+                        )
+                    }
+                } catch (_: Exception) {
+                    enableEdgeToEdge()
+                }
+            }
+
             LetThemCookTheme(theme) {
                 NavHost(
                     navController = navController,
-//                    startDestination = AuthNavRoutes.Login
-                    startDestination = EditorNavRoutes.Builder
+                    startDestination = AuthNavRoutes.Login
                 ) {
                     addAuthRoutes(
                         navController = navController,
@@ -73,7 +102,8 @@ class MainActivity : ComponentActivity() {
                     addProfileRoutes(
                         navController = navController,
                         logOutRoute = AuthNavRoutes.Login,
-                        navBarRoutes = navBarRoutes
+                        navBarRoutes = navBarRoutes,
+                        onViewMedia = onViewMedia
                     )
                     addFeedRoutes(
                         navController = navController,
@@ -83,9 +113,13 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         navBarRoutes = navBarRoutes,
                         editorRoute = EditorNavRoutes.Builder,
-                        cookingRoute = EditorNavRoutes.Cooking
+                        cookingRoute = EditorNavRoutes.Cooking,
+                        onViewMedia = onViewMedia
                     )
                     addEditorRoutes(
+                        navController = navController
+                    )
+                    addMediaRoutes(
                         navController = navController
                     )
                 }

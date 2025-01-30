@@ -1,9 +1,10 @@
-package com.letthemcook.recipe.domain.viewModels.settings
+package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.graphics.ImageBitmap
 import com.letthemcook.core.domain.model.data.CategoryItemData
 import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.LikeStatus
 
@@ -37,5 +38,6 @@ data class EditedRecipeUiState(
     val image: ImageBitmap? = null,
     val isLiked: LikeStatus = LikeStatus.NONE,
     val isPublished: Boolean = false,
-    val reviewText: TextFieldState = TextFieldState()
+    val reviewText: TextFieldState = TextFieldState(),
+    val files: List<File> = emptyList()
 )

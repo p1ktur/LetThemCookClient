@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileViewModel
@@ -27,7 +28,8 @@ sealed interface ProfileNavRoutes {
 fun NavGraphBuilder.addProfileRoutes(
     navController: NavController,
     logOutRoute: Any,
-    navBarRoutes: NavBarRoutes
+    navBarRoutes: NavBarRoutes,
+    onViewMedia: (File) -> Unit
 ) {
     composable<ProfileNavRoutes.Profile> {
         val viewModel = koinInject<ProfileViewModel>()
@@ -41,6 +43,9 @@ fun NavGraphBuilder.addProfileRoutes(
                     ProfileUiAction.NavigateToHome -> navController.navigate(navBarRoutes.homeRoute)
                     ProfileUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
                     ProfileUiAction.NavigateToSettings -> navController.navigate(ProfileNavRoutes.Settings)
+
+                    is ProfileUiAction.ViewMediaFile -> onViewMedia(action.file)
+
                     ProfileUiAction.ChangePassword -> navController.navigate(ProfileNavRoutes.PasswordChange)
                     else -> Unit
                 }

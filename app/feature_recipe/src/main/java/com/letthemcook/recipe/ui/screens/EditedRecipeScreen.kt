@@ -1,8 +1,10 @@
 package com.letthemcook.recipe.ui.screens
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,20 +19,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.outlined.AddAPhoto
+import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.FilePresent
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.outlined.VideoFile
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,15 +46,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.media.camera.MediaFilePickerManager
+import com.letthemcook.core.domain.media.MediaFilePickerManager
+import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.data.file.MediaFile
 import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
-import com.letthemcook.recipe.domain.viewModels.settings.EditedRecipeUiAction
-import com.letthemcook.recipe.domain.viewModels.settings.EditedRecipeUiState
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
 import com.letthemcook.recipe.ui.components.ReviewItem
 import com.letthemcook.recipe.ui.components.dialogs.ReviewTextFieldDialog
 import com.letthemcook.recipe.ui.components.popups.WeightedProductsLabelContainer
@@ -61,6 +70,9 @@ import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.components.textFields.BorderlessTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
 
 @Composable
 fun EditedRecipeScreen(
@@ -68,15 +80,28 @@ fun EditedRecipeScreen(
     reviewsUiState: ReviewsUiState,
     onUiAction: (EditedRecipeUiAction) -> Unit
 ) {
-    val context = LocalContext.current
+    // Media
+    val recipePictureName = "RecipePicture${uiState.id}"
+    val recipeFileName = "RecipeFile${uiState.id}_"
+    var recipePictureBitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    var isMediaPickMethodDialogShown by remember { mutableStateOf(false) }
-    val mediaFilePickerManager = remember { MediaFilePickerManager(context, "RecipeImage_${uiState.id}") }
-    val profileImageBitmap by mediaFilePickerManager.imageBitmap.collectAsState()
+    val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
+    mediaFilePickerManager.RegisterLaunchers()
 
+    // Reviews
     var isReviewTextFieldDialogShown by remember { mutableStateOf(false) }
 
-    mediaFilePickerManager.RegisterLaunchers()
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            mediaFilePickerManager.getStoredFile(recipePictureName) {
+                recipePictureBitmap = (it as? MediaFile.Image)?.bitmap
+            }
+
+            mediaFilePickerManager.getStoredFilesIndexed(recipeFileName, 0) {
+                onUiAction(EditedRecipeUiAction.AddFile(it.file))
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -104,7 +129,7 @@ fun EditedRecipeScreen(
             ) {
                 Image(
                     modifier = Modifier.fillMaxSize(),
-                    bitmap = profileImageBitmap
+                    bitmap = recipePictureBitmap?.asImageBitmap()
                         ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
                     contentDescription = "Recipe Image",
                     contentScale = ContentScale.FillBounds
@@ -155,7 +180,9 @@ fun EditedRecipeScreen(
                                 .size(40.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    isMediaPickMethodDialogShown = true
+                                    mediaFilePickerManager.showDialog(FileType.IMAGE, recipePictureName) {
+                                        recipePictureBitmap = (it as? MediaFile.Image)?.bitmap
+                                    }
                                 }
                                 .padding(8.dp),
                             imageVector = Icons.Outlined.AddAPhoto,
@@ -231,6 +258,48 @@ fun EditedRecipeScreen(
                 state = uiState.description,
                 labelText = "Description"
             )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                uiState.files.forEach { file ->
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .clickable {
+                                onUiAction(EditedRecipeUiAction.ViewMediaFile(file))
+                            }
+                            .padding(4.dp),
+                        imageVector = when (file.type) {
+                            FileType.IMAGE -> Icons.Outlined.Image
+                            FileType.VIDEO -> Icons.Outlined.VideoFile
+                            FileType.ANY -> Icons.Outlined.FilePresent
+                        },
+                        contentDescription = "File Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+                // TODO make delete files
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            mediaFilePickerManager.showDialog(FileType.ANY, recipeFileName + uiState.files.size) {
+                                onUiAction(EditedRecipeUiAction.AddFile(it.file))
+                            }
+                        }
+                        .padding(4.dp),
+                    imageVector = Icons.Outlined.AttachFile,
+                    contentDescription = "Attach File Icon",
+                    tint = LocalAppTheme.current.text
+                )
+            }
             HorizontalDivider(color = LocalAppTheme.current.text)
             Column {
                 Text(
@@ -334,20 +403,8 @@ fun EditedRecipeScreen(
         BottomInsetSpacer()
     }
 
-    MediaPickMethodDialog(
-        isShown = isMediaPickMethodDialogShown,
-        onGalleryOptionSelected = {
-            mediaFilePickerManager.launchGallery()
-            isMediaPickMethodDialogShown = false
-        },
-        onCameraOptionSelected = {
-            mediaFilePickerManager.launchCamera()
-            isMediaPickMethodDialogShown = false
-        },
-        onDismiss = {
-            isMediaPickMethodDialogShown = false
-        }
-    )
+    MediaPickMethodDialog(mediaFilePickerManager)
+
     ReviewTextFieldDialog(
         isShown = isReviewTextFieldDialogShown,
         reviewState = uiState.reviewText,

@@ -1,5 +1,6 @@
-package com.letthemcook.recipe.domain.viewModels.settings
+package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 
 sealed interface EditedRecipeUiAction {
@@ -8,6 +9,9 @@ sealed interface EditedRecipeUiAction {
     data object NavigateToAddRecipe : EditedRecipeUiAction
     data object NavigateToProfile : EditedRecipeUiAction
     data class NavigateToOtherProfile(val id: Int) : EditedRecipeUiAction
+
+    data class ViewMediaFile(val file: File) : EditedRecipeUiAction
+    data class AddFile(val file: File) : EditedRecipeUiAction
 
     data class AddWeightedProduct(val data: WeightedProductItemData) : EditedRecipeUiAction
     data class DeleteWeightedProduct(val index: Int) : EditedRecipeUiAction

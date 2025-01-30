@@ -1,6 +1,7 @@
-package com.letthemcook.recipe.domain.viewModels.settings
+package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import androidx.lifecycle.ViewModel
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,9 @@ class EditedRecipeViewModel(
             is EditedRecipeUiAction.NavigateToOtherProfile -> Unit
             // TODO save changes on navigation
 
+            is EditedRecipeUiAction.ViewMediaFile -> Unit
+            is EditedRecipeUiAction.AddFile -> addFile(action.file)
+
             is EditedRecipeUiAction.AddWeightedProduct -> addWeightedProduct(action.data)
             is EditedRecipeUiAction.DeleteWeightedProduct -> deleteWeightedProduct(action.index)
 
@@ -39,6 +43,14 @@ class EditedRecipeViewModel(
             EditedRecipeUiAction.SendReview -> sendReview()
             is EditedRecipeUiAction.LikeReview -> likeReview(action.id)
             is EditedRecipeUiAction.DislikeReview -> dislikeReview(action.id)
+        }
+    }
+
+    private fun addFile(file: File) {
+        _uiState.update {
+            it.copy(
+                files = it.files + file
+            )
         }
     }
 

@@ -1,6 +1,5 @@
 package com.letthemcook.theme.components.dialogs
 
-import android.graphics.Paint.Align
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,20 +23,28 @@ import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.media.MediaFilePickerManager
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 
 @Composable
-fun MediaPickMethodDialog(
-    isShown: Boolean,
-    onGalleryOptionSelected: () -> Unit,
-    onCameraOptionSelected: () -> Unit,
-    onDismiss: () -> Unit
-) {
+fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
+    val isShown by remember { mediaFilePickerManager.isDialogShown }
+    val fileType by remember { mediaFilePickerManager.currentFileType }
+
+    var selectedFileType by remember(fileType) { mutableStateOf(FileType.IMAGE) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,7 +53,9 @@ fun MediaPickMethodDialog(
                     clickable(
                         interactionSource = null,
                         indication = null,
-                        onClick = onDismiss
+                        onClick = {
+                            mediaFilePickerManager.hideDialog()
+                        }
                     )
                 } else this
             },
@@ -66,10 +74,50 @@ fun MediaPickMethodDialog(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Select Image",
-                    style = LocalAppTheme.current.typography.titleSmall
-                )
+                when (fileType) {
+                    FileType.IMAGE -> {
+                        Text(
+                            text = "Select Image",
+                            style = LocalAppTheme.current.typography.titleSmall
+                        )
+                    }
+                    FileType.VIDEO -> {
+                        Text(
+                            text = "Select Video",
+                            style = LocalAppTheme.current.typography.titleSmall
+                        )
+                    }
+                    FileType.ANY -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        selectedFileType = FileType.IMAGE
+                                    }
+                                    .padding(6.dp),
+                                text = "Select Image",
+                                style = LocalAppTheme.current.typography.titleSmall,
+                                textDecoration = if (selectedFileType == FileType.IMAGE) TextDecoration.Underline else null
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        selectedFileType = FileType.VIDEO
+                                    }
+                                    .padding(6.dp),
+                                text = "Select Video",
+                                style = LocalAppTheme.current.typography.titleSmall,
+                                textDecoration = if (selectedFileType == FileType.VIDEO) TextDecoration.Underline else null
+                            )
+                        }
+                    }
+                }
                 Row (
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -77,7 +125,10 @@ fun MediaPickMethodDialog(
                     Column(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .clickable(onClick = onGalleryOptionSelected)
+                            .clickable {
+                                mediaFilePickerManager.launchGallery(selectedFileType)
+                                mediaFilePickerManager.hideDialog()
+                            }
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -98,7 +149,10 @@ fun MediaPickMethodDialog(
                     Column(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .clickable(onClick = onCameraOptionSelected)
+                            .clickable {
+                                mediaFilePickerManager.launchCamera(selectedFileType)
+                                mediaFilePickerManager.hideDialog()
+                            }
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {

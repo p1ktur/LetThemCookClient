@@ -1,7 +1,7 @@
 package com.letthemcook.recipe.domain.koin
 
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeViewModel
-import com.letthemcook.recipe.domain.viewModels.settings.EditedRecipeViewModel
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

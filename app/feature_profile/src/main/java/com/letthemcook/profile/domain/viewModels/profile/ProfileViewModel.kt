@@ -21,6 +21,9 @@ class ProfileViewModel(
             ProfileUiAction.NavigateBack -> Unit
             ProfileUiAction.NavigateToHome -> Unit
             ProfileUiAction.NavigateToSettings -> Unit
+
+            is ProfileUiAction.ViewMediaFile -> Unit
+
             ProfileUiAction.ChangePassword -> Unit
         }
     }

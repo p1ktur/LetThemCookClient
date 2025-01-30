@@ -219,9 +219,6 @@ class BuilderViewModel : ViewModel() {
         }
     }
 
-    // TODO add settings to retain product on the block
-    // TODO add settings to show debug (helper) rectangles on containers
-
     private fun removeComponent() {
         val componentToRemove = (uiState.value.componentFocus as? ComponentFocus.Block)?.ref ?: return
 

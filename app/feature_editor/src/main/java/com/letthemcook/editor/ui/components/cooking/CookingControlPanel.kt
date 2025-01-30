@@ -33,6 +33,7 @@ import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiState
 import com.letthemcook.theme.base.LocalAppTheme
+import com.letthemcook.theme.components.bars.ProgressBar
 
 @Composable
 fun CookingControlPanel(
@@ -119,7 +120,8 @@ fun CookingControlPanel(
         }
         HorizontalDivider(color = LocalAppTheme.current.text)
         ProgressBar(
-            cookingProgress = uiState.cookingProgress
+            progress = uiState.cookingProgress,
+            height = 4.dp
         )
         if (uiState.trackData != EmptyTrackData) {
             HorizontalDivider(color = LocalAppTheme.current.text)

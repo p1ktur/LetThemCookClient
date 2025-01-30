@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidKotlin)
     alias(libs.plugins.androidComposeCompiler)
     alias(libs.plugins.serializationJson)
-    alias(libs.plugins.devToolsKsp)
 }
 
 android {
@@ -50,6 +49,7 @@ dependencies {
     implementation(project(":app:feature_feed"))
     implementation(project(":app:feature_recipe"))
     implementation(project(":app:feature_editor"))
+    implementation(project(":app:feature_media"))
 
     // Common
     implementation(libs.androidx.core.ktx)
@@ -87,11 +87,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // Room
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
 
     // Serialization
     implementation(libs.kotlinx.serialization.json)

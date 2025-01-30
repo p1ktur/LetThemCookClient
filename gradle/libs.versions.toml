@@ -1,13 +1,13 @@
 [versions]
-activityCompose = "1.9.3"
+activityCompose = "1.10.0"
 androidGradle = "8.3.2"
 androidLifecycleKtx = "2.8.7"
 appcompat = "1.7.0"
-composeBom = "2024.12.01"
-composeNavigation = "2.8.5"
+composeBom = "2025.01.01"
+composeNavigation = "2.8.6"
 constraintLayout = "2.2.0"
 coreKtx = "1.15.0"
-datastorePreferences = "1.1.1"
+datastorePreferences = "1.1.2"
 espressoCore = "3.6.1"
 gradlePlugin = "3.4.3"
 junit = "4.13.2"
@@ -19,7 +19,10 @@ koinCompose = "4.0.1"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
 ktorVersion = "3.0.3"
-materialIconsExtendedAndroid = "1.7.6"
+materialIconsExtendedAndroid = "1.7.7"
+mediaExoplayer = "1.5.1"
+mediaExoplayerDash = "1.5.1"
+mediaUi = "1.5.1"
 serializationJson = "1.8.0"
 serializationJsonPlugin = "2.0.20"
 room = "2.6.1"
@@ -39,6 +42,9 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidLifecycleKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "mediaExoplayer" }
+androidx-media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "mediaExoplayerDash" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "mediaUi" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }

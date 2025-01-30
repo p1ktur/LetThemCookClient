@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.serialization
+package com.letthemcook.core.domain.dataConvertion.serialization
 
 import androidx.compose.ui.geometry.*
 import kotlinx.serialization.*
