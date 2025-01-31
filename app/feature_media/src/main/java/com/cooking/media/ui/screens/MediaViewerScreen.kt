@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.file.MediaFile
 import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerUiAction
 import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerUiState
 import com.cooking.media.ui.components.ImageViewer

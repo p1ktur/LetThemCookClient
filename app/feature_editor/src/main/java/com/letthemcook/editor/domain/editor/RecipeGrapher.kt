@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent

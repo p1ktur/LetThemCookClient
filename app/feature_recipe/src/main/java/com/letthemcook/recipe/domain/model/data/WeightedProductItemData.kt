@@ -1,6 +1,6 @@
 package com.letthemcook.recipe.domain.model.data
 
-import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.items.ProductItemData
 
 data class WeightedProductItemData(
     val data: ProductItemData,

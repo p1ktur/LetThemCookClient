@@ -1,7 +1,7 @@
 package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import androidx.lifecycle.ViewModel
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,6 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
-import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.items.ProductItemData
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 
 sealed interface ComponentFocus {

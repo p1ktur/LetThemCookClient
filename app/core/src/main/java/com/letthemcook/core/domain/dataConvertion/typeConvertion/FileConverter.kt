@@ -1,13 +1,12 @@
 package com.letthemcook.core.domain.dataConvertion.typeConvertion
 
-import android.net.Uri
 import androidx.room.TypeConverter
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import kotlinx.serialization.json.Json
 
 class FileConverter {
 
-    val json = Json {
+    private val json = Json {
         encodeDefaults = true
     }
 

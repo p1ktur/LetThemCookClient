@@ -1,15 +1,15 @@
 package com.letthemcook.feed.domain.viewModels.search
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.letthemcook.core.domain.model.data.CategoryItemData
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.feed.domain.model.data.RecipeItemData
+import com.letthemcook.core.domain.model.items.CategoryItemData
+import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.local.FavoredRecipe
 
 data class SearchUiState(
     val searchText: TextFieldState = TextFieldState(),
     val searchType: SearchType = SearchType.NAME,
     val sortType: SortType = SortType.DATE,
-    val searchedRecipes: List<RecipeItemData> = emptyList(),
+    val searchedRecipes: List<FavoredRecipe> = emptyList(),
     val resultsAmount: Int = 0,
     // Categories
     val categoriesSearchText: TextFieldState = TextFieldState(),

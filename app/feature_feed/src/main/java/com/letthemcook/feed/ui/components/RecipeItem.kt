@@ -25,14 +25,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.letthemcook.feed.R
-import com.letthemcook.feed.domain.model.data.RecipeItemData
+import com.letthemcook.core.domain.model.local.FavoredRecipe
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun RecipeItem(
     modifier: Modifier = Modifier,
-    recipeItemData: RecipeItemData,
+    recipeItemData: FavoredRecipe,
     onClick: () -> Unit
 ) {
     Box(

@@ -3,10 +3,8 @@ package com.cooking.media.ui.navigation
 import android.net.Uri
 import android.os.Bundle
 import androidx.navigation.NavType
-import com.letthemcook.core.domain.model.data.file.File
-import kotlinx.serialization.decodeFromString
+import com.letthemcook.core.domain.model.file.File
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.Json.Default.decodeFromString
 
 class FileNavType : NavType<File>(false) {
 

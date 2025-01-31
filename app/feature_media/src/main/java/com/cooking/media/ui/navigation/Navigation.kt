@@ -1,11 +1,7 @@
 package com.cooking.media.ui.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -13,10 +9,9 @@ import androidx.navigation.toRoute
 import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerUiAction
 import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerViewModel
 import com.cooking.media.ui.screens.MediaViewerScreen
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
 

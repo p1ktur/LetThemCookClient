@@ -1,14 +1,14 @@
 package com.letthemcook.recipe.domain.viewModels.reviews
 
-import com.letthemcook.recipe.domain.model.data.review.ReviewData
+import com.letthemcook.core.domain.model.items.ReviewItemData
 
 data class ReviewsUiState(
-    val reviews: List<ReviewData> = listOf(
-        ReviewData(
+    val reviews: List<ReviewItemData> = listOf(
+        ReviewItemData(
             id = 0,
             authorId = 0,
             authorLogin = "@username",
-            authorImage = null,
+            authorBitmap = null,
             text = "I really like it!",
             likesAmount = 123,
             isLiked = true

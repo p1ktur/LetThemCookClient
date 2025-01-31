@@ -1,15 +1,12 @@
 package com.letthemcook.editor.domain.viewModels.builder
 
-import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.items.ProductItemData
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
-import com.letthemcook.editor.domain.editor.components.EmptyComponent.tryRecalculateSize
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.BlockContainment
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -33,9 +30,7 @@ import com.letthemcook.editor.domain.editor.geometry.limit
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
 import com.letthemcook.editor.domain.viewModels.cooking.testCookData
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

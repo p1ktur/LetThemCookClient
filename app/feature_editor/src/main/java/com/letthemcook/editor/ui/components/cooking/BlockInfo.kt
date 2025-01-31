@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.VideoFile
@@ -32,10 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.ui.drawing.getBlockBodyBrush

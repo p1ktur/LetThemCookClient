@@ -32,7 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.items.ProductItemData
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.LabelItem

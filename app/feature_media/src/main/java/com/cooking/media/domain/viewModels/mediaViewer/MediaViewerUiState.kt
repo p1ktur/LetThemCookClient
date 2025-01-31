@@ -1,7 +1,7 @@
 package com.cooking.media.domain.viewModels.mediaViewer
 
-import com.letthemcook.core.domain.model.data.file.MediaFile
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.MediaFile
+import com.letthemcook.core.domain.model.file.File
 
 data class MediaViewerUiState(
     val file: File,

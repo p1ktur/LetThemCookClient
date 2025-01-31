@@ -2,8 +2,8 @@ package com.letthemcook.editor.domain.viewModels.builder
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent

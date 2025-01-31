@@ -52,10 +52,10 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.media.MediaFilePickerManager
-import com.letthemcook.core.domain.model.data.file.FileType
-import com.letthemcook.core.domain.model.data.file.MediaFile
-import com.letthemcook.core.domain.model.data.file.getRecipeFilesPrefix
-import com.letthemcook.core.domain.model.data.file.getRecipePictureFileName
+import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.MediaFile
+import com.letthemcook.core.domain.model.file.getRecipeFilesPrefix
+import com.letthemcook.core.domain.model.file.getRecipePictureFileName
 import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
@@ -376,7 +376,7 @@ fun EditedRecipeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .animateItem(),
-                            reviewData = reviewData,
+                            reviewItemData = reviewData,
                             onProfileClick = {
                                 onUiAction(EditedRecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
                             },

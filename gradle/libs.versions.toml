@@ -23,6 +23,7 @@ materialIconsExtendedAndroid = "1.7.7"
 mediaExoplayer = "1.5.1"
 mediaExoplayerDash = "1.5.1"
 mediaUi = "1.5.1"
+securityCrypto = "1.1.0-alpha06"
 serializationJson = "1.8.0"
 serializationJsonPlugin = "2.0.20"
 room = "2.6.1"
@@ -48,6 +49,7 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-icons = { group = "androidx.compose.material", name = "material-icons-extended" }

@@ -1,6 +1,6 @@
 package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 
 sealed interface EditedRecipeUiAction {

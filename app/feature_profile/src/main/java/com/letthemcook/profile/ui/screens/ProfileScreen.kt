@@ -35,9 +35,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.media.MediaFilePickerManager
-import com.letthemcook.core.domain.model.data.file.FileType
-import com.letthemcook.core.domain.model.data.file.MediaFile
-import com.letthemcook.core.domain.model.data.file.getProfilePictureFileName
+import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.MediaFile
+import com.letthemcook.core.domain.model.file.getProfilePictureFileName
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiState
 import com.letthemcook.profile.ui.components.ProfileEditedData

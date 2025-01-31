@@ -1,10 +1,10 @@
 package com.letthemcook.feed.domain.viewModels.savedRecipes
 
-import com.letthemcook.feed.domain.model.data.RecipeItemData
+import com.letthemcook.core.domain.model.local.FavoredRecipe
 
 data class SavedRecipesUiState(
-    val savedRecipes: List<RecipeItemData> = listOf(
-        RecipeItemData(
+    val savedRecipes: List<FavoredRecipe> = listOf(
+        FavoredRecipe(
             name = "Recipe name",
             authorLogin = "@username",
             likesAmount = 123,

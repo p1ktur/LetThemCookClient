@@ -1,17 +1,13 @@
 package com.letthemcook.core.data.files
 
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
-import com.letthemcook.core.data.files.database.FileDao
-import com.letthemcook.core.domain.model.data.file.File
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.file.FileType
 import java.util.UUID
 
 class FilesManager(

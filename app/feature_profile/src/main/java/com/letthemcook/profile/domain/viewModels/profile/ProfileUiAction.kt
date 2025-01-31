@@ -1,6 +1,6 @@
 package com.letthemcook.profile.domain.viewModels.profile
 
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 
 sealed interface ProfileUiAction {
     data object NavigateBack : ProfileUiAction

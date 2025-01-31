@@ -55,11 +55,21 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.icons)
 
+    // Encrypted Storage
+    implementation(libs.androidx.security.crypto)
+
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
+    
+    // Ktor
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

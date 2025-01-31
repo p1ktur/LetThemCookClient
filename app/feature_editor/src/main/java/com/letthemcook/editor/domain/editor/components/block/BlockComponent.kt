@@ -1,6 +1,5 @@
 package com.letthemcook.editor.domain.editor.components.block
 
-import android.util.Log
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -20,11 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
 import com.letthemcook.core.domain.dataConvertion.serialization.SizeSerializer
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent

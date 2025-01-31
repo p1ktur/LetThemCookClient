@@ -6,7 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeViewModel
@@ -16,7 +16,6 @@ import com.letthemcook.recipe.ui.screens.RecipeScreen
 import com.letthemcook.recipe.ui.screens.EditedRecipeScreen
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 sealed interface RecipeNavRoutes {

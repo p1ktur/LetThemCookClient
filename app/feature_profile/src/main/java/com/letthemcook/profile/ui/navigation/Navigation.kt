@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileViewModel

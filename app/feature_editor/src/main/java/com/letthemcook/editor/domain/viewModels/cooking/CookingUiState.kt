@@ -1,6 +1,6 @@
 package com.letthemcook.editor.domain.viewModels.cooking
 
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
 import com.letthemcook.editor.domain.cooking.track.TrackData

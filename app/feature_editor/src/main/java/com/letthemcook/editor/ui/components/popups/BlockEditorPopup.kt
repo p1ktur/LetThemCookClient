@@ -1,6 +1,5 @@
 package com.letthemcook.editor.ui.components.popups
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.outlined.VideoFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +42,8 @@ import com.letthemcook.core.domain.format.toHoursString
 import com.letthemcook.core.domain.format.toMinutesString
 import com.letthemcook.core.domain.format.toSecondsString
 import com.letthemcook.core.domain.media.MediaFilePickerManager
-import com.letthemcook.core.domain.model.data.file.File
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -56,7 +54,6 @@ import com.letthemcook.theme.components.textFields.DigitsTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.SingleLineTextField
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 

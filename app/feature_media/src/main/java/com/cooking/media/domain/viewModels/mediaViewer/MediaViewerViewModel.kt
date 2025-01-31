@@ -1,10 +1,10 @@
 package com.cooking.media.domain.viewModels.mediaViewer
 
 import androidx.lifecycle.ViewModel
-import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.core.data.files.FilesManager
-import com.letthemcook.core.domain.model.data.file.File
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

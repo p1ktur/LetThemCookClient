@@ -7,13 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -22,7 +19,7 @@ import com.cooking.media.ui.navigation.MediaNavRoutes
 import com.cooking.media.ui.navigation.addMediaRoutes
 import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.editor.ui.navigation.EditorNavRoutes
 import com.letthemcook.editor.ui.navigation.addEditorRoutes

@@ -2,8 +2,8 @@ package com.letthemcook.editor.domain.editor.components.block
 
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import kotlinx.serialization.Serializable
 import java.util.UUID

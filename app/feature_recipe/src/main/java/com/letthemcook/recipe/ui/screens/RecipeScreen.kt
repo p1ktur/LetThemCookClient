@@ -251,7 +251,7 @@ fun RecipeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem(),
-                        reviewData = reviewData,
+                        reviewItemData = reviewData,
                         onProfileClick = {
                             onUiAction(RecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
                         },

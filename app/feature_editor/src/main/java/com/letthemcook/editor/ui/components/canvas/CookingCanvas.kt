@@ -1,6 +1,5 @@
 package com.letthemcook.editor.ui.components.canvas
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.calculatePan
@@ -23,7 +22,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.RecipeGrapher
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiState

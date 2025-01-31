@@ -1,13 +1,12 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
-import android.util.Log.i
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.data.file.FileType
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData

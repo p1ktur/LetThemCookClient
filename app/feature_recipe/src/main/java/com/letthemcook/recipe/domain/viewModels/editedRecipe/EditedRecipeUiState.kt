@@ -2,9 +2,9 @@ package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.graphics.ImageBitmap
-import com.letthemcook.core.domain.model.data.CategoryItemData
-import com.letthemcook.core.domain.model.data.ProductItemData
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.items.CategoryItemData
+import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.LikeStatus
 

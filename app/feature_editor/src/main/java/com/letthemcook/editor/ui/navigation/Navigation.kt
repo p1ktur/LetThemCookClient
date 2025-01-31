@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.viewModels.tutorial.TutorialUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderViewModel
@@ -15,10 +15,8 @@ import com.letthemcook.editor.domain.viewModels.cooking.CookingViewModel
 import com.letthemcook.editor.ui.screens.BuilderScreen
 import com.letthemcook.editor.ui.screens.TutorialScreen
 import com.letthemcook.editor.ui.screens.CookingScreen
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 sealed interface EditorNavRoutes {
     @Serializable data object Builder : EditorNavRoutes

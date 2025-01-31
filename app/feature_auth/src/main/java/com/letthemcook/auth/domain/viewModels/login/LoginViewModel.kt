@@ -2,7 +2,8 @@ package com.letthemcook.auth.domain.viewModels.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.auth.domain.data.LoginData
+import com.letthemcook.core.data.authorization.AuthManager
+import com.letthemcook.core.domain.model.auth.LoginData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-//    private val authorizationManager: AuthorizationManager
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -65,13 +66,13 @@ class LoginViewModel(
                 )
             }
 
-//            val loginResult = authorizationManager.loginUser(loginData)
-//
-//            _uiState.update {
-//                it.copy(
-//                    loginResult = loginResult
-//                )
-//            }
+            val loginResult = authManager.login(loginData)
+
+            _uiState.update {
+                it.copy(
+                    loginResult = loginResult
+                )
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,8 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
 import com.letthemcook.core.data.files.FilesManager
-import com.letthemcook.core.domain.model.data.file.FileType
-import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.MediaFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream

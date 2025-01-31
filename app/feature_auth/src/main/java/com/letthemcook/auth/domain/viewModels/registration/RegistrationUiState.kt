@@ -1,7 +1,7 @@
 package com.letthemcook.auth.domain.viewModels.registration
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.letthemcook.auth.domain.authorization.result.RegistrationAuthResult
+import com.letthemcook.core.domain.model.auth.RegistrationAuthResult
 
 data class RegistrationUiState(
     // Fields

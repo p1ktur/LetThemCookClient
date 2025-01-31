@@ -23,15 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.letthemcook.recipe.domain.model.data.review.ReviewData
+import com.letthemcook.core.domain.model.items.ReviewItemData
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun ReviewItem(
     modifier: Modifier = Modifier,
-    reviewData: ReviewData,
+    reviewItemData: ReviewItemData,
     onProfileClick: () -> Unit,
     onLikeClick: () -> Unit
 ) {
@@ -40,7 +41,7 @@ fun ReviewItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (reviewData.authorImage == null) {
+        if (reviewItemData.authorBitmap == null) {
             Image(
                 modifier = Modifier
                     .width(64.dp)
@@ -53,7 +54,7 @@ fun ReviewItem(
                 contentScale = ContentScale.FillWidth,
                 colorFilter = ColorFilter.tint(LocalAppTheme.current.text, BlendMode.SrcAtop)
             )
-        } else {
+        } else reviewItemData.authorBitmap?.let { bitmap ->
             Image(
                 modifier = Modifier
                     .width(64.dp)
@@ -61,7 +62,7 @@ fun ReviewItem(
                     .clip(CircleShape)
                     .background(LocalAppTheme.current.screenThree)
                     .clickable(onClick = onProfileClick),
-                bitmap = reviewData.authorImage,
+                bitmap = bitmap.asImageBitmap(),
                 contentDescription = "Profile Image"
             )
         }
@@ -70,12 +71,12 @@ fun ReviewItem(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = reviewData.authorLogin,
+                text = reviewItemData.authorLogin,
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = reviewData.text,
+                text = reviewItemData.text,
                 style = LocalAppTheme.current.typography.bodySmall
             )
         }
@@ -83,7 +84,7 @@ fun ReviewItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = reviewData.likesAmount.toString(),
+                text = reviewItemData.likesAmount.toString(),
                 style = LocalAppTheme.current.typography.bodySmall
             )
             Icon(
@@ -91,7 +92,7 @@ fun ReviewItem(
                     .size(24.dp)
                     .clip(CircleShape)
                     .clickable(onClick = onLikeClick),
-                imageVector = if (reviewData.isLiked) {
+                imageVector = if (reviewItemData.isLiked) {
                     Icons.Default.ThumbUp
                 } else {
                     Icons.Outlined.ThumbUp

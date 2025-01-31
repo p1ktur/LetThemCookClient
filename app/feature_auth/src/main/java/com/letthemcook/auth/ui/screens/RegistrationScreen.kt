@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.letthemcook.auth.R
-import com.letthemcook.auth.domain.authorization.result.RegistrationAuthResult
+import com.letthemcook.core.domain.model.auth.RegistrationAuthResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
