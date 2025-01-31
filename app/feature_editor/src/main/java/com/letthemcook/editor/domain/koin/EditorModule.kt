@@ -1,7 +1,8 @@
 package com.letthemcook.editor.domain.koin
 
-import com.letthemcook.editor.data.RecipeLocalDataManager
+import com.letthemcook.editor.data.LocalBuiltRecipeDataManager
 import com.letthemcook.editor.data.database.BuiltRecipeDatabase
+import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
 import com.letthemcook.editor.domain.viewModels.builder.BuilderViewModel
 import com.letthemcook.editor.domain.viewModels.cooking.CookingViewModel
 import org.koin.android.ext.koin.androidContext
@@ -11,8 +12,10 @@ import org.koin.dsl.module
 val koinEditorModule = module {
     single { BuiltRecipeDatabase.getInstance(androidContext()) }
     single { get<BuiltRecipeDatabase>().getDao() }
-    single { RecipeLocalDataManager(get()) }
+    single { LocalBuiltRecipeDataManager(get(), get()) }
 
-    viewModel { BuilderViewModel() }
-    viewModel { CookingViewModel() }
+    single { RecipeGraphSerializer(get()) }
+
+    viewModel { BuilderViewModel(get()) }
+    viewModel { CookingViewModel(get()) }
 }

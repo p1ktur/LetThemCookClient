@@ -2,6 +2,7 @@ package com.letthemcook.editor.ui.screens
 
 import android.content.ClipData
 import android.content.ClipDescription
+import android.util.Log
 import android.view.View
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,6 +34,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -53,9 +56,10 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.getLongTime
+import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.components.BlockItem
@@ -66,10 +70,12 @@ import com.letthemcook.editor.ui.modifier.rowScrollbar
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.buttons.IconButton
+import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
 import com.letthemcook.theme.components.labels.LabelIcon
 import com.letthemcook.theme.components.labels.LabelItem
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -77,6 +83,9 @@ fun BuilderScreen(
     uiState: BuilderUiState,
     onUiAction: (BuilderUiAction) -> Any?
 ) {
+    val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
+    mediaFilePickerManager.RegisterLaunchers()
+
     var isBlocksMenuVisible by remember { mutableStateOf(true) }
 
     var containerPosition by remember { mutableStateOf(Offset.Zero) }
@@ -90,7 +99,7 @@ fun BuilderScreen(
     val blockComponentNameTextStyle = MaterialTheme.typography.bodyLarge
     val blockComponentContentTextStyle = MaterialTheme.typography.bodyMedium
 
-    val canvasDragAndDropManager = remember(uiState.unusedProducts, uiState.unusedBlockComponents) {
+    val canvasDragAndDropManager = remember(uiState.unusedProducts, uiState.unusedBlockComponents, canvasGlobalPosition) {
         CanvasDragAndDropManager(
             canvasGlobalPosition = canvasGlobalPosition,
             unusedProducts = uiState.unusedProducts,
@@ -104,6 +113,13 @@ fun BuilderScreen(
 
     val productsRowScrollState = rememberScrollState()
     val blocksRowScrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        if (uiState.savedBlockEditorState != null) {
+            onUiAction(BuilderUiAction.SetBlockEditorState(uiState.savedBlockEditorState))
+            onUiAction(BuilderUiAction.SaveBlockEditorState(null))
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -331,14 +347,16 @@ fun BuilderScreen(
 
     BlockEditorPopup(
         state = uiState.blockEditorState,
+        mediaFilePickerManager = mediaFilePickerManager,
         anchorPosition = containerPosition,
         anchorSize = containerSize,
-        onEdit = { name, description, hours, minutes, seconds, colorOption ->
+        onEdit = { name, description, hours, minutes, seconds, colorOption, file ->
             val newBlockComponent = UnusedBlockComponent(
                 name = name,
                 description = description,
                 time = getLongTime(hours, minutes, seconds),
-                colorOption = colorOption
+                colorOption = colorOption,
+                file = file
             )
 
             when (uiState.blockEditorState) {
@@ -356,8 +374,16 @@ fun BuilderScreen(
 
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
         },
+        onViewMediaFile = { file ->
+            onUiAction(BuilderUiAction.ViewMediaFile(file))
+        },
+        onSaveState = { state ->
+            onUiAction(BuilderUiAction.SaveBlockEditorState(state))
+        },
         onDismiss = {
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
         }
     )
+
+    MediaPickMethodDialog(mediaFilePickerManager)
 }

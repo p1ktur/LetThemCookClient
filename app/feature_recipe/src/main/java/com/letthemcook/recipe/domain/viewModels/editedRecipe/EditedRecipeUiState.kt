@@ -32,7 +32,7 @@ data class EditedRecipeUiState(
     val searchedCategories: List<CategoryItemData> = listOf(CategoryItemData(0, "Dariya Fries")),
     // Products
     val productsSearchText: TextFieldState = TextFieldState(),
-    val products: List<WeightedProductItemData> = listOf(WeightedProductItemData("Renat Tomatoes", 100, 2)),
+    val products: List<WeightedProductItemData> = listOf(WeightedProductItemData(ProductItemData(0, "Renat Tomatoes"), 100, 2)),
     val searchedProducts: List<ProductItemData> = listOf(ProductItemData(0, "Renat Tomatoes")),
     // Other
     val image: ImageBitmap? = null,

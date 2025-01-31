@@ -4,4 +4,5 @@ sealed interface BlockContainment {
     data object None : BlockContainment
     data object Whole : BlockContainment
     data class ProductLabel(val index: Int) : BlockContainment
+    data object FileIcon : BlockContainment
 }

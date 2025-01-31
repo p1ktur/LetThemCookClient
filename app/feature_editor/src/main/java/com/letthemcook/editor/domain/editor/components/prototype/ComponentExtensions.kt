@@ -4,8 +4,10 @@ import android.util.Log.i
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
@@ -32,6 +34,7 @@ fun Component.drawOn(
     highlightColor: Color,
     warningHighlightColor: Color,
     goodHighlightColor: Color,
+    fileIcons: Map<FileType, VectorPainter>,
     positionXIsCentral: Boolean = false,
     canvasUiState: CanvasUiState
 ) {
@@ -49,7 +52,8 @@ fun Component.drawOn(
                 warningHighlightColor = warningHighlightColor,
                 goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
-                canvasUiState = canvasUiState
+                canvasUiState = canvasUiState,
+                fileIcons = fileIcons
             )
         }
         is HorizontalComposedComponent -> {
@@ -65,7 +69,8 @@ fun Component.drawOn(
                 warningHighlightColor = warningHighlightColor,
                 goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
-                canvasUiState = canvasUiState
+                canvasUiState = canvasUiState,
+                fileIcons = fileIcons
             )
         }
         is VerticalComposedComponent -> {
@@ -81,7 +86,8 @@ fun Component.drawOn(
                 warningHighlightColor = warningHighlightColor,
                 goodHighlightColor = goodHighlightColor,
                 positionXIsCentral = positionXIsCentral,
-                canvasUiState = canvasUiState
+                canvasUiState = canvasUiState,
+                fileIcons = fileIcons
             )
         }
     }
@@ -278,6 +284,14 @@ fun List<Component>.doForEveryChild(action: Component.() -> Unit) {
     val childrenList = map { it.asComposed()?.components }
 
     childrenList.forEach { it?.doForEveryChild(action) }
+}
+
+suspend fun List<Component>.doForEveryChildAsync(action: suspend Component.() -> Unit) {
+    forEach { it.action() }
+
+    val childrenList = map { it.asComposed()?.components }
+
+    childrenList.forEach { it?.doForEveryChildAsync(action) }
 }
 
 fun Component.firstInHierarchy(): Component {

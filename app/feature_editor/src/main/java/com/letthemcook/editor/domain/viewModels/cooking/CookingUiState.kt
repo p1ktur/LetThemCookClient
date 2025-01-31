@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.viewModels.cooking
 
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
 import com.letthemcook.editor.domain.cooking.track.TrackData
@@ -11,6 +12,8 @@ import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 
 data class CookingUiState(
+    // Cooking screen
+    val viewedMediaFile: File? = null,
     // Cooking
     val cookingState: CookingState = CookingState.NOT_STARTED,
     val totalCookingTime: Long = 0L,
@@ -36,6 +39,7 @@ val testCookData = "{\n" +
         "      \"components\": [\n" +
         "        {\n" +
         "          \"type\": \"block\",\n" +
+        "          \"id\": \"block1\",\n" +
         "          \"name\": \"Comp 1\",\n" +
         "          \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "          \"time\": 0,\n" +
@@ -50,6 +54,7 @@ val testCookData = "{\n" +
         "          \"components\": [\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block2\",\n" +
         "              \"name\": \"Comp 3\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +
@@ -64,6 +69,7 @@ val testCookData = "{\n" +
         "              \"components\": [\n" +
         "                {\n" +
         "                  \"type\": \"block\",\n" +
+        "                  \"id\": \"block3\",\n" +
         "                  \"name\": \"I am here! 2\",\n" +
         "                  \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "                  \"time\": 0,\n" +
@@ -75,6 +81,7 @@ val testCookData = "{\n" +
         "                },\n" +
         "                {\n" +
         "                  \"type\": \"block\",\n" +
+        "                  \"id\": \"block4\",\n" +
         "                  \"name\": \"I am here! 5\",\n" +
         "                  \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "                  \"time\": 0,\n" +
@@ -92,6 +99,7 @@ val testCookData = "{\n" +
         "        },\n" +
         "        {\n" +
         "          \"type\": \"block\",\n" +
+        "          \"id\": \"block5\",\n" +
         "          \"name\": \"I am here! 6\",\n" +
         "          \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "          \"time\": 0,\n" +
@@ -109,6 +117,7 @@ val testCookData = "{\n" +
         "      \"components\": [\n" +
         "        {\n" +
         "          \"type\": \"block\",\n" +
+        "          \"id\": \"block6\",\n" +
         "          \"name\": \"Comp 2\",\n" +
         "          \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "          \"time\": 0,\n" +
@@ -123,6 +132,7 @@ val testCookData = "{\n" +
         "          \"components\": [\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block7\",\n" +
         "              \"name\": \"I am here! 1\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +
@@ -134,6 +144,7 @@ val testCookData = "{\n" +
         "            },\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block8\",\n" +
         "              \"name\": \"I am here! 3\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +
@@ -145,6 +156,7 @@ val testCookData = "{\n" +
         "            },\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block9\",\n" +
         "              \"name\": \"I am here! 4\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +
@@ -162,6 +174,7 @@ val testCookData = "{\n" +
         "          \"components\": [\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block10\",\n" +
         "              \"name\": \"I am here! 7\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +
@@ -173,6 +186,7 @@ val testCookData = "{\n" +
         "            },\n" +
         "            {\n" +
         "              \"type\": \"block\",\n" +
+        "              \"id\": \"block11\",\n" +
         "              \"name\": \"I am here! 8\",\n" +
         "              \"description\": \"Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block\",\n" +
         "              \"time\": 0,\n" +

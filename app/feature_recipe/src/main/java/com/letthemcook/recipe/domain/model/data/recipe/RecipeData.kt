@@ -1,4 +1,4 @@
-package com.letthemcook.recipe.domain.model.data
+package com.letthemcook.recipe.domain.model.data.recipe
 
 import androidx.compose.ui.graphics.ImageBitmap
 

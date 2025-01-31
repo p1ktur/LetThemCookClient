@@ -16,6 +16,7 @@ import com.letthemcook.feed.ui.screens.FeedScreen
 import com.letthemcook.feed.ui.screens.SavedRecipesScreen
 import com.letthemcook.feed.ui.screens.SearchScreen
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 sealed interface FeedNavRoutes {
@@ -29,7 +30,7 @@ fun NavGraphBuilder.addFeedRoutes(
     navBarRoutes: NavBarRoutes
 ) {
     composable<FeedNavRoutes.Feed> {
-        val viewModel = koinInject<FeedViewModel>()
+        val viewModel = koinViewModel<FeedViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         FeedScreen(
@@ -47,7 +48,7 @@ fun NavGraphBuilder.addFeedRoutes(
         )
     }
     composable<FeedNavRoutes.Search> {
-        val viewModel = koinInject<SearchViewModel>()
+        val viewModel = koinViewModel<SearchViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         SearchScreen(
@@ -63,7 +64,7 @@ fun NavGraphBuilder.addFeedRoutes(
         )
     }
     composable<FeedNavRoutes.SavedRecipes> {
-        val viewModel = koinInject<SavedRecipesViewModel>()
+        val viewModel = koinViewModel<SavedRecipesViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         SavedRecipesScreen(

@@ -12,6 +12,7 @@ import com.letthemcook.auth.domain.viewModels.registration.RegistrationViewModel
 import com.letthemcook.auth.ui.screens.LoginScreen
 import com.letthemcook.auth.ui.screens.RegistrationScreen
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 sealed interface AuthNavRoutes {
@@ -24,7 +25,7 @@ fun NavGraphBuilder.addAuthRoutes(
     logInRoute: Any
 ) {
     composable<AuthNavRoutes.Registration> {
-        val viewModel = koinInject<RegistrationViewModel>()
+        val viewModel = koinViewModel<RegistrationViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         RegistrationScreen(
@@ -41,7 +42,7 @@ fun NavGraphBuilder.addAuthRoutes(
         )
     }
     composable<AuthNavRoutes.Login> {
-        val viewModel = koinInject<LoginViewModel>()
+        val viewModel = koinViewModel<LoginViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         LoginScreen(

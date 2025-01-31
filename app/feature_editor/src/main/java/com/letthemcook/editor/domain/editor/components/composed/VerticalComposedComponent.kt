@@ -4,9 +4,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 import com.letthemcook.editor.domain.editor.components.prototype.componentHashCodes
@@ -53,6 +55,7 @@ data class VerticalComposedComponent(
         highlightColor: Color,
         warningHighlightColor: Color,
         goodHighlightColor: Color,
+        fileIcons: Map<FileType, VectorPainter>,
         positionXIsCentral: Boolean,
         canvasUiState: CanvasUiState
     ) {
@@ -99,7 +102,8 @@ data class VerticalComposedComponent(
                 highlightColor = highlightColor,
                 warningHighlightColor = warningHighlightColor,
                 goodHighlightColor = goodHighlightColor,
-                canvasUiState = canvasUiState
+                canvasUiState = canvasUiState,
+                fileIcons = fileIcons
             )
 
             cursorPosition += Offset(0f, component.size.height)

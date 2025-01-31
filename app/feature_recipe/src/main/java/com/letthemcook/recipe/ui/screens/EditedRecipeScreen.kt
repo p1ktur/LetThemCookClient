@@ -54,6 +54,8 @@ import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.data.file.getRecipeFilesPrefix
+import com.letthemcook.core.domain.model.data.file.getRecipePictureFileName
 import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
@@ -81,8 +83,8 @@ fun EditedRecipeScreen(
     onUiAction: (EditedRecipeUiAction) -> Unit
 ) {
     // Media
-    val recipePictureName = "RecipePicture${uiState.id}"
-    val recipeFileName = "RecipeFile${uiState.id}_"
+    val recipePictureName = getRecipePictureFileName(uiState.id)
+    val recipeFileName = getRecipeFilesPrefix(uiState.id)
     var recipePictureBitmap: Bitmap? by remember { mutableStateOf(null) }
 
     val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
@@ -328,7 +330,7 @@ fun EditedRecipeScreen(
                     productDataList = uiState.products,
                     searchTitle = "Products",
                     searchText = uiState.productsSearchText,
-                    searchedLabels = uiState.searchedProducts.map { it.name },
+                    searchedLabels = uiState.searchedProducts,
                     maxRows = 2,
                     onLabelCreate = { data ->
                         onUiAction(EditedRecipeUiAction.AddWeightedProduct(data))

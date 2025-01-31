@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.LabelItem
@@ -44,7 +45,7 @@ fun WeightedProductsLabelContainer(
     productDataList: List<WeightedProductItemData>,
     searchTitle: String,
     searchText: TextFieldState,
-    searchedLabels: List<String>,
+    searchedLabels: List<ProductItemData>,
     maxRows: Int = 3,
     onLabelCreate: (WeightedProductItemData) -> Unit,
     onContainerClick: () -> Unit,
@@ -60,7 +61,7 @@ fun WeightedProductsLabelContainer(
     var isPopupShown by remember { mutableStateOf(false) }
     var isEditPopupShown by remember { mutableStateOf(false) }
 
-    var chosenLabelName by remember { mutableStateOf("") }
+    var chosenProductItem: ProductItemData? by remember { mutableStateOf(null) }
     val weightText = remember { TextFieldState() }
     val amountText = remember { TextFieldState() }
 
@@ -118,12 +119,12 @@ fun WeightedProductsLabelContainer(
     if (isPopupShown) {
         LabelPopup(
             title = searchTitle,
-            searchedLabels = searchedLabels,
+            searchedLabels = searchedLabels.map { it.name }, // TODO optimize
             searchText = searchText,
             anchorPosition = containerPosition,
             anchorSize = containerSize,
             onLabelClick = { labelIndex ->
-                chosenLabelName = searchedLabels[labelIndex]
+                chosenProductItem = searchedLabels[labelIndex]
                 isPopupShown = false
                 isEditPopupShown = true
             },
@@ -135,7 +136,7 @@ fun WeightedProductsLabelContainer(
 
     if (isEditPopupShown) {
         WeightedLabelEditPopup(
-            title = chosenLabelName,
+            title = chosenProductItem?.name ?: "",
             weightText = weightText,
             amountText = amountText,
             anchorPosition = containerPosition,
@@ -143,7 +144,7 @@ fun WeightedProductsLabelContainer(
             onAdd = {
                 try {
                     val data = WeightedProductItemData(
-                        chosenLabelName,
+                        chosenProductItem ?: return@WeightedLabelEditPopup,
                         weightText.text.toString().toInt(),
                         amountText.text.toString().toInt()
                     )

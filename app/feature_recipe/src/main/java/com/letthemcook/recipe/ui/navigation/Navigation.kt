@@ -15,6 +15,7 @@ import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeViewMod
 import com.letthemcook.recipe.ui.screens.RecipeScreen
 import com.letthemcook.recipe.ui.screens.EditedRecipeScreen
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
@@ -34,7 +35,7 @@ fun NavGraphBuilder.addRecipeRoutes(
         val route = navBackStackEntry.toRoute<RecipeNavRoutes.Recipe>()
         val recipeId = route.id
 
-        val viewModel = koinInject<RecipeViewModel>(parameters = { parametersOf(recipeId) })
+        val viewModel = koinViewModel<RecipeViewModel>(parameters = { parametersOf(recipeId) })
         val uiState by viewModel.uiState.collectAsState()
         val reviewsUiState by viewModel.reviewsUiState.collectAsState()
 
@@ -58,7 +59,7 @@ fun NavGraphBuilder.addRecipeRoutes(
         val route = navBackStackEntry.toRoute<RecipeNavRoutes.EditedRecipe>()
         val recipeId = route.id
 
-        val viewModel = koinInject<EditedRecipeViewModel>(parameters = { parametersOf(recipeId) })
+        val viewModel = koinViewModel<EditedRecipeViewModel>(parameters = { parametersOf(recipeId) })
         val uiState by viewModel.uiState.collectAsState()
         val reviewsUiState by viewModel.reviewsUiState.collectAsState()
 

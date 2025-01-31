@@ -5,9 +5,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
@@ -34,7 +36,8 @@ object RecipeGrapher {
         textColor: Color,
         highlightColor: Color,
         warningHighlightColor: Color,
-        goodHighlightColor: Color
+        goodHighlightColor: Color,
+        fileIcons: Map<FileType, VectorPainter>
     ) {
         if (centralComponent is EmptyComponent) {
             startComponent.size = startComponent.calculateSize(textMeasurer, titleTextStyle)
@@ -109,6 +112,15 @@ object RecipeGrapher {
                 canvasUiState = canvasUiState
             )
         } else {
+            if (startComponent.position.x != drawScope.center.x - startComponent.size.width / 2) {
+                startComponent.size = startComponent.calculateSize(textMeasurer, titleTextStyle)
+
+                startComponent.position = Offset(
+                    x = drawScope.center.x - startComponent.size.width / 2f,
+                    y = drawScope.size.height * 0.1f - startComponent.size.height / 2f
+                )
+            }
+
             startComponent.drawOn(
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
@@ -133,6 +145,7 @@ object RecipeGrapher {
                 highlightColor = highlightColor,
                 warningHighlightColor = warningHighlightColor,
                 goodHighlightColor = goodHighlightColor,
+                fileIcons = fileIcons,
                 positionXIsCentral = true,
                 canvasUiState = canvasUiState
             )

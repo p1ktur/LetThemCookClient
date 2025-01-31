@@ -43,7 +43,7 @@ fun RecipeItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(5f / 4f),
-            bitmap = recipeItemData.image
+            bitmap = recipeItemData.imageBitmap
                 ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
             contentDescription = "Recipe Image",
             contentScale = ContentScale.FillBounds

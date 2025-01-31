@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -93,7 +95,8 @@ class MainActivity : ComponentActivity() {
             LetThemCookTheme(theme) {
                 NavHost(
                     navController = navController,
-                    startDestination = AuthNavRoutes.Login
+//                    startDestination = AuthNavRoutes.Login
+                    startDestination = EditorNavRoutes.Builder
                 ) {
                     addAuthRoutes(
                         navController = navController,
@@ -117,7 +120,8 @@ class MainActivity : ComponentActivity() {
                         onViewMedia = onViewMedia
                     )
                     addEditorRoutes(
-                        navController = navController
+                        navController = navController,
+                        onViewMedia = onViewMedia
                     )
                     addMediaRoutes(
                         navController = navController

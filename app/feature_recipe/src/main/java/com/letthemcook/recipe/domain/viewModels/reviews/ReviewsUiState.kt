@@ -1,6 +1,6 @@
 package com.letthemcook.recipe.domain.viewModels.reviews
 
-import com.letthemcook.recipe.domain.model.data.ReviewData
+import com.letthemcook.recipe.domain.model.data.review.ReviewData
 
 data class ReviewsUiState(
     val reviews: List<ReviewData> = listOf(

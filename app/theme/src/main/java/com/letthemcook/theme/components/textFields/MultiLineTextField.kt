@@ -52,7 +52,7 @@ fun MultiLineTextField(
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 4.dp)
+                .padding(top = 6.dp)
                 .border(1.dp, textColor, RoundedCornerShape(8.dp))
                 .padding(top = 10.dp, bottom = 6.dp)
                 .padding(start = 10.dp)

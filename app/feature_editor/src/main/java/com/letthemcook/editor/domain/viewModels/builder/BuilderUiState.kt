@@ -1,12 +1,13 @@
 package com.letthemcook.editor.domain.viewModels.builder
 
 import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.ComponentFocus
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
@@ -15,6 +16,8 @@ import com.letthemcook.editor.ui.components.popups.BlockEditorState
 data class BuilderUiState(
     // Builder screen
     val blockEditorState: BlockEditorState = BlockEditorState.Hidden,
+    val savedBlockEditorState: BlockEditorState? = null,
+    val viewedMediaFile: File? = null,
     // Products
     val unusedProducts: List<ProductItemData> = listOf(
         ProductItemData(0, "Tomato"),

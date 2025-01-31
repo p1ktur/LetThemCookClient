@@ -1,13 +1,18 @@
 package com.letthemcook.editor.domain.editor.components.block
 
+import android.util.Log
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -19,9 +24,9 @@ import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
 import com.letthemcook.core.domain.dataConvertion.serialization.SizeSerializer
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
@@ -36,11 +41,13 @@ import com.letthemcook.editor.ui.drawing.getBlockBodyBrush
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import java.util.UUID
 import kotlin.math.max
 
 @Serializable
 @SerialName(value = "block")
 data class BlockComponent(
+    val id: String = UUID.randomUUID().toString(),
     // Data
     var name: String = "Recipe Block",
     var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
@@ -57,14 +64,20 @@ data class BlockComponent(
 
     companion object {
         const val MIN_WIDTH = 144f
-        const val MAX_WIDTH = 432f
+        const val MAX_WIDTH = 460f
 
         const val MIN_HEIGHT = 72f
+
+        const val ICON_SIZE = 92f
     }
 
-    @Transient private val _time = time
+    @Transient
+    private val _time = time
 
-    @Transient override var containedPointerPosition: Offset? = null
+    @Transient
+    override var containedPointerPosition: Offset? = null
+    @Transient
+    private var cachedFileIconPosition: Offset? = null
 
     @Transient
     val cachedDrawnProductLabelSizes: MutableList<IntSize> = mutableListOf()
@@ -76,6 +89,8 @@ data class BlockComponent(
     @Transient
     private var highlighting: Boolean = false
 
+    @Transient
+    private var cachedSizeCalculationHashcode: Int = 0
     @Transient
     private var localTextMeasurer: TextMeasurer? = null
     @Transient
@@ -99,10 +114,14 @@ data class BlockComponent(
         highlightColor: Color,
         warningHighlightColor: Color,
         goodHighlightColor: Color,
+        fileIcons: Map<FileType, VectorPainter>,
         positionXIsCentral: Boolean = false,
         canvasUiState: CanvasUiState
     ) {
-        if (!isVisible(canvasUiState)) return
+        if (!isVisible(canvasUiState)) {
+            calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+            return
+        }
 
         val currentFrameColor = if (highlightingForNextFrame || highlighting) {
             highlightColor
@@ -119,6 +138,7 @@ data class BlockComponent(
             BlockCookingState.DONE -> goodHighlightColor
         }
 
+        val iconSize = if (file != null) ICON_SIZE else 0f
         var contentHeightSum = 0f
         var productsContentHeightSum = 0f
         var productsTopWidth = 0f
@@ -159,7 +179,8 @@ data class BlockComponent(
         }
 
         val comparedHeight = max(contentHeightSum + DRAW_PADDING * 2, productsContentHeightSum)
-        val widthValue = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width) + DRAW_PADDING * 4 + productsTopWidth
+        val maxTextsWidth = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width)
+        val widthValue = maxTextsWidth + DRAW_PADDING * 4 + productsTopWidth + iconSize + if (iconSize > 0f) DRAW_PADDING else 0f
 
         size = size.copy(
             width = max(MIN_WIDTH, widthValue),
@@ -227,7 +248,7 @@ data class BlockComponent(
             textLayoutResult = nameTextLayout,
             color = textColor,
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - nameTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - nameTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
@@ -237,7 +258,7 @@ data class BlockComponent(
             textLayoutResult = timeTextLayout,
             color = textColor,
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - timeTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - timeTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
@@ -247,11 +268,38 @@ data class BlockComponent(
             textLayoutResult = descriptionTextLayout,
             color = textColor,
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - descriptionTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - descriptionTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
         currentPosition += Offset(0f, descriptionTextLayout.size.height.toFloat())
+
+        val fileIcon = when (file?.type) {
+            FileType.IMAGE -> fileIcons[FileType.IMAGE]
+            FileType.VIDEO -> fileIcons[FileType.VIDEO]
+            FileType.ANY -> fileIcons[FileType.ANY]
+            null -> null
+        }
+
+        if (fileIcon != null) {
+            with (fileIcon) {
+                val fileIconPosition = Offset(
+                    x = position.x + DRAW_PADDING * 2 + maxTextsWidth,
+                    y = position.y + size.height - COMPONENT_PADDING - DRAW_PADDING - iconSize
+                )
+                cachedFileIconPosition = fileIconPosition
+
+                drawScope.translate(
+                    left = fileIconPosition.x,
+                    top = fileIconPosition.y
+                ) {
+                    drawScope.draw(
+                        size = Size(iconSize, iconSize),
+                        colorFilter = ColorFilter.tint(textColor, BlendMode.SrcAtop)
+                    )
+                }
+            }
+        }
 
         if (productTextLayouts.isNotEmpty()) {
             var productCurrentPosition = position.plus(
@@ -282,11 +330,13 @@ data class BlockComponent(
         frameColor: Color,
         containerColor: Color,
         textColor: Color,
-        centerPosition: Offset
+        centerPosition: Offset,
+        fileIcons: Map<FileType, VectorPainter>
     ) {
         val alpha = 0.5f
         val size = size.copy(height = size.height - 2 * COMPONENT_PADDING)
         val position = centerPosition - Offset(size.width / 2, size.height / 2)
+        val iconSize = if (file != null) ICON_SIZE else 0f
 
         val currentFrameColor = frameColor.copy(alpha = alpha)
         val currentContainerColor = containerColor.copy(alpha = alpha)
@@ -319,6 +369,8 @@ data class BlockComponent(
             }
         }
 
+        val maxTextsWidth = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width)
+
         drawScope.drawRoundRect(
             brush = getBlockBodyBrush(
                 containerColor = currentContainerColor,
@@ -350,7 +402,7 @@ data class BlockComponent(
             textLayoutResult = nameTextLayout,
             color = textColor.copy(alpha = alpha),
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - nameTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - nameTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
@@ -360,7 +412,7 @@ data class BlockComponent(
             textLayoutResult = timeTextLayout,
             color = textColor.copy(alpha = alpha),
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - timeTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - timeTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
@@ -370,11 +422,32 @@ data class BlockComponent(
             textLayoutResult = descriptionTextLayout,
             color = textColor.copy(alpha = alpha),
             topLeft = Offset(
-                x = position.x + (size.width - productsTopWidth) / 2f - descriptionTextLayout.size.width / 2f,
+                x = position.x + (size.width - productsTopWidth) / 2f - descriptionTextLayout.size.width / 2f - iconSize / 2f,
                 y = currentPosition.y
             )
         )
         currentPosition += Offset(0f, descriptionTextLayout.size.height.toFloat())
+
+        val fileIcon = when (file?.type) {
+            FileType.IMAGE -> fileIcons[FileType.IMAGE]
+            FileType.VIDEO -> fileIcons[FileType.VIDEO]
+            FileType.ANY -> fileIcons[FileType.ANY]
+            null -> null
+        }
+
+        if (fileIcon != null) {
+            with (fileIcon) {
+                drawScope.translate(
+                    left = position.x + DRAW_PADDING * 2 + maxTextsWidth,
+                    top = position.y + size.height - DRAW_PADDING - iconSize
+                ) {
+                    drawScope.draw(
+                        size = Size(iconSize, iconSize),
+                        colorFilter = ColorFilter.tint(textColor, BlendMode.SrcAtop)
+                    )
+                }
+            }
+        }
 
         if (productTextLayouts.isNotEmpty()) {
             var productCurrentPosition = position.plus(
@@ -402,10 +475,15 @@ data class BlockComponent(
         nameTextStyle: TextStyle,
         contentTextStyle: TextStyle
     ): Size {
+        if (cachedSizeCalculationHashcode == hashCode()) return size
+
+        cachedSizeCalculationHashcode = hashCode()
+
         localTextMeasurer = textMeasurer
         localNameTextStyle = nameTextStyle
         localContentTextStyle = contentTextStyle
 
+        val iconSize = if (file != null) ICON_SIZE else 0f
         var contentHeightSum = 0f
         var productsContentHeightSum = 0f
         var productsTopWidth = 0f
@@ -446,7 +524,8 @@ data class BlockComponent(
         }
 
         val comparedHeight = max(contentHeightSum + DRAW_PADDING * 2, productsContentHeightSum)
-        val widthValue = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width) + DRAW_PADDING * 4 + productsTopWidth
+        val maxTextWidth = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width)
+        val widthValue = maxTextWidth + DRAW_PADDING * 4 + productsTopWidth + iconSize + if (iconSize > 0f) DRAW_PADDING else 0f
 
         size = size.copy(
             width = max(MIN_WIDTH, widthValue),
@@ -510,12 +589,19 @@ data class BlockComponent(
             }
         }
 
+        if (file != null) {
+            cachedFileIconPosition?.let { iconPosition ->
+                val containsWhole = pointerPosition.x in (iconPosition.x..iconPosition.x + ICON_SIZE) &&
+                        pointerPosition.y in (iconPosition.y..iconPosition.y + ICON_SIZE)
+
+                if (containsWhole) containment = BlockContainment.FileIcon
+            }
+        }
+
         val containsWhole = pointerPosition.x in (position.x..position.x + size.width) &&
                 pointerPosition.y in (position.y + COMPONENT_PADDING..position.y + size.height - COMPONENT_PADDING)
 
-        if (containment == BlockContainment.None) {
-            containment = if (containsWhole) BlockContainment.Whole else BlockContainment.None
-        }
+        if (containment == BlockContainment.None && containsWhole) containment = BlockContainment.Whole
 
         if (containment == BlockContainment.Whole && isDown) {
             containedPointerPosition = pointerPosition - position
@@ -527,7 +613,7 @@ data class BlockComponent(
     // Component
 
     fun toUnusedBlockComponent(): UnusedBlockComponent {
-        return UnusedBlockComponent(name, description, time, productNames, colorOption)
+        return UnusedBlockComponent(id, name, description, time, productNames, colorOption, file)
     }
 
     // Cooking
@@ -558,6 +644,7 @@ data class BlockComponent(
 
         other as BlockComponent
 
+        if (id != other.id) return false
         if (name != other.name) return false
         if (description != other.description) return false
         if (productNames.hashCode() != other.productNames.hashCode()) return false
@@ -569,7 +656,8 @@ data class BlockComponent(
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + name.hashCode()
         result = 31 * result + description.hashCode()
         result = 31 * result + productNames.hashCode()
         result = 31 * result + position.hashCode()

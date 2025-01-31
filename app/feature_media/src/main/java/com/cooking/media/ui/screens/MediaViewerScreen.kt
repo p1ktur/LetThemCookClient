@@ -77,7 +77,7 @@ fun MediaViewerScreen(
                     text = when (uiState.viewedMediaFile) {
                         is MediaFile.Image -> "Viewing Image" //TODO localize
                         is MediaFile.Video -> "Viewing Video" //TODO localize
-                        null -> ""
+                        null -> "No Media Found"
                     },
                     style = LocalAppTheme.current.typography.titleSmall,
                     color = Color.White

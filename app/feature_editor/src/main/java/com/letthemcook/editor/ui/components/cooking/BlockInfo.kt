@@ -17,6 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.FilePresent
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.VideoFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.ui.drawing.getBlockBodyBrush
@@ -113,24 +118,48 @@ fun BlockInfo(
                         )
                     }
                 }
-                Text(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp),
-                    text = selectedBlock.description,
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = selectedBlock.description,
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                    selectedBlock.file?.let { file ->
+                        Icon(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    onUiAction(CookingUiAction.ViewMediaFile(file))
+                                }
+                                .padding(4.dp),
+                            imageVector = when (file.type) {
+                                FileType.IMAGE -> Icons.Outlined.Image
+                                FileType.VIDEO -> Icons.Outlined.VideoFile
+                                FileType.ANY -> Icons.Outlined.FilePresent
+                            },
+                            contentDescription = "File Icon",
+                            tint = LocalAppTheme.current.text
+                        )
+                    }
+                }
             }
         } else {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(getBlockBodyBrush(LocalAppTheme.current.background, selectedBlock.colorOption.color)),
+                    .background(getBlockBodyBrush(LocalAppTheme.current.background, selectedBlock.colorOption.color))
+                    .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    modifier = Modifier.padding(start = 8.dp),
                     text = "Block info",
                     style = LocalAppTheme.current.typography.bodyLarge
                 )

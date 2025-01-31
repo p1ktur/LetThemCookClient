@@ -6,11 +6,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.domain.model.data.ProductItemData
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
+import com.letthemcook.editor.domain.editor.components.EmptyComponent.tryRecalculateSize
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.BlockContainment
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
@@ -29,15 +31,20 @@ import com.letthemcook.editor.domain.editor.components.prototype.pointInBounds
 import com.letthemcook.editor.domain.editor.components.prototype.removeFromHierarchy
 import com.letthemcook.editor.domain.editor.geometry.limit
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
+import com.letthemcook.editor.domain.viewModels.cooking.testCookData
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class BuilderViewModel : ViewModel() {
+class BuilderViewModel(
+    private val recipeGraphSerializer: RecipeGraphSerializer
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BuilderUiState())
     val uiState = _uiState.asStateFlow()
@@ -49,13 +56,27 @@ class BuilderViewModel : ViewModel() {
     private var pointerDownJob: Job? = null
 
     init {
-        //TODO load recipes from followed users
+        viewModelScope.launch {
+            val centralComponent = recipeGraphSerializer.deserializeComponent(testCookData)
+
+            _uiState.update {
+                it.copy(
+                    centralComponent = centralComponent
+                )
+            }
+
+            delay(100)
+            updateCanvasCounter()
+        }
     }
 
     fun onUiAction(action: BuilderUiAction): Any? {
         when (action) {
             BuilderUiAction.NavigateBack -> Unit
             BuilderUiAction.NavigateToTutorial -> Unit
+
+            is BuilderUiAction.ViewMediaFile -> Unit
+            BuilderUiAction.StopViewingMediaFile -> stopViewingMediaFile()
 
             // Common
             BuilderUiAction.FetchData -> fetchData()
@@ -87,12 +108,22 @@ class BuilderViewModel : ViewModel() {
 
             // Block Editor
             is BuilderUiAction.SetBlockEditorState -> setBlockEditorState(action.state)
+            is BuilderUiAction.SaveBlockEditorState -> saveBlockEditorState(action.state)
         }
 
         return null
     }
 
     // ACTIONS
+
+    private fun stopViewingMediaFile() {
+        _uiState.update {
+            it.copy(
+                viewedMediaFile = null
+            )
+        }
+    }
+
     // Common
 
     private fun fetchData() {
@@ -114,7 +145,7 @@ class BuilderViewModel : ViewModel() {
 
     private fun prepareCookingData(): String? {
         return try {
-            RecipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
+            recipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
         } catch (_: Exception) {
             null
         }
@@ -131,6 +162,8 @@ class BuilderViewModel : ViewModel() {
             }
 
             containedBlock.productNames.add(product)
+            containedBlock.tryRecalculateSize()
+
             updateCanvasCounter()
             containedBlock
         }
@@ -216,6 +249,11 @@ class BuilderViewModel : ViewModel() {
             component.time = newComponent.time
             component.description = newComponent.description
             component.colorOption = newComponent.colorOption
+            component.file = newComponent.file
+
+            component.tryRecalculateSize()
+            uiState.value.centralComponent.tryRecalculateSize()
+            updateCanvasCounter()
         }
     }
 
@@ -325,6 +363,7 @@ class BuilderViewModel : ViewModel() {
                         updateCanvasCounter()
                         return@launch
                     }
+                    BlockContainment.FileIcon -> Unit
                 }
             }
 
@@ -351,14 +390,25 @@ class BuilderViewModel : ViewModel() {
     private fun pointerRelease() {
         if (pointerDownJob?.isActive == true) {
             uiState.value.canvasUiState.pointerDownOffset?.let { pointerDownOffset ->
+                val checkOffset = scaleAndTranslate(pointerDownOffset)
                 val containerBlockComponent = components.getPointerContainer(
-                    point = scaleAndTranslate(pointerDownOffset),
+                    point = checkOffset,
                     onlyBlocks = true,
                     strict = true
                 )
 
                 if (containerBlockComponent != null && containerBlockComponent is BlockComponent) {
-                    setBlockEditorState(BlockEditorState.EditingBlock(containerBlockComponent))
+                    val containment = containerBlockComponent.containsPointer(checkOffset, true)
+
+                    if (containment == BlockContainment.FileIcon) {
+                        _uiState.update {
+                            it.copy(
+                                viewedMediaFile = containerBlockComponent.file
+                            )
+                        }
+                    } else {
+                        setBlockEditorState(BlockEditorState.EditingBlock(containerBlockComponent))
+                    }
                 }
 
                 pointerDownJob?.cancel()
@@ -457,6 +507,14 @@ class BuilderViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 blockEditorState = state
+            )
+        }
+    }
+
+    private fun saveBlockEditorState(state: BlockEditorState?) {
+        _uiState.update {
+            it.copy(
+                savedBlockEditorState = state
             )
         }
     }

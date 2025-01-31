@@ -9,6 +9,7 @@ import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
 import com.letthemcook.editor.domain.cooking.track.doForEveryChild
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
+import com.letthemcook.editor.domain.editor.components.block.BlockContainment
 import com.letthemcook.editor.domain.editor.components.prototype.canFinish
 import com.letthemcook.editor.domain.editor.components.prototype.canRestore
 import com.letthemcook.editor.domain.editor.components.prototype.cook
@@ -25,6 +26,8 @@ import com.letthemcook.editor.domain.editor.components.prototype.restore
 import com.letthemcook.editor.domain.editor.components.prototype.toTrackData
 import com.letthemcook.editor.domain.editor.geometry.limit
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
+import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
+import com.letthemcook.editor.ui.components.popups.BlockEditorState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +36,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class CookingViewModel : ViewModel() {
+class CookingViewModel(
+    private val recipeGraphSerializer: RecipeGraphSerializer
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CookingUiState())
     val uiState = _uiState.asStateFlow()
@@ -44,21 +49,29 @@ class CookingViewModel : ViewModel() {
     private var pointerDownJob: Job? = null
 
     init {
-        val centralComponent = RecipeGraphSerializer.deserializeComponent(testCookData)
-        val totalTime = centralComponent.getTotalTime()
+        viewModelScope.launch {
+            val centralComponent = recipeGraphSerializer.deserializeComponent(testCookData)
+            val totalTime = centralComponent.getTotalTime()
 
-        _uiState.update {
-            it.copy(
-                centralComponent = centralComponent,
-                totalCookingTime = totalTime,
-                cookingTimeLeft = totalTime
-            )
+            _uiState.update {
+                it.copy(
+                    centralComponent = centralComponent,
+                    totalCookingTime = totalTime,
+                    cookingTimeLeft = totalTime
+                )
+            }
+
+            delay(100)
+            updateCanvasCounter()
         }
     }
 
     fun onUiAction(action: CookingUiAction) {
         when (action) {
             CookingUiAction.NavigateBack -> Unit
+
+            is CookingUiAction.ViewMediaFile -> Unit
+            CookingUiAction.StopViewingMediaFile -> stopViewingMediaFile()
 
             // Cooking
             CookingUiAction.StartCooking -> startCooking()
@@ -84,6 +97,15 @@ class CookingViewModel : ViewModel() {
     }
 
     // ACTIONS
+
+    private fun stopViewingMediaFile() {
+        _uiState.update {
+            it.copy(
+                viewedMediaFile = null
+            )
+        }
+    }
+
     // Cooking
 
     private fun startCooking() {
@@ -136,8 +158,6 @@ class CookingViewModel : ViewModel() {
         uiState.value.trackData.doForEveryChild {
             if (isCooking()) cookingState = BlockCookingState.WAITING
         }
-
-//        recalculateTrackData()
 
         updateCanvasCounter()
     }
@@ -283,14 +303,25 @@ class CookingViewModel : ViewModel() {
     private fun pointerRelease() {
         if (pointerDownJob?.isActive == true) {
             uiState.value.canvasUiState.pointerDownOffset?.let { pointerDownOffset ->
+                val checkOffset = scaleAndTranslate(pointerDownOffset)
                 val containerBlockComponent = components.getPointerContainer(
-                    point = scaleAndTranslate(pointerDownOffset),
+                    point = checkOffset,
                     onlyBlocks = true,
                     strict = true
                 )
 
                 if (containerBlockComponent != null && containerBlockComponent is BlockComponent) {
-                    selectBlock(containerBlockComponent)
+                    val containment = containerBlockComponent.containsPointer(checkOffset, true)
+
+                    if (containment == BlockContainment.FileIcon) {
+                        _uiState.update {
+                            it.copy(
+                                viewedMediaFile = containerBlockComponent.file
+                            )
+                        }
+                    } else {
+                        selectBlock(containerBlockComponent)
+                    }
                 }
 
                 pointerDownJob?.cancel()

@@ -17,6 +17,7 @@ import com.letthemcook.profile.ui.screens.PasswordChangeScreen
 import com.letthemcook.profile.ui.screens.ProfileScreen
 import com.letthemcook.profile.ui.screens.SettingsScreen
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 sealed interface ProfileNavRoutes {
@@ -32,7 +33,7 @@ fun NavGraphBuilder.addProfileRoutes(
     onViewMedia: (File) -> Unit
 ) {
     composable<ProfileNavRoutes.Profile> {
-        val viewModel = koinInject<ProfileViewModel>()
+        val viewModel = koinViewModel<ProfileViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         ProfileScreen(
@@ -54,7 +55,7 @@ fun NavGraphBuilder.addProfileRoutes(
         )
     }
     composable<ProfileNavRoutes.Settings> {
-        val viewModel = koinInject<SettingsViewModel>()
+        val viewModel = koinViewModel<SettingsViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
         SettingsScreen(

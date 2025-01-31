@@ -1,6 +1,5 @@
 package com.letthemcook.recipe.ui.components
 
-import android.graphics.Paint.Align
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +25,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.letthemcook.recipe.domain.model.data.ReviewData
+import com.letthemcook.recipe.domain.model.data.review.ReviewData
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable

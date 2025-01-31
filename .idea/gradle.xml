@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/app/feature_auth" />
             <option value="$PROJECT_DIR$/app/feature_editor" />
             <option value="$PROJECT_DIR$/app/feature_feed" />
+            <option value="$PROJECT_DIR$/app/feature_media" />
             <option value="$PROJECT_DIR$/app/feature_profile" />
             <option value="$PROJECT_DIR$/app/feature_recipe" />
             <option value="$PROJECT_DIR$/app/theme" />

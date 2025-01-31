@@ -1,20 +1,32 @@
 package com.letthemcook.editor.ui.components.popups
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.FilePresent
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.VideoFile
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,15 +43,21 @@ import androidx.compose.ui.window.PopupProperties
 import com.letthemcook.core.domain.format.toHoursString
 import com.letthemcook.core.domain.format.toMinutesString
 import com.letthemcook.core.domain.format.toSecondsString
+import com.letthemcook.core.domain.media.MediaFilePickerManager
+import com.letthemcook.core.domain.model.data.file.File
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.ui.components.colorChooser.ColorChooser
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.SingleLineTextField
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 sealed interface BlockEditorState {
@@ -49,15 +67,21 @@ sealed interface BlockEditorState {
     data class EditingBlock(val component: BlockComponent) : BlockEditorState
 }
 
+// TODO delete file or edit it
+
 @Composable
 fun BlockEditorPopup(
     state: BlockEditorState,
+    mediaFilePickerManager: MediaFilePickerManager,
     anchorPosition: Offset,
     anchorSize: IntSize,
-    onEdit: (String, String, Int, Int, Int, ColorOption) -> Unit,
+    onEdit: (String, String, Int, Int, Int, ColorOption, File?) -> Unit,
+    onViewMediaFile: (File) -> Unit,
+    onSaveState: (BlockEditorState) -> Unit,
     onDismiss: () -> Unit
 ) {
-    if (state == BlockEditorState.Hidden) return
+    val coroutineScope = rememberCoroutineScope()
+    val isMediaPickerDialogShown by remember { mediaFilePickerManager.isDialogShown }
 
     var colorOption by remember(state) {
         mutableStateOf(
@@ -129,6 +153,17 @@ fun BlockEditorPopup(
         }
         TextFieldState(text)
     }
+
+    var blockFile: File? by remember(state) {
+        when (state) {
+            BlockEditorState.Hidden -> mutableStateOf(null)
+            BlockEditorState.Creating -> mutableStateOf(null)
+            is BlockEditorState.EditingBlock -> mutableStateOf(state.component.file)
+            is BlockEditorState.EditingUnusedBlock -> mutableStateOf(state.component.file)
+        }
+    }
+
+    if (state == BlockEditorState.Hidden || isMediaPickerDialogShown) return
 
     val popupPositionProvider = remember {
         object : PopupPositionProvider {
@@ -206,12 +241,13 @@ fun BlockEditorPopup(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 16.dp),
+                        .padding(end = 20.dp),
                     state = timeHoursText,
                     labelText = "Hours",
                     backgroundColor = LocalAppTheme.current.screenTwo
@@ -219,7 +255,7 @@ fun BlockEditorPopup(
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 10.dp),
                     state = timeMinutesText,
                     labelText = "Minutes",
                     backgroundColor = LocalAppTheme.current.screenTwo
@@ -227,11 +263,103 @@ fun BlockEditorPopup(
                 DigitsTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 16.dp),
+                        .padding(start = 20.dp),
                     state = timeSecondsText,
                     labelText = "Seconds",
                     backgroundColor = LocalAppTheme.current.screenTwo
                 )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (blockFile != null) {
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                val blockId =
+                                    (state as? BlockEditorState.EditingBlock)?.component?.id
+                                        ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
+                                        ?: return@clickable
+
+                                blockFile = null
+
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    mediaFilePickerManager.deleteStoredFile(blockId)
+                                }
+                            }
+                            .padding(4.dp),
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete File Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            val blockId = (state as? BlockEditorState.EditingBlock)?.component?.id
+                                ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
+                                ?: return@clickable
+
+                            if (blockFile == null) {
+                                mediaFilePickerManager.showDialog(FileType.ANY, blockId) {
+                                    blockFile = it.file
+                                }
+                            } else blockFile?.let {
+                                onSaveState(state)
+                                onDismiss()
+                                onViewMediaFile(it)
+                            }
+                        }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = when (blockFile?.type) {
+                            FileType.IMAGE -> "Image"
+                            FileType.VIDEO -> "Video"
+                            FileType.ANY -> "File"
+                            null -> "Attach file"
+                        },
+                        style = LocalAppTheme.current.typography.bodyLarge
+                    )
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = when (blockFile?.type) {
+                            FileType.IMAGE -> Icons.Outlined.Image
+                            FileType.VIDEO -> Icons.Outlined.VideoFile
+                            FileType.ANY -> Icons.Outlined.FilePresent
+                            null -> Icons.Outlined.AttachFile
+                        },
+                        contentDescription = "File Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+                if (blockFile != null) {
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                val blockId = (state as? BlockEditorState.EditingBlock)?.component?.id
+                                        ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
+                                        ?: return@clickable
+
+                                mediaFilePickerManager.showDialog(FileType.ANY, blockId) {
+                                    blockFile = it.file
+                                }
+                            }
+                            .padding(4.dp),
+                        imageVector = Icons.Outlined.AttachFile,
+                        contentDescription = "Attach File Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -247,7 +375,8 @@ fun BlockEditorPopup(
                                 timeHoursText.text.toString().toInt(),
                                 timeMinutesText.text.toString().toInt(),
                                 timeSecondsText.text.toString().toInt(),
-                                colorOption
+                                colorOption,
+                                blockFile
                             )
 
                             nameText.clearText()

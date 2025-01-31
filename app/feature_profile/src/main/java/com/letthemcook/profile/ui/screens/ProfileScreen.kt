@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.core.domain.model.data.file.MediaFile
+import com.letthemcook.core.domain.model.data.file.getProfilePictureFileName
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiState
 import com.letthemcook.profile.ui.components.ProfileEditedData
@@ -58,7 +59,7 @@ fun ProfileScreen(
     uiState: ProfileUiState,
     onUiAction: (ProfileUiAction) -> Unit
 ) {
-    val profilePictureName = "ProfilePicture"
+    val profilePictureName = getProfilePictureFileName()
     var profilePictureFile: MediaFile.Image? by remember { mutableStateOf(null) }
 
     val mediaFilePickerManager = koinInject<MediaFilePickerManager>()

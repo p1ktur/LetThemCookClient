@@ -15,6 +15,7 @@ import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerViewModel
 import com.cooking.media.ui.screens.MediaViewerScreen
 import com.letthemcook.core.domain.model.data.file.File
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.reflect.typeOf
@@ -34,7 +35,7 @@ fun NavGraphBuilder.addMediaRoutes(
         val route = navBackStackEntry.toRoute<MediaNavRoutes.MediaViewer>()
         val file = route.file
 
-        val viewModel = koinInject<MediaViewerViewModel>(parameters = { parametersOf(file) })
+        val viewModel = koinViewModel<MediaViewerViewModel>(parameters = { parametersOf(file) })
         val uiState by viewModel.uiState.collectAsState()
 
         MediaViewerScreen(

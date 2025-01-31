@@ -1,11 +1,16 @@
 package com.letthemcook.editor.ui.components.canvas
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -15,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -22,6 +28,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import com.letthemcook.core.domain.model.data.file.FileType
 import com.letthemcook.editor.domain.editor.RecipeGrapher
 import com.letthemcook.editor.domain.editor.canvasButtons.DeleteIcon.Companion.rememberDeleteIcon
 import com.letthemcook.editor.domain.editor.components.prototype.ComponentFocus
@@ -60,6 +67,11 @@ fun RecipeCanvas(
     val frameColor = LocalAppTheme.current.text
     val containerColor = LocalAppTheme.current.container
     val componentTextColor = LocalAppTheme.current.text
+    val fileIcons = mapOf(
+        FileType.IMAGE to rememberVectorPainter(Icons.Default.Image),
+        FileType.VIDEO to rememberVectorPainter(Icons.Default.VideoFile),
+        FileType.ANY to rememberVectorPainter(Icons.Default.FilePresent)
+    )
     // Delete Icon
     val deleteIcon = rememberDeleteIcon(uiState)
     val deleteIconIsVisible = remember(uiState.componentFocus) { uiState.componentFocus is ComponentFocus.Block }
@@ -170,6 +182,7 @@ fun RecipeCanvas(
                         highlightColor = highlightColor,
                         warningHighlightColor = warningHighlightColor,
                         goodHighlightColor = goodHighlightColor,
+                        fileIcons = fileIcons
                     )
 
                     when (uiState.componentFocus) {
@@ -187,7 +200,8 @@ fun RecipeCanvas(
                                     position = uiState.canvasUiState.pointerMoveOffset ?:
                                     uiState.canvasUiState.pointerDownOffset ?:
                                     return@run
-                                )
+                                ),
+                                fileIcons = fileIcons
                             )
                         }
                         is ComponentFocus.Product -> {

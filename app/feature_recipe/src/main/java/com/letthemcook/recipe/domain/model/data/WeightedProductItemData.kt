@@ -1,12 +1,14 @@
 package com.letthemcook.recipe.domain.model.data
 
+import com.letthemcook.core.domain.model.data.ProductItemData
+
 data class WeightedProductItemData(
-    val name: String,
+    val data: ProductItemData,
     val weight: Int,
     val pieces: Int
 ) {
     override fun toString(): String {
         val piecesSuffix = if (pieces == 1) "pc" else "pcs"
-        return "$name, ${weight}g, $pieces $piecesSuffix"
+        return "${data.name}, ${weight}g, $pieces $piecesSuffix"
     }
 }

@@ -2,10 +2,14 @@ package com.letthemcook.editor.domain.viewModels.cooking
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import com.letthemcook.core.domain.model.data.file.File
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 
 sealed interface CookingUiAction {
     data object NavigateBack : CookingUiAction
+
+    data class ViewMediaFile(val file: File) : CookingUiAction
+    data object StopViewingMediaFile : CookingUiAction
 
     // Cooking
     data object StartCooking : CookingUiAction

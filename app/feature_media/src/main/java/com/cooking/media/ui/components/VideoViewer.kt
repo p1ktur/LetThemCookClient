@@ -59,7 +59,7 @@ fun VideoViewer(
 ) {
     val context = LocalContext.current
 
-    var showUi by remember { mutableStateOf(false) }
+    var showUi by remember { mutableStateOf(true) }
     val playerAlpha by animateFloatAsState(
         targetValue = if (canPlay) 1f else 0f
     )
@@ -88,6 +88,11 @@ fun VideoViewer(
         } else {
             playerProgress.toShortTimeString(canInstant = false)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        delay(150)
+        showUi = false
     }
 
     LaunchedEffect(canPlay) {

@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.dragging
 
+import android.util.Log
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
@@ -8,7 +9,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.core.domain.model.data.ProductItemData
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
-import com.letthemcook.editor.domain.editor.components.block.unused.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
 class CanvasDragAndDropManager(

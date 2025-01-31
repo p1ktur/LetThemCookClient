@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,13 +43,16 @@ class MediaFilePickerManager(
     private lateinit var mediaPermissionLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
 
     private var currentFileName: String = ""
+
+    private var _currentFileType = FileType.IMAGE
     var currentFileType = mutableStateOf(FileType.IMAGE)
 
-    var onReceiveMediaFile: ((MediaFile) -> Unit)? = null
+    private var onReceiveMediaFile: ((MediaFile) -> Unit)? = null
 
     // Camera
     private var temporaryCameraFileUri: Uri = Uri.EMPTY
 
+    // UI
     @Composable
     fun RegisterLaunchers() {
         val coroutineScope = rememberCoroutineScope()
@@ -81,7 +85,7 @@ class MediaFilePickerManager(
         ) { isCameraAllowed ->
             if (isCameraAllowed) {
                 try {
-                    when (currentFileType.value) {
+                    when (_currentFileType) {
                         FileType.IMAGE -> {
                             val temporaryFile = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temporary.jpg")
                             temporaryCameraFileUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", temporaryFile)
@@ -110,7 +114,7 @@ class MediaFilePickerManager(
         ) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
 
-            when (currentFileType.value) {
+            when (_currentFileType) {
                 FileType.IMAGE ->  coroutineScope.launch(Dispatchers.IO) {
                     processImageUri(uri)
                 }
@@ -128,7 +132,7 @@ class MediaFilePickerManager(
 
             if (isMediaPickerAllowed) {
                 try {
-                    val request = when (currentFileType.value) {
+                    val request = when (_currentFileType) {
                         FileType.IMAGE -> PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         FileType.VIDEO -> PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
                         FileType.ANY -> return@rememberLauncherForActivityResult
@@ -150,9 +154,10 @@ class MediaFilePickerManager(
     ) {
         isDialogShown.value = true
 
-        this.onReceiveMediaFile = onReceiveMediaFile
-        currentFileType.value = fileType
         currentFileName = fileName
+        _currentFileType = fileType
+        currentFileType.value = fileType
+        this.onReceiveMediaFile = onReceiveMediaFile
     }
 
     fun hideDialog() {
@@ -160,7 +165,7 @@ class MediaFilePickerManager(
     }
 
     fun launchGallery(fileType: FileType) {
-        currentFileType.value = fileType
+        _currentFileType = fileType
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             mediaPermissionLauncher.launch(arrayOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED))
@@ -172,13 +177,14 @@ class MediaFilePickerManager(
     }
 
     fun launchCamera(fileType: FileType) {
-        currentFileType.value = fileType
+        _currentFileType = fileType
 
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
+    // Files
     suspend fun getStoredFile(
-        fileName: String = UUID.randomUUID().toString(),
+        fileName: String,
         onReceiveMediaFile: (MediaFile) -> Unit
     ): Boolean {
         filesManager.getFileByName(fileName)?.let { file ->
@@ -200,7 +206,7 @@ class MediaFilePickerManager(
     }
 
     suspend fun getStoredFilesIndexed(
-        fileName: String = UUID.randomUUID().toString(),
+        fileName: String,
         startIndex: Int,
         onReceiveMediaFile: (MediaFile) -> Unit
     ) {
@@ -213,6 +219,15 @@ class MediaFilePickerManager(
         }
     }
 
+    suspend fun deleteStoredFile(fileName: String): Boolean {
+        filesManager.getFileByName(fileName)?.let { file ->
+            filesManager.deleteFile(file)
+        } ?: return false
+
+        return true
+    }
+
+    // Private
     private suspend fun processImageUri(uri: Uri) {
         try {
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -226,9 +241,10 @@ class MediaFilePickerManager(
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
 
             val existingFile = filesManager.getFileByName(currentFileName)
+            existingFile?.type = _currentFileType
 
             val file = if (existingFile == null) {
-                filesManager.saveFile(outputStream.toByteArray(), currentFileType.value, currentFileName)
+                filesManager.saveFile(outputStream.toByteArray(), _currentFileType, currentFileName)
             } else {
                 filesManager.updateFile(existingFile, outputStream.toByteArray())
             } ?: return
@@ -247,9 +263,10 @@ class MediaFilePickerManager(
             } ?: return
 
             val existingFile = filesManager.getFileByName(currentFileName)
+            existingFile?.type = _currentFileType
 
             val file = if (existingFile == null) {
-                filesManager.saveFile(bytes, currentFileType.value, currentFileName)
+                filesManager.saveFile(bytes, _currentFileType, currentFileName)
             } else {
                 filesManager.updateFile(existingFile, bytes)
             } ?: return

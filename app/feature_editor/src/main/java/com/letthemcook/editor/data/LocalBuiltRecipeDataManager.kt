@@ -5,8 +5,9 @@ import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.model.data.BuiltRecipe
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
 
-class RecipeLocalDataManager(
-    private val dao: BuiltRecipeDao
+class LocalBuiltRecipeDataManager(
+    private val dao: BuiltRecipeDao,
+    private val recipeGraphSerializer: RecipeGraphSerializer
 ) {
 
     suspend fun getBuiltRecipeAsComponent(recipeId: Int): Component {
@@ -14,11 +15,11 @@ class RecipeLocalDataManager(
 
         // TODO get files
 
-        return RecipeGraphSerializer.deserializeComponent(jsonString)
+        return recipeGraphSerializer.deserializeComponent(jsonString)
     }
 
     suspend fun saveBuiltRecipeAsJson(recipeId: Int, component: Component) {
-        val jsonString = RecipeGraphSerializer.serializeToJson(component)
+        val jsonString = recipeGraphSerializer.serializeToJson(component)
 
         // TODO set files
 
