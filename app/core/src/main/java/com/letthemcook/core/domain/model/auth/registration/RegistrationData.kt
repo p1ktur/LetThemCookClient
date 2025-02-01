@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.model.auth
+package com.letthemcook.core.domain.model.auth.registration
 
 import kotlinx.serialization.Serializable
 

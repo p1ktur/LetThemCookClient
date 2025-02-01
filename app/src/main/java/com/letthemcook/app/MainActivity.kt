@@ -92,8 +92,7 @@ class MainActivity : ComponentActivity() {
             LetThemCookTheme(theme) {
                 NavHost(
                     navController = navController,
-//                    startDestination = AuthNavRoutes.Login
-                    startDestination = EditorNavRoutes.Builder
+                    startDestination = AuthNavRoutes.Login
                 ) {
                     addAuthRoutes(
                         navController = navController,

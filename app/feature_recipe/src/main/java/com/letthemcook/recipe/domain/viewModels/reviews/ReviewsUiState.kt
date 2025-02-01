@@ -5,7 +5,7 @@ import com.letthemcook.core.domain.model.items.ReviewItemData
 data class ReviewsUiState(
     val reviews: List<ReviewItemData> = listOf(
         ReviewItemData(
-            id = 0,
+            id = "test_recipe",
             authorId = 0,
             authorLogin = "@username",
             authorBitmap = null,

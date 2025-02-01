@@ -8,7 +8,7 @@ import com.letthemcook.core.domain.model.file.File
 
 @Entity
 data class FavoredRecipe(
-    @PrimaryKey(autoGenerate = false) var id: String,
+    @PrimaryKey(autoGenerate = false) var id: String = "",
     var name: String = "",
     var authorLogin: String = "",
     var likesAmount: Int = 0,

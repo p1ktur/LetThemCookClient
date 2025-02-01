@@ -90,11 +90,11 @@ class EditedRecipeViewModel(
 
     }
 
-    private fun likeReview(id: Int) {
+    private fun likeReview(id: String) {
 
     }
 
-    private fun dislikeReview(id: Int) {
+    private fun dislikeReview(id: String) {
 
     }
 }

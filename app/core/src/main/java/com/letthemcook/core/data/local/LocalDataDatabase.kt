@@ -8,11 +8,12 @@ import androidx.room.TypeConverters
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.FileConverter
 import com.letthemcook.core.domain.model.local.RecipeJson
 import com.letthemcook.core.domain.model.local.FavoredRecipe
+import com.letthemcook.core.domain.model.local.Following
 import com.letthemcook.core.domain.model.local.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.local.reactions.ReviewLike
 
 @Database(
-    entities = [FavoredRecipe::class, RecipeJson::class, RecipeReaction::class, ReviewLike::class],
+    entities = [FavoredRecipe::class, RecipeJson::class, RecipeReaction::class, ReviewLike::class, Following::class],
     exportSchema = false,
     version = 1
 )

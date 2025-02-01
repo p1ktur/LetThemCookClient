@@ -23,6 +23,6 @@ sealed interface EditedRecipeUiAction {
     data object DislikeRecipe : EditedRecipeUiAction
 
     data object SendReview : EditedRecipeUiAction
-    data class LikeReview(val id: Int) : EditedRecipeUiAction
-    data class DislikeReview(val id: Int) : EditedRecipeUiAction
+    data class LikeReview(val id: String) : EditedRecipeUiAction
+    data class DislikeReview(val id: String) : EditedRecipeUiAction
 }

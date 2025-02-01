@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.letthemcook.auth.R
-import com.letthemcook.core.domain.model.auth.RegistrationAuthResult
+import com.letthemcook.core.domain.model.auth.registration.RegistrationAuthResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
@@ -65,7 +65,7 @@ fun RegistrationScreen(
             val toastText = when (result) {
                 RegistrationAuthResult.Failed -> "Registration failed."
                 RegistrationAuthResult.Successful -> "Registration successful."
-                RegistrationAuthResult.UserAlreadyExists -> "User already exists."
+                else -> return@let
             }
 
             Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()

@@ -3,7 +3,7 @@ package com.letthemcook.auth.domain.viewModels.registration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.authorization.AuthManager
-import com.letthemcook.core.domain.model.auth.RegistrationData
+import com.letthemcook.core.domain.model.auth.registration.RegistrationData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
@@ -34,7 +34,7 @@ class RegistrationViewModel(
         if (validateEmail(uiState.value.email.text) != EmailValidationResult.OK) return
         if (validateLogin(uiState.value.login.text) != LoginValidationResult.OK) return
         if (validatePassword(uiState.value.password.text) != PasswordValidationResult.OK) return
-        if (uiState.value.password.text == uiState.value.repeatedPassword.text) return
+        if (uiState.value.password.text != uiState.value.repeatedPassword.text) return
 
         viewModelScope.launch(Dispatchers.IO) {
             val registrationData = RegistrationData(

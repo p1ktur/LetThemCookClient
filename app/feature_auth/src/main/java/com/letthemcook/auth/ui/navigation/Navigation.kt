@@ -1,5 +1,6 @@
 package com.letthemcook.auth.ui.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
@@ -11,9 +12,10 @@ import com.letthemcook.auth.domain.viewModels.registration.RegistrationUiAction
 import com.letthemcook.auth.domain.viewModels.registration.RegistrationViewModel
 import com.letthemcook.auth.ui.screens.LoginScreen
 import com.letthemcook.auth.ui.screens.RegistrationScreen
+import com.letthemcook.core.domain.model.auth.login.LoginAuthResult
+import com.letthemcook.core.domain.model.auth.registration.RegistrationAuthResult
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
-import org.koin.compose.koinInject
 
 sealed interface AuthNavRoutes {
     @Serializable data object Registration : AuthNavRoutes
@@ -28,14 +30,18 @@ fun NavGraphBuilder.addAuthRoutes(
         val viewModel = koinViewModel<RegistrationViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
+        LaunchedEffect(uiState.registrationResult) {
+            if (uiState.registrationResult == RegistrationAuthResult.Successful) {
+                navController.navigate(logInRoute)
+            }
+        }
+
         RegistrationScreen(
             uiState = uiState,
             onUiAction = { action ->
                 when (action) {
                     RegistrationUiAction.NavigateToLogin -> navController.navigate(AuthNavRoutes.Login)
-                    //TODO temporary
-                    RegistrationUiAction.Register -> navController.navigate(logInRoute)
-                    else -> Unit
+                    RegistrationUiAction.Register -> Unit
                 }
                 viewModel.onUiAction(action)
             }
@@ -45,13 +51,17 @@ fun NavGraphBuilder.addAuthRoutes(
         val viewModel = koinViewModel<LoginViewModel>()
         val uiState by viewModel.uiState.collectAsState()
 
+        LaunchedEffect(uiState.loginResult) {
+            if (uiState.loginResult == LoginAuthResult.Successful) {
+                navController.navigate(logInRoute)
+            }
+        }
+
         LoginScreen(
             uiState = uiState,
             onUiAction = { action ->
                 when (action) {
                     LoginUiAction.NavigateToRegistration -> navController.navigate(AuthNavRoutes.Registration)
-                    //TODO temporary
-                    LoginUiAction.Login -> navController.navigate(logInRoute)
                     else -> Unit
                 }
                 viewModel.onUiAction(action)

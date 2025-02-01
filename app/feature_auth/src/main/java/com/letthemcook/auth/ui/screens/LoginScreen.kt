@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.letthemcook.auth.R
-import com.letthemcook.core.domain.model.auth.LoginAuthResult
+import com.letthemcook.core.domain.model.auth.login.LoginAuthResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
@@ -74,8 +74,7 @@ fun LoginScreen(
             val toastText = when (result) {
                 LoginAuthResult.Failed -> "Registration failed."
                 LoginAuthResult.Successful -> "Registration successful."
-                LoginAuthResult.UserDoesNotExist -> "User already exists."
-                LoginAuthResult.WrongPassword -> "Wrong password."
+                else -> return@let
             }
 
             Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
@@ -298,7 +297,7 @@ fun LoginScreen(
                                         textDecoration = TextDecoration.Underline
                                     )
                                 ) {
-                                    append("Login")
+                                    append("Register")
                                 }
                             },
                             style = LocalAppTheme.current.typography.bodyMedium,
