@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class File(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    var name: String,
+    var uid: String,
     @Serializable(with = UriSerializer::class) var uri: Uri,
     var type: FileType
 )

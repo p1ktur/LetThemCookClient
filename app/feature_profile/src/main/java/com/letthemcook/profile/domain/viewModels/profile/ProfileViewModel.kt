@@ -1,62 +1,64 @@
 package com.letthemcook.profile.domain.viewModels.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.remote.file.RemoteFileManager
+import com.letthemcook.core.data.remote.user.UserManager
+import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.FileType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-//    private val authorizationManager: AuthorizationManager
+    userId: String,
+    userManager: UserManager,
+    remoteFileManager: RemoteFileManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()
 
-    // TODO save profile image
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            userManager.getUser(userId)?.let { user ->
+                _uiState.update {
+                    it.copy(
+                        user = user
+                    )
+                }
+
+                user.profilePictureId?.let { fileId ->
+                    val params = RemoteFileManager.RequestParams(
+                        userId = userId,
+                        fileId = fileId,
+                        type = FileType.IMAGE
+                    )
+                    val bytes = remoteFileManager.getFile(params)
+
+                    _uiState.update {
+                        it.copy(
+                            userImage = bytes?.toBitmap()
+                        )
+                    }
+                }
+            }
+
+            // TODO Load recipes
+        }
+    }
 
     fun onUiAction(action: ProfileUiAction) {
         when (action) {
             ProfileUiAction.NavigateToAddRecipe -> Unit
-//            is ProfileUiAction.ToggleLoginOption -> toggleLoginOption(action.loginOption)
-            ProfileUiAction.Login -> Unit
             ProfileUiAction.NavigateBack -> Unit
             ProfileUiAction.NavigateToHome -> Unit
-            ProfileUiAction.NavigateToSettings -> Unit
+            ProfileUiAction.NavigateToEditedProfile -> Unit
 
             is ProfileUiAction.ViewMediaFile -> Unit
-
-            ProfileUiAction.ChangePassword -> Unit
         }
     }
-
-//    private fun login() {
-//        if (uiState.value.loginOption == LoginOption.EMAIL && validateLogin(uiState.value.login.text) != LoginValidationResult.OK) return
-//        if (uiState.value.loginOption == LoginOption.LOGIN && validateEmail(uiState.value.email.text) != EmailValidationResult.OK) return
-//        if (uiState.value.loginOption == LoginOption.PHONE && validatePhoneNumber(uiState.value.phoneNumber.text) != PhoneNumberValidationResult.OK) return
-//        if (validatePassword(uiState.value.password.text) != PasswordValidationResult.OK) return
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val loginData = when (uiState.value.loginOption) {
-//                LoginOption.LOGIN -> LoginData(
-//                    login = uiState.value.login.text.toString(),
-//                    password = uiState.value.password.text.toString()
-//                )
-//                LoginOption.EMAIL -> LoginData(
-//                    email = uiState.value.email.text.toString(),
-//                    password = uiState.value.password.text.toString()
-//                )
-//                LoginOption.PHONE -> LoginData(
-//                    phoneNumber = uiState.value.phoneNumber.text.toString(),
-//                    password = uiState.value.password.text.toString()
-//                )
-//            }
-//
-////            val loginResult = authorizationManager.loginUser(loginData)
-////
-////            _uiState.update {
-////                it.copy(
-////                    loginResult = loginResult
-////                )
-////            }
-//        }
-//    }
 }

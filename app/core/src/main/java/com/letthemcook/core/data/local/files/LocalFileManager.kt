@@ -1,4 +1,4 @@
-package com.letthemcook.core.data.files
+package com.letthemcook.core.data.local.files
 
 import android.content.ContentValues
 import android.content.Context
@@ -6,11 +6,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.provider.MediaStore
+import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import java.util.UUID
 
-class FilesManager(
+class LocalFileManager(
     private val context: Context,
     private val dao: FileDao
 ) {
@@ -26,13 +27,11 @@ class FilesManager(
             bytes = inputStream.readBytes()
         }
 
-        return bytes?.let {
-            BitmapFactory.decodeByteArray(it, 0, it.size)
-        }
+        return bytes?.toBitmap()
     }
 
-    suspend fun getFileByName(name: String): File? {
-        return dao.getFileByName(name)
+    suspend fun getFileByUid(uid: String): File? {
+        return dao.getFileByUid(uid)
     }
 
     suspend fun saveFile(
@@ -77,7 +76,7 @@ class FilesManager(
                 outputStream.write(bytes)
             }
 
-            File(name = name, uri = it, type = type).apply {
+            File(uid = name, uri = it, type = type).apply {
                 dao.upsertFile(this)
             }
         }

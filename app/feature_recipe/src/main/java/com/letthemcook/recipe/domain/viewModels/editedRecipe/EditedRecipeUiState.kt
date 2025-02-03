@@ -9,7 +9,7 @@ import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.LikeStatus
 
 data class EditedRecipeUiState(
-    val id: Int = 0,
+    val id: String,
     val name: TextFieldState = TextFieldState(),
     val authorLogin: String = "",
     val likesAmount: Int = 0,

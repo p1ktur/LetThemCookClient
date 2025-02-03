@@ -109,7 +109,7 @@ fun CookingCanvas(
     ) {
         uiState.canvasCounter.let {
             drawGrid(
-                step = 48 * (1.5f + (uiState.canvasUiState.zoom) % 0.5f),
+                step = 48 * uiState.canvasUiState.zoom,
                 canvasZoom = uiState.canvasUiState.zoom,
                 canvasOffset = uiState.canvasUiState.offset,
                 backgroundColor = backgroundColor,

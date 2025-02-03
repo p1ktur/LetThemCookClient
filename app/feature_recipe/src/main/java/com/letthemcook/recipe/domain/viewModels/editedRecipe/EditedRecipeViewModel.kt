@@ -7,12 +7,14 @@ import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.UUID
 
 class EditedRecipeViewModel(
-    recipeId: Int?
+    recipeId: String?
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(EditedRecipeUiState(recipeId ?: 0))
+    // TODO on save store this id
+    private val _uiState = MutableStateFlow(EditedRecipeUiState(recipeId ?: UUID.randomUUID().toString()))
     val uiState = _uiState.asStateFlow()
 
     private val _reviewsUiState = MutableStateFlow(ReviewsUiState())

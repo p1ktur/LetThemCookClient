@@ -40,6 +40,8 @@ import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.language.Language
 
+// TODO check dark theme for feed and editor and cooking!
+
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,

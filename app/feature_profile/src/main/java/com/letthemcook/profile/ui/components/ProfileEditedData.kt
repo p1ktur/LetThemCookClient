@@ -3,7 +3,6 @@ package com.letthemcook.profile.ui.components
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,11 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,24 +26,25 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateName
-import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePhoneNumber
 import com.letthemcook.core.domain.validation.result.EmailValidationResult
 import com.letthemcook.core.domain.validation.result.NameValidationResult
-import com.letthemcook.core.domain.validation.result.PasswordValidationResult
 import com.letthemcook.core.domain.validation.result.PhoneNumberValidationResult
-import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
-import com.letthemcook.profile.domain.viewModels.profile.ProfileUiState
+import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
+import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiState
 import com.letthemcook.theme.base.LocalAppTheme
+import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.ValidatedTextField
 
 @Composable
 fun ProfileEditedData(
     modifier: Modifier = Modifier,
-    uiState: ProfileUiState,
-    onUiAction: (ProfileUiAction) -> Unit
+    uiState: EditedProfileUiState,
+    onUiAction: (EditedProfileUiAction) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    // TODO birthDate
 
     Column(
         modifier = modifier.animateContentSize(),
@@ -60,11 +57,13 @@ fun ProfileEditedData(
                 .clip(CircleShape)
                 .clickable {
                     isExpanded = !isExpanded
+                    if (!isExpanded) {
+                        onUiAction(EditedProfileUiAction.UpdateUserData)
+                    }
                 }
                 .padding(4.dp),
             imageVector = if (isExpanded) {
                 Icons.Default.Done
-                // TODO update data on server and notify user
             } else {
                 Icons.Default.Edit
             },
@@ -72,6 +71,22 @@ fun ProfileEditedData(
             tint = LocalAppTheme.current.text
         )
         if (!isExpanded) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "About",
+                    style = LocalAppTheme.current.typography.bodyMedium
+                )
+                if (uiState.about.text.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = uiState.about.text.toString(),
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -125,6 +140,11 @@ fun ProfileEditedData(
                 )
             }
         } else {
+            MultiLineTextField(
+                modifier = Modifier.fillMaxWidth(),
+                state = uiState.about,
+                labelText = "About"
+            )
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.name,
@@ -154,7 +174,7 @@ fun ProfileEditedData(
                 validationFunction = { toValidateText ->
                     when (validateEmail(toValidateText)) {
                         EmailValidationResult.OK -> ""
-                        EmailValidationResult.Empty -> "This field cannot be empty."
+                        EmailValidationResult.Empty -> ""
                         EmailValidationResult.WrongFormat -> "Please follow the email format, such as example@email.com."
                     }
                 }
@@ -167,7 +187,7 @@ fun ProfileEditedData(
                 validationFunction = { toValidateText ->
                     when (validatePhoneNumber(toValidateText)) {
                         PhoneNumberValidationResult.OK -> ""
-                        PhoneNumberValidationResult.Empty -> "This field cannot be empty."
+                        PhoneNumberValidationResult.Empty -> ""
                         PhoneNumberValidationResult.TooShort -> "Phone number is too short."
                         PhoneNumberValidationResult.TooLong -> "Phone number is too long."
                         PhoneNumberValidationResult.OnlyNumbersAllowed -> "Only numbers are allowed."
@@ -181,7 +201,7 @@ fun ProfileEditedData(
                 Text(
                     modifier = Modifier
                         .clickable {
-                            onUiAction(ProfileUiAction.ChangePassword)
+                            onUiAction(EditedProfileUiAction.ChangePassword)
                         }
                         .padding(6.dp),
                     text = "Change password",

@@ -2,25 +2,25 @@ package com.cooking.media.domain.viewModels.mediaViewer
 
 import androidx.lifecycle.ViewModel
 import com.letthemcook.core.domain.model.file.MediaFile
-import com.letthemcook.core.data.files.FilesManager
+import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class MediaViewerViewModel(
+class MediaViewerForLocalViewModel(
     file: File,
-    filesManager: FilesManager
+    localFileManager: LocalFileManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MediaViewerUiState(file))
+    private val _uiState = MutableStateFlow(MediaViewerForLocalUiState(file))
     val uiState = _uiState.asStateFlow()
 
     init {
         when (file.type) {
             FileType.IMAGE -> {
-                filesManager.getFileAsBitmap(file)?.let { bitmap ->
+                localFileManager.getFileAsBitmap(file)?.let { bitmap ->
                     _uiState.update {
                         it.copy(
                             viewedMediaFile = MediaFile.Image(
@@ -44,9 +44,9 @@ class MediaViewerViewModel(
         }
     }
 
-    fun onUiAction(action: MediaViewerUiAction) {
+    fun onUiAction(action: MediaViewerForLocalUiAction) {
         when (action) {
-            MediaViewerUiAction.NavigateBack -> Unit
+            MediaViewerForLocalUiAction.NavigateBack -> Unit
         }
     }
 }

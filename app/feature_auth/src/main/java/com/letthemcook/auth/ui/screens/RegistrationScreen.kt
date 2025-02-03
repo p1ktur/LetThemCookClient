@@ -1,6 +1,5 @@
 package com.letthemcook.auth.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,13 +20,11 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -38,6 +35,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.letthemcook.auth.R
+import com.letthemcook.auth.domain.viewModels.registration.RegistrationUiAction
+import com.letthemcook.auth.domain.viewModels.registration.RegistrationUiState
 import com.letthemcook.core.domain.model.auth.registration.RegistrationAuthResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
@@ -45,33 +44,17 @@ import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validat
 import com.letthemcook.core.domain.validation.result.EmailValidationResult
 import com.letthemcook.core.domain.validation.result.LoginValidationResult
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
-import com.letthemcook.auth.domain.viewModels.registration.RegistrationUiAction
-import com.letthemcook.auth.domain.viewModels.registration.RegistrationUiState
-import com.letthemcook.theme.components.textFields.ValidatedTextField
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.components.textFields.ValidatedTextField
 
 @Composable
 fun RegistrationScreen(
     uiState: RegistrationUiState,
     onUiAction: (RegistrationUiAction) -> Unit
 ) {
-    val context = LocalContext.current
-
-    LaunchedEffect(uiState.registrationResult) {
-        uiState.registrationResult?.let { result ->
-            val toastText = when (result) {
-                RegistrationAuthResult.Failed -> "Registration failed."
-                RegistrationAuthResult.Successful -> "Registration successful."
-                else -> return@let
-            }
-
-            Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
-        }
-    }
-
     Column {
         TopInsetSpacer()
         Box(
@@ -115,26 +98,8 @@ fun RegistrationScreen(
                     text = "Registration",
                     style = LocalAppTheme.current.typography.titleMedium
                 )
+                RegistrationError(uiState.registrationResult)
                 Spacer(modifier = Modifier.height(4.dp))
-                if (uiState.registrationResult == RegistrationAuthResult.UserAlreadyExists) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(12.dp),
-                            imageVector = Icons.Default.Error,
-                            contentDescription = "Error Show Icon",
-                            tint = LocalAppTheme.current.errorText
-                        )
-                        Text(
-                            text = "User with such email or login already exists.",
-                            style = LocalAppTheme.current.typography.bodySmall,
-                            color = LocalAppTheme.current.errorText
-                        )
-                    }
-                }
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     textFieldState = uiState.email,
@@ -226,5 +191,51 @@ fun RegistrationScreen(
             }
         }
         BottomInsetSpacer()
+    }
+}
+
+@Composable
+private fun RegistrationError(result: RegistrationAuthResult?) {
+    when (result) {
+        RegistrationAuthResult.Successful -> Unit
+        RegistrationAuthResult.Failed -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Show Icon",
+                    tint = LocalAppTheme.current.errorText
+                )
+                Text(
+                    text = "Sorry, but registration failed.",
+                    style = LocalAppTheme.current.typography.bodySmall,
+                    color = LocalAppTheme.current.errorText
+                )
+            }
+        }
+        RegistrationAuthResult.UserAlreadyExists -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Show Icon",
+                    tint = LocalAppTheme.current.errorText
+                )
+                Text(
+                    text = "User with such email or login already exists.",
+                    style = LocalAppTheme.current.typography.bodySmall,
+                    color = LocalAppTheme.current.errorText
+                )
+            }
+        }
+        null -> Unit
     }
 }

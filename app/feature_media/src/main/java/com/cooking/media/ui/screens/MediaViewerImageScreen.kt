@@ -25,19 +25,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerForLocalUiAction
-import com.cooking.media.domain.viewModels.mediaViewer.MediaViewerForLocalUiState
+import com.cooking.media.domain.viewModels.mediaViewerImage.MediaViewerImageUiAction
+import com.cooking.media.domain.viewModels.mediaViewerImage.MediaViewerImageUiState
 import com.cooking.media.ui.components.ImageViewer
-import com.cooking.media.ui.components.VideoViewer
-import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 
 @Composable
-fun MediaViewerScreen(
-    uiState: MediaViewerForLocalUiState,
-    onUiAction: (MediaViewerForLocalUiAction) -> Unit
+fun MediaViewerImageScreen(
+    uiState: MediaViewerImageUiState,
+    onUiAction: (MediaViewerImageUiAction) -> Unit
 ) {
     val blackColor = remember { Color(0xFF111811) }
 
@@ -65,7 +63,7 @@ fun MediaViewerScreen(
                         .clip(CircleShape)
                         .clickable {
                             canPlayVideo = false
-                            onUiAction(MediaViewerForLocalUiAction.NavigateBack)
+                            onUiAction(MediaViewerImageUiAction.NavigateBack)
                         }
                         .padding(6.dp),
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -74,31 +72,15 @@ fun MediaViewerScreen(
                 )
                 Text(
                     modifier = Modifier.padding(horizontal = 12.dp),
-                    text = when (uiState.viewedMediaFile) {
-                        is MediaFile.Image -> "Viewing Image" //TODO localize
-                        is MediaFile.Video -> "Viewing Video" //TODO localize
-                        null -> "No Media Found"
-                    },
+                    text = "Viewing Image", // TODO localize
                     style = LocalAppTheme.current.typography.titleSmall,
                     color = Color.White
                 )
             }
-            when (val mediaFile = uiState.viewedMediaFile) {
-                is MediaFile.Image -> {
-                    ImageViewer(
-                        modifier = Modifier.fillMaxSize(),
-                        bitmap = mediaFile.bitmap
-                    )
-                }
-                is MediaFile.Video -> {
-                    VideoViewer(
-                        modifier = Modifier.fillMaxSize(),
-                        canPlay = canPlayVideo,
-                        uri = mediaFile.file.uri
-                    )
-                }
-                null -> Unit
-            }
+            ImageViewer(
+                modifier = Modifier.fillMaxSize(),
+                bitmap = uiState.bitmap
+            )
         }
         BottomInsetSpacer(blackColor)
     }

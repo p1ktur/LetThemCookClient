@@ -1,6 +1,5 @@
 package com.letthemcook.auth.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,14 +23,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -44,6 +41,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.letthemcook.auth.R
+import com.letthemcook.auth.domain.viewModels.login.LoginUiAction
+import com.letthemcook.auth.domain.viewModels.login.LoginUiState
 import com.letthemcook.core.domain.model.auth.login.LoginAuthResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
@@ -53,13 +52,11 @@ import com.letthemcook.core.domain.validation.result.EmailValidationResult
 import com.letthemcook.core.domain.validation.result.LoginValidationResult
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
 import com.letthemcook.core.domain.validation.result.PhoneNumberValidationResult
-import com.letthemcook.auth.domain.viewModels.login.LoginUiAction
-import com.letthemcook.auth.domain.viewModels.login.LoginUiState
-import com.letthemcook.theme.components.textFields.ValidatedTextField
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.components.textFields.ValidatedTextField
 
 
 @Composable
@@ -67,20 +64,6 @@ fun LoginScreen(
     uiState: LoginUiState,
     onUiAction: (LoginUiAction) -> Unit
 ) {
-    val context = LocalContext.current
-
-    LaunchedEffect(uiState.loginResult) {
-        uiState.loginResult?.let { result ->
-            val toastText = when (result) {
-                LoginAuthResult.Failed -> "Registration failed."
-                LoginAuthResult.Successful -> "Registration successful."
-                else -> return@let
-            }
-
-            Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
-        }
-    }
-
     Column {
         TopInsetSpacer()
         Box(
@@ -171,32 +154,7 @@ fun LoginScreen(
                         text = "Login",
                         style = LocalAppTheme.current.typography.titleMedium
                     )
-                    if (uiState.loginResult == LoginAuthResult.UserDoesNotExist) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            val loginOptionText = remember(uiState.loginOption) {
-                                when (uiState.loginOption) {
-                                    LoginUiState.LoginOption.LOGIN -> "login"
-                                    LoginUiState.LoginOption.EMAIL -> "email"
-                                    LoginUiState.LoginOption.PHONE -> "phone number"
-                                }
-                            }
-                            Icon(
-                                modifier = Modifier.size(12.dp),
-                                imageVector = Icons.Default.Error,
-                                contentDescription = "Error Show Icon",
-                                tint = LocalAppTheme.current.errorText
-                            )
-                            Text(
-                                text = "User with such $loginOptionText does not exist.",
-                                style = LocalAppTheme.current.typography.bodySmall,
-                                color = LocalAppTheme.current.errorText
-                            )
-                        }
-                    }
+                    LoginError(uiState.loginResult, uiState.loginOption)
                     Spacer(modifier = Modifier.height(4.dp))
                     when (uiState.loginOption) {
                         LoginUiState.LoginOption.LOGIN -> {
@@ -309,5 +267,78 @@ fun LoginScreen(
             }
         }
         BottomInsetSpacer()
+    }
+}
+
+
+@Composable
+private fun LoginError(result: LoginAuthResult?, loginOption: LoginUiState.LoginOption) {
+    when (result) {
+        LoginAuthResult.Successful -> Unit
+        LoginAuthResult.Failed -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Show Icon",
+                    tint = LocalAppTheme.current.errorText
+                )
+                Text(
+                    text = "Sorry, but login failed.",
+                    style = LocalAppTheme.current.typography.bodySmall,
+                    color = LocalAppTheme.current.errorText
+                )
+            }
+        }
+        LoginAuthResult.UserDoesNotExist -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                val loginOptionText = remember(loginOption) {
+                    when (loginOption) {
+                        LoginUiState.LoginOption.LOGIN -> "login"
+                        LoginUiState.LoginOption.EMAIL -> "email"
+                        LoginUiState.LoginOption.PHONE -> "phone number"
+                    }
+                }
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Show Icon",
+                    tint = LocalAppTheme.current.errorText
+                )
+                Text(
+                    text = "User with such $loginOptionText does not exist.",
+                    style = LocalAppTheme.current.typography.bodySmall,
+                    color = LocalAppTheme.current.errorText
+                )
+            }
+        }
+        LoginAuthResult.WrongPassword -> {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(12.dp),
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error Show Icon",
+                    tint = LocalAppTheme.current.errorText
+                )
+                Text(
+                    text = "Wrong password.",
+                    style = LocalAppTheme.current.typography.bodySmall,
+                    color = LocalAppTheme.current.errorText
+                )
+            }
+        }
+        null -> Unit
     }
 }

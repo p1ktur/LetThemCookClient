@@ -1,11 +1,12 @@
 package com.letthemcook.profile.domain.viewModels.profile
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.text.input.TextFieldState
+import com.letthemcook.core.domain.model.auth.User
+import com.letthemcook.core.domain.model.items.RecipeItemData
 
 data class ProfileUiState(
-    // Edit Fields
-    val name: TextFieldState = TextFieldState(),
-    val surname: TextFieldState = TextFieldState(),
-    val email: TextFieldState = TextFieldState(),
-    val phoneNumber: TextFieldState = TextFieldState(),
+    val user: User? = null,
+    val userImage: Bitmap? = null,
+    val recipes: List<RecipeItemData> = emptyList()
 )

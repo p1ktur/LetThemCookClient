@@ -1,4 +1,4 @@
-package com.letthemcook.core.data.files
+package com.letthemcook.core.data.local.files
 
 import android.content.Context
 import androidx.room.Database

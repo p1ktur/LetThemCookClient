@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
-import com.letthemcook.core.data.files.FilesManager
+import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +32,7 @@ import java.util.UUID
 
 class MediaFilePickerManager(
     private val context: Context,
-    private val filesManager: FilesManager
+    private val localFileManager: LocalFileManager
 ) {
     // UI
     val isDialogShown = mutableStateOf(false)
@@ -148,12 +148,12 @@ class MediaFilePickerManager(
 
     fun showDialog(
         fileType: FileType,
-        fileName: String = UUID.randomUUID().toString(),
+        fileId: String = UUID.randomUUID().toString(),
         onReceiveMediaFile: (MediaFile) -> Unit
     ) {
         isDialogShown.value = true
 
-        currentFileName = fileName
+        currentFileName = fileId
         _currentFileType = fileType
         currentFileType.value = fileType
         this.onReceiveMediaFile = onReceiveMediaFile
@@ -183,13 +183,13 @@ class MediaFilePickerManager(
 
     // Files
     suspend fun getStoredFile(
-        fileName: String,
+        fileId: String,
         onReceiveMediaFile: (MediaFile) -> Unit
     ): Boolean {
-        filesManager.getFileByName(fileName)?.let { file ->
+        localFileManager.getFileByUid(fileId)?.let { file ->
             when (file.type) {
                 FileType.IMAGE -> {
-                    val bitmap = filesManager.getFileAsBitmap(file) ?: return false
+                    val bitmap = localFileManager.getFileAsBitmap(file) ?: return false
                     val mediaFile = MediaFile.Image(bitmap, file)
                     onReceiveMediaFile(mediaFile)
                 }
@@ -205,7 +205,7 @@ class MediaFilePickerManager(
     }
 
     suspend fun getStoredFilesIndexed(
-        fileName: String,
+        fileId: String,
         startIndex: Int,
         onReceiveMediaFile: (MediaFile) -> Unit
     ) {
@@ -213,14 +213,14 @@ class MediaFilePickerManager(
         var currentIndex = startIndex
 
         while (searching) {
-            searching = getStoredFile(fileName + currentIndex, onReceiveMediaFile)
+            searching = getStoredFile(fileId + currentIndex, onReceiveMediaFile)
             currentIndex++
         }
     }
 
-    suspend fun deleteStoredFile(fileName: String): Boolean {
-        filesManager.getFileByName(fileName)?.let { file ->
-            filesManager.deleteFile(file)
+    suspend fun deleteStoredFile(fileId: String): Boolean {
+        localFileManager.getFileByUid(fileId)?.let { file ->
+            localFileManager.deleteFile(file)
         } ?: return false
 
         return true
@@ -236,16 +236,15 @@ class MediaFilePickerManager(
                 MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
             }
 
-            val outputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            val bitmapBytes = bitmap.compressBitmap()
 
-            val existingFile = filesManager.getFileByName(currentFileName)
+            val existingFile = localFileManager.getFileByUid(currentFileName)
             existingFile?.type = _currentFileType
 
             val file = if (existingFile == null) {
-                filesManager.saveFile(outputStream.toByteArray(), _currentFileType, currentFileName)
+                localFileManager.saveFile(bitmapBytes, _currentFileType, currentFileName)
             } else {
-                filesManager.updateFile(existingFile, outputStream.toByteArray())
+                localFileManager.updateFile(existingFile, bitmapBytes)
             } ?: return
 
             val mediaFile = MediaFile.Image(bitmap, file)
@@ -261,13 +260,13 @@ class MediaFilePickerManager(
                 inputStream.readBytes()
             } ?: return
 
-            val existingFile = filesManager.getFileByName(currentFileName)
+            val existingFile = localFileManager.getFileByUid(currentFileName)
             existingFile?.type = _currentFileType
 
             val file = if (existingFile == null) {
-                filesManager.saveFile(bytes, _currentFileType, currentFileName)
+                localFileManager.saveFile(bytes, _currentFileType, currentFileName)
             } else {
-                filesManager.updateFile(existingFile, bytes)
+                localFileManager.updateFile(existingFile, bytes)
             } ?: return
 
             val mediaFile = MediaFile.Video(file)

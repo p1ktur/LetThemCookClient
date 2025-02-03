@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePhoneNumber
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
@@ -97,14 +98,7 @@ fun PasswordChangeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                SingleLineTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = uiState.oldPassword,
-                    labelText = "Old Password",
-                    isPhoneNumber = false,
-                    isPassword = true
-                )
-                if (uiState.oldPasswordErrorText.isNotBlank()) {
+                if (uiState.passwordChangeResult == PasswordChangeResult.OldPasswordIsIncorrect) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -117,12 +111,28 @@ fun PasswordChangeScreen(
                             tint = LocalAppTheme.current.errorText
                         )
                         Text(
-                            text = uiState.oldPasswordErrorText,
+                            text = "Old password is incorrect.",
                             style = LocalAppTheme.current.typography.bodySmall,
                             color = LocalAppTheme.current.errorText
                         )
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
+                ValidatedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    textFieldState = uiState.oldPassword,
+                    label = "Old Password",
+                    isPassword = true,
+                    validationFunction = { toValidateText ->
+                        when (validatePassword(toValidateText)) {
+                            PasswordValidationResult.OK -> ""
+                            PasswordValidationResult.Empty -> "This field cannot be empty."
+                            PasswordValidationResult.TooShort -> "Password it too short."
+                            PasswordValidationResult.TooLong -> "Password it too long."
+                            PasswordValidationResult.WrongFormat -> "Password must contain at least one capital letter, one small letter and one digit."
+                        }
+                    }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),

@@ -5,10 +5,10 @@ import com.letthemcook.core.domain.model.auth.registration.RegistrationAuthResul
 
 data class RegistrationUiState(
     // Fields
-    val email: TextFieldState = TextFieldState("example@mail.com"),
-    val login: TextFieldState = TextFieldState("userlogin"),
-    val password: TextFieldState = TextFieldState("Dashka123"),
-    val repeatedPassword: TextFieldState = TextFieldState("Dashka123"),
+    val email: TextFieldState = TextFieldState(),
+    val login: TextFieldState = TextFieldState(),
+    val password: TextFieldState = TextFieldState(),
+    val repeatedPassword: TextFieldState = TextFieldState(),
     // Registration
     val registrationResult: RegistrationAuthResult? = null
 )

@@ -1,5 +1,4 @@
 package com.letthemcook.core.domain.model.file
 
-fun getProfilePictureFileName(): String = "ProfilePicture"
-fun getRecipePictureFileName(recipeId: Int): String = "RecipePicture$recipeId"
-fun getRecipeFilesPrefix(recipeId: Int): String = "RecipeFile${recipeId}_"
+fun getRecipePictureFileName(recipeId: String): String = "RecipePicture$recipeId"
+fun getRecipeFilesPrefix(recipeId: String): String = "RecipeFile${recipeId}_"

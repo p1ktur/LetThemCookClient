@@ -1,14 +1,12 @@
 package com.letthemcook.editor.domain.serialization
 
-import android.util.Log
-import com.letthemcook.core.data.files.FilesManager
+import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent
 import com.letthemcook.editor.domain.editor.components.composed.VerticalComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
-import com.letthemcook.editor.domain.editor.components.prototype.doForEveryChild
 import com.letthemcook.editor.domain.editor.components.prototype.doForEveryChildAsync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +16,7 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
 class RecipeGraphSerializer(
-    private val filesManager: FilesManager
+    private val localFileManager: LocalFileManager
 ) {
 
     private val jsonSerializationModule = SerializersModule {
@@ -59,7 +57,7 @@ class RecipeGraphSerializer(
 
                 withContext(Dispatchers.IO) {
                     (this@doForEveryChildAsync as? BlockComponent)?.apply {
-                        file = filesManager.getFileByName(id)
+                        file = localFileManager.getFileByUid(id)
                     }
                 }
             }

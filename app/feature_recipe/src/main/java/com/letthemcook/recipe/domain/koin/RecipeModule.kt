@@ -7,5 +7,5 @@ import org.koin.dsl.module
 
 val koinRecipeModule = module {
     viewModel { RecipeViewModel(get()) }
-    viewModel { (recipeId: Int?) -> EditedRecipeViewModel(recipeId) }
+    viewModel { (recipeId: String?) -> EditedRecipeViewModel(recipeId) }
 }

@@ -19,8 +19,8 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 sealed interface RecipeNavRoutes {
-    @Serializable data class Recipe(val id: Int) : RecipeNavRoutes
-    @Serializable data class EditedRecipe(val id: Int?) : RecipeNavRoutes
+    @Serializable data class Recipe(val id: String) : RecipeNavRoutes
+    @Serializable data class EditedRecipe(val id: String?) : RecipeNavRoutes
 }
 
 fun NavGraphBuilder.addRecipeRoutes(

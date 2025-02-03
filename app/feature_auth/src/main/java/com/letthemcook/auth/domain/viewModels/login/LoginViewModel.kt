@@ -1,8 +1,9 @@
 package com.letthemcook.auth.domain.viewModels.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.authorization.AuthManager
+import com.letthemcook.core.data.remote.authorization.AuthManager
 import com.letthemcook.core.domain.model.auth.login.LoginData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin
@@ -42,9 +43,9 @@ class LoginViewModel(
     }
 
     private fun login() {
-        if (uiState.value.loginOption == LoginUiState.LoginOption.EMAIL &&
-            validateLogin(uiState.value.login.text) != LoginValidationResult.OK) return
         if (uiState.value.loginOption == LoginUiState.LoginOption.LOGIN &&
+            validateLogin(uiState.value.login.text) != LoginValidationResult.OK) return
+        if (uiState.value.loginOption == LoginUiState.LoginOption.EMAIL &&
             validateEmail(uiState.value.email.text) != EmailValidationResult.OK) return
         if (uiState.value.loginOption == LoginUiState.LoginOption.PHONE &&
             validatePhoneNumber(uiState.value.phoneNumber.text) != PhoneNumberValidationResult.OK) return

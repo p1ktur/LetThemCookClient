@@ -1,14 +1,22 @@
 package com.letthemcook.profile.domain.viewModels.passwordChange
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.remote.authorization.AuthManager
+import com.letthemcook.core.data.remote.user.UserManager
+import com.letthemcook.core.domain.model.auth.registration.RegistrationData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class PasswordChangeViewModel(
-//    private val authorizationManager: AuthorizationManager
+    private val authManager: AuthManager,
+    private val userManager: UserManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PasswordChangeUiState())
@@ -22,40 +30,24 @@ class PasswordChangeViewModel(
     }
 
     private fun changePassword() {
-        _uiState.update {
-            it.copy(
-                oldPasswordErrorText = ""
-            )
-        }
-
-        // TODO VALIDATE OLD PASSWORD
-        if (uiState.value.oldPassword.text != "") {
-            _uiState.update {
-                it.copy(
-                    oldPasswordErrorText = "Not blank"
-                )
-            }
-            return
-        }
+        if (validatePassword(uiState.value.oldPassword.text) != PasswordValidationResult.OK) return
         if (validatePassword(uiState.value.password.text) != PasswordValidationResult.OK) return
-        if (uiState.value.password.text == uiState.value.repeatedPassword.text) return
+        if (uiState.value.password.text != uiState.value.repeatedPassword.text) return
 
+        viewModelScope.launch(Dispatchers.IO) {
+            authManager.getUser()?.id?.let { id ->
+                val passwordChangeResult = userManager.updatePassword(
+                    userId = id,
+                    oldPassword = uiState.value.oldPassword.text.toString(),
+                    password = uiState.value.password.text.toString()
+                )
 
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val registrationData = RegistrationData(
-//                login = uiState.value.login.text.toString(),
-//                email = uiState.value.email.text.toString(),
-//                password = uiState.value.repeatedPassword.text.toString()
-//            )
-
-//            val registrationResult = authorizationManager.registerUser(registrationData)
-//
-//            _uiState.update {
-//                it.copy(
-//                    registrationResult = registrationResult
-//                )
-//            }
-//        }
+                _uiState.update {
+                    it.copy(
+                        passwordChangeResult = passwordChangeResult
+                    )
+                }
+            }
+        }
     }
 }

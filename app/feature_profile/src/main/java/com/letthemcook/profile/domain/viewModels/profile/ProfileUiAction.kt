@@ -1,16 +1,12 @@
 package com.letthemcook.profile.domain.viewModels.profile
 
-import com.letthemcook.core.domain.model.file.File
+import android.graphics.Bitmap
 
 sealed interface ProfileUiAction {
     data object NavigateBack : ProfileUiAction
     data object NavigateToHome : ProfileUiAction
     data object NavigateToAddRecipe : ProfileUiAction
-    data object NavigateToSettings : ProfileUiAction
+    data object NavigateToEditedProfile : ProfileUiAction
 
-    data class ViewMediaFile(val file: File) : ProfileUiAction
-
-    data object ChangePassword : ProfileUiAction
-
-    data object Login : ProfileUiAction
+    data class ViewMediaFile(val bitmap: Bitmap) : ProfileUiAction
 }
