@@ -1,6 +1,5 @@
-package com.letthemcook.core.data.remote.file
+package com.letthemcook.core.data.remote
 
-import com.letthemcook.core.data.remote.authorization.AuthManager
 import com.letthemcook.core.domain.http.delete
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.postFile
@@ -48,6 +47,8 @@ class RemoteFileManager(
 
     suspend fun uploadFile(params: RequestParams, bytes: ByteArray): Boolean {
         if (!authManager.checkAccessTokenAndTryRefresh()) return false
+
+        // TODO if video -> compress it
 
         return postFile(
             urlString = "/file",

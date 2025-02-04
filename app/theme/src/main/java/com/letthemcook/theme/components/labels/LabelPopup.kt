@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -30,8 +33,10 @@ fun LabelPopup(
     title: String,
     searchedLabels: List<String>,
     searchText: TextFieldState,
+    isLoading: Boolean,
     anchorPosition: Offset,
     anchorSize: IntSize,
+    onSearchedListEndReach: () -> Unit,
     onLabelClick: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -45,7 +50,7 @@ fun LabelPopup(
             ): IntOffset {
                 val delta = 48
 
-                return if (windowSize.height - anchorBounds.height < popupContentSize.height) {
+                return if (windowSize.height - anchorBounds.height > popupContentSize.height) {
                     IntOffset(
                         x = 0,
                         y = anchorPosition.y.roundToInt() + anchorSize.height - delta
@@ -72,25 +77,23 @@ fun LabelPopup(
                 .clip(RoundedCornerShape(12.dp))
                 .background(LocalAppTheme.current.screenTwo, RoundedCornerShape(12.dp))
                 .border(1.dp, LocalAppTheme.current.text, RoundedCornerShape(12.dp))
-                .padding(8.dp)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SearchTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                state = searchText,
-                onSearchClick = {
-
-                }
+                state = searchText
             )
-            if (searchedLabels.isNotEmpty()) {
-                LabelContainer(
-                    modifier = Modifier.fillMaxWidth(),
-                    name = title,
-                    labels = searchedLabels,
-                    onLabelClick = onLabelClick
-                )
-            }
+            LabelContainer(
+                modifier = Modifier.fillMaxWidth(),
+                name = title,
+                labels = searchedLabels,
+                isLoading = isLoading,
+                onScrolledToEnd = onSearchedListEndReach,
+                onLabelClick = onLabelClick
+            )
         }
     }
 }

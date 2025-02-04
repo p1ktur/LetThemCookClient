@@ -1,16 +1,17 @@
 package com.letthemcook.core.domain.model.items
 
-import androidx.compose.ui.graphics.ImageBitmap
+import android.graphics.Bitmap
+import java.time.LocalDateTime
 
 data class RecipeItemData(
-    val id: String = "",
-    val name: String = "",
-    val authorLogin: String = "",
-    val likesAmount: Int = 0,
-    val dislikesAmount: Int = 0,
-    val reviewsAmount: Int = 0,
-    val preparationsAmount: Int = 0,
-    val description: String = "",
-    val image: ImageBitmap? = null,
-    val isPublished: Boolean = false
+    val id: String,
+    val name: String,
+    val authorLogin: String,
+    val likesAmount: Int,
+    val dislikesAmount: Int,
+    val reviewsAmount: Int,
+    val preparationsAmount: Int,
+    val description: String,
+    val publicationDate: LocalDateTime,
+    val bitmap: Bitmap? = null
 )

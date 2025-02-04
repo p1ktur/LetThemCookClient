@@ -9,4 +9,6 @@ sealed interface ProfileUiAction {
     data object NavigateToEditedProfile : ProfileUiAction
 
     data class ViewMediaFile(val bitmap: Bitmap) : ProfileUiAction
+
+    data object FollowOrUnfollow : ProfileUiAction
 }

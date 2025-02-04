@@ -2,7 +2,7 @@ package com.letthemcook.auth.domain.viewModels.registration
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.remote.authorization.AuthManager
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.registration.RegistrationData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin

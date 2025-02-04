@@ -2,7 +2,7 @@ package com.letthemcook.editor.domain.editor.components.block
 
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import kotlinx.serialization.Serializable
@@ -14,7 +14,7 @@ data class UnusedBlockComponent(
     var name: String = "Recipe Block",
     var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
     var time: Long = 0L,
-    val productNames: MutableList<ProductItemData> = mutableListOf(),
+    val productNames: MutableList<Product> = mutableListOf(),
     var colorOption: ColorOption = ColorOption.WHITE,
     var file: File? = null
 ) {

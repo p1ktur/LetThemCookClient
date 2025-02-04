@@ -1,9 +1,8 @@
 package com.letthemcook.auth.domain.viewModels.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.remote.authorization.AuthManager
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.login.LoginData
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateLogin

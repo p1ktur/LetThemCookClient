@@ -1,6 +1,6 @@
 package com.letthemcook.editor.domain.viewModels.builder
 
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
@@ -19,10 +19,10 @@ data class BuilderUiState(
     val savedBlockEditorState: BlockEditorState? = null,
     val viewedMediaFile: File? = null,
     // Products
-    val unusedProducts: List<ProductItemData> = listOf(
-        ProductItemData(0, "Tomato"),
-        ProductItemData(1, "Potato"),
-        ProductItemData(2, "Carrot")
+    val unusedProducts: List<Product> = listOf(
+        Product(0, "Tomato"),
+        Product(1, "Potato"),
+        Product(2, "Carrot")
     ),
     // Components
     val unusedBlockComponents: List<UnusedBlockComponent> = listOf(

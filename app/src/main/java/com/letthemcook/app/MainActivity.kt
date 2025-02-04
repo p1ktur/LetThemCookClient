@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -25,7 +24,7 @@ import com.cooking.media.ui.navigation.MediaNavRoutes
 import com.cooking.media.ui.navigation.addMediaRoutes
 import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
-import com.letthemcook.core.data.remote.authorization.AuthManager
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.media.toBytes
 import com.letthemcook.core.domain.model.auth.tokens.TokenCheckResult
 import com.letthemcook.core.domain.model.file.File

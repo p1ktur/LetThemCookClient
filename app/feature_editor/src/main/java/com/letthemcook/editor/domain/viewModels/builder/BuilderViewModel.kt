@@ -4,7 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
@@ -148,7 +148,7 @@ class BuilderViewModel(
 
     // Products
 
-    private fun addProduct(product: ProductItemData, position: Offset): BlockComponent? {
+    private fun addProduct(product: Product, position: Offset): BlockComponent? {
         return getBlockUnderPosition(scaleAndTranslate(position))?.let { containedBlock ->
             _uiState.update {
                 it.copy(

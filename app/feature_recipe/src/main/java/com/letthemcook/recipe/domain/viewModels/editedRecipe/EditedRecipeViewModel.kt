@@ -59,7 +59,7 @@ class EditedRecipeViewModel(
     private fun addWeightedProduct(data: WeightedProductItemData) {
         _uiState.update {
             it.copy(
-                products = it.products + data
+                productsFilter = it.productsFilter + data
             )
         }
     }
@@ -67,7 +67,7 @@ class EditedRecipeViewModel(
     private fun deleteWeightedProduct(index: Int) {
         _uiState.update {
             it.copy(
-                products = it.products.minus(it.products[index])
+                productsFilter = it.productsFilter.minus(it.productsFilter[index])
             )
         }
     }

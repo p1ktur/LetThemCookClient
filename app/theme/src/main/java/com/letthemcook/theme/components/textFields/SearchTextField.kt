@@ -47,8 +47,7 @@ fun SearchTextField(
     textStyle: TextStyle = LocalAppTheme.current.typography.bodyLarge,
     placeholderTextStyle: TextStyle = LocalAppTheme.current.typography.labelLarge,
     textColor: Color = LocalAppTheme.current.text,
-    backgroundColor: Color = LocalAppTheme.current.background,
-    onSearchClick: () -> Unit
+    backgroundColor: Color = LocalAppTheme.current.background
 ) {
     Box(
         modifier = modifier
@@ -81,7 +80,6 @@ fun SearchTextField(
             Icon(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable(onClick = onSearchClick)
                     .padding(6.dp),
                 imageVector = Icons.Outlined.Search,
                 contentDescription = "Search Icon",

@@ -1,10 +1,9 @@
 package com.letthemcook.profile.domain.viewModels.profile
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.remote.file.RemoteFileManager
-import com.letthemcook.core.data.remote.user.UserManager
+import com.letthemcook.core.data.remote.RemoteFileManager
+import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     userId: String,
-    userManager: UserManager,
+    private val userManager: UserManager,
     remoteFileManager: RemoteFileManager
 ) : ViewModel() {
 
@@ -59,6 +58,28 @@ class ProfileViewModel(
             ProfileUiAction.NavigateToEditedProfile -> Unit
 
             is ProfileUiAction.ViewMediaFile -> Unit
+
+            ProfileUiAction.FollowOrUnfollow -> followOrUnfollow()
+        }
+    }
+
+    private fun followOrUnfollow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            uiState.value.user?.let { user ->
+                if (user.isFollowed) {
+                    userManager.unfollow(user.id)
+                } else {
+                    userManager.follow(user.id)
+                }
+
+                _uiState.update {
+                    it.copy(
+                        user = it.user?.copy(
+                            isFollowed = !user.isFollowed
+                        )
+                    )
+                }
+            }
         }
     }
 }

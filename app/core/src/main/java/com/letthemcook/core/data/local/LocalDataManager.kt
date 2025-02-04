@@ -2,20 +2,27 @@ package com.letthemcook.core.data.local
 
 import com.letthemcook.core.domain.model.local.RecipeJson
 import com.letthemcook.core.domain.model.local.FavoredRecipe
-import com.letthemcook.core.domain.model.local.Following
 import com.letthemcook.core.domain.model.local.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.local.reactions.ReviewLike
+import kotlinx.coroutines.flow.Flow
 
 class LocalDataManager(
     private val favoredRecipeDao: FavoredRecipeDao,
     private val recipeJsonDao: RecipeJsonDao,
     private val recipeReactionDao: RecipeReactionDao,
-    private val reviewLikeDao: ReviewLikeDao,
-    private val followingDao: FollowingDao
+    private val reviewLikeDao: ReviewLikeDao
 ) {
     //Favored Recipes
+    suspend fun getFavoredRecipes(): List<FavoredRecipe> {
+        return favoredRecipeDao.getFavoredRecipes()
+    }
+
     suspend fun getFavoredRecipe(recipeId: String): FavoredRecipe? {
         return favoredRecipeDao.getFavoredRecipeById(recipeId)
+    }
+
+    fun getFavoredRecipesAmount(): Flow<Int> {
+        return favoredRecipeDao.getFavoredRecipesAmount()
     }
 
     suspend fun saveFavoredRecipe(favoredRecipe: FavoredRecipe) {
@@ -63,18 +70,5 @@ class LocalDataManager(
 
     suspend fun deleteReviewLike(reviewLike: ReviewLike) {
         reviewLikeDao.deleteReviewLike(reviewLike)
-    }
-
-    //User Followings
-    suspend fun getFollowing(userId: String): Following? {
-        return followingDao.getFollowingByUserId(userId)
-    }
-
-    suspend fun saveFollowing(following: Following) {
-        followingDao.upsertFollowing(following)
-    }
-
-    suspend fun deleteFollowing(following: Following) {
-        followingDao.deleteFollowing(following)
     }
 }

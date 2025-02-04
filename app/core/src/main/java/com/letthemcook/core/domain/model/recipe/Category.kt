@@ -1,9 +1,9 @@
-package com.letthemcook.core.domain.model.items
+package com.letthemcook.core.domain.model.recipe
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ProductItemData(
+data class Category(
     val id: Int,
     val name: String
 )

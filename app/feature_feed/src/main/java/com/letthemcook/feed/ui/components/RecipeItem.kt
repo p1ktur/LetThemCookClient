@@ -21,17 +21,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.model.items.RecipeItemData
 import com.letthemcook.core.domain.model.local.FavoredRecipe
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun RecipeItem(
     modifier: Modifier = Modifier,
-    recipeItemData: FavoredRecipe,
+    recipeItemData: RecipeItemData,
     onClick: () -> Unit
 ) {
     Box(
@@ -42,7 +44,7 @@ fun RecipeItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(5f / 4f),
-            bitmap = recipeItemData.imageBitmap
+            bitmap = recipeItemData.bitmap?.asImageBitmap()
                 ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
             contentDescription = "Recipe Image",
             contentScale = ContentScale.FillBounds

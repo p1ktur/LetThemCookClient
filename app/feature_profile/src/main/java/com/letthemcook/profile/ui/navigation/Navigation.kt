@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.letthemcook.core.data.remote.authorization.AuthManager
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.ui.navigation.NavBarRoutes

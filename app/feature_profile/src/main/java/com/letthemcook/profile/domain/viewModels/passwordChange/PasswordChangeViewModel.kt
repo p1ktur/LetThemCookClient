@@ -1,11 +1,9 @@
 package com.letthemcook.profile.domain.viewModels.passwordChange
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.remote.authorization.AuthManager
-import com.letthemcook.core.data.remote.user.UserManager
-import com.letthemcook.core.domain.model.auth.registration.RegistrationData
+import com.letthemcook.core.data.remote.AuthManager
+import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
 import kotlinx.coroutines.Dispatchers

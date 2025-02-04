@@ -32,7 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.LabelItem
@@ -45,7 +45,7 @@ fun WeightedProductsLabelContainer(
     productDataList: List<WeightedProductItemData>,
     searchTitle: String,
     searchText: TextFieldState,
-    searchedLabels: List<ProductItemData>,
+    searchedLabels: List<Product>,
     maxRows: Int = 3,
     onLabelCreate: (WeightedProductItemData) -> Unit,
     onContainerClick: () -> Unit,
@@ -61,7 +61,7 @@ fun WeightedProductsLabelContainer(
     var isPopupShown by remember { mutableStateOf(false) }
     var isEditPopupShown by remember { mutableStateOf(false) }
 
-    var chosenProductItem: ProductItemData? by remember { mutableStateOf(null) }
+    var chosenProductItem: Product? by remember { mutableStateOf(null) }
     val weightText = remember { TextFieldState() }
     val amountText = remember { TextFieldState() }
 
@@ -121,12 +121,16 @@ fun WeightedProductsLabelContainer(
             title = searchTitle,
             searchedLabels = searchedLabels.map { it.name }, // TODO optimize
             searchText = searchText,
+            isLoading = false, // TODO
             anchorPosition = containerPosition,
             anchorSize = containerSize,
             onLabelClick = { labelIndex ->
                 chosenProductItem = searchedLabels[labelIndex]
                 isPopupShown = false
                 isEditPopupShown = true
+            },
+            onSearchedListEndReach = {
+                //TODO
             },
             onDismiss = {
                 isPopupShown = false

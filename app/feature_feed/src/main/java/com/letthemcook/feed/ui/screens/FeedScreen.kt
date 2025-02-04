@@ -5,19 +5,31 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiState
@@ -33,6 +45,20 @@ fun FeedScreen(
     uiState: FeedUiState,
     onUiAction: (FeedUiAction) -> Unit
 ) {
+    val columnLazyListState = rememberLazyListState()
+
+    val isScrolledToBottom by remember {
+        derivedStateOf {
+            !columnLazyListState.canScrollForward
+        }
+    }
+
+    LaunchedEffect(isScrolledToBottom) {
+        if (isScrolledToBottom && !uiState.loading) {
+            onUiAction(FeedUiAction.LoadNextRecipes)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,51 +71,126 @@ fun FeedScreen(
                 onUiAction(FeedUiAction.NavigateToSearch)
             }
         )
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            if (uiState.savedRecipesAmount > 0) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onUiAction(FeedUiAction.NavigateToSavedRecipes)
-                            }
-                            .padding(6.dp)
-                            .animateItem(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            text = "Saved Recipes: ${uiState.savedRecipesAmount}",
-                            style = LocalAppTheme.current.typography.bodyLarge
-                        )
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            imageVector = Icons.Outlined.Bookmark,
-                            contentDescription = "Saved Recipes Icon",
-                            tint = LocalAppTheme.current.text
-                        )
-                    }
-                }
-            }
-            itemsIndexed(uiState.recipes, key = { _, it -> it.id }) { index, recipeItemData ->
-                RecipeItem(
+        if (uiState.recipes.isEmpty()) {
+            if (uiState.favoredRecipesAmount > 0) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateItem(),
-                    recipeItemData = recipeItemData,
-                    onClick = {
-                        onUiAction(FeedUiAction.NavigateToRecipe(recipeItemData.id))
-                    }
+                        .clickable {
+                            onUiAction(FeedUiAction.NavigateToSavedRecipes)
+                        }
+                        .padding(6.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
+                        style = LocalAppTheme.current.typography.bodyLarge
+                    )
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = Icons.Outlined.Bookmark,
+                        contentDescription = "Saved Recipes Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Your feed is empty",
+                    style = LocalAppTheme.current.typography.titleSmall
                 )
-                if (index != uiState.recipes.lastIndex) {
-                    HorizontalDivider(color = LocalAppTheme.current.text)
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "try to search new recipes",
+                        style = LocalAppTheme.current.typography.bodyLarge
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape),
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = "Search Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "or follow other users",
+                        style = LocalAppTheme.current.typography.bodyLarge
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape),
+                        imageVector = Icons.Outlined.Person,
+                        contentDescription = "User Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                state = columnLazyListState
+            ) {
+                if (uiState.favoredRecipesAmount > 0) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onUiAction(FeedUiAction.NavigateToSavedRecipes)
+                                }
+                                .padding(6.dp)
+                                .animateItem(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
+                                style = LocalAppTheme.current.typography.bodyLarge
+                            )
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                imageVector = Icons.Outlined.Bookmark,
+                                contentDescription = "Saved Recipes Icon",
+                                tint = LocalAppTheme.current.text
+                            )
+                        }
+                    }
+                }
+                itemsIndexed(uiState.recipes, key = { _, it -> it.id }) { index, recipeItemData ->
+                    RecipeItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateItem(),
+                        recipeItemData = recipeItemData,
+                        onClick = {
+                            onUiAction(FeedUiAction.NavigateToRecipe(recipeItemData.id))
+                        }
+                    )
+                    if (index != uiState.recipes.lastIndex) {
+                        HorizontalDivider(color = LocalAppTheme.current.text)
+                    }
                 }
             }
         }
+
         NavBar(
             modifier = Modifier.fillMaxWidth(),
             onHomeClick = {},

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
 import com.letthemcook.core.domain.dataConvertion.serialization.SizeSerializer
@@ -51,7 +51,7 @@ data class BlockComponent(
     var name: String = "Recipe Block",
     var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
     var time: Long = 0L,
-    val productNames: MutableList<ProductItemData> = mutableListOf(),
+    val productNames: MutableList<Product> = mutableListOf(),
     @Transient override var parentComponent: ComposedComponent? = null,
     var cookingState: BlockCookingState = BlockCookingState.NOT_REACHED,
     var file: File? = null,

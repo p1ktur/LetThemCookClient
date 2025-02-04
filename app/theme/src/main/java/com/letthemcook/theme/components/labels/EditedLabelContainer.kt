@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,78 +42,91 @@ fun EditedLabelContainer(
     labels: List<String>,
     searchTitle: String,
     searchText: TextFieldState,
+    isLoading: Boolean,
     searchedLabels: List<String>,
     maxRows: Int = 3,
     onContainerClick: () -> Unit,
-    onLabelClick: (Int) -> Unit
+    onSearchedLabelClick: (Int) -> Unit,
+    onSearchedListEndReach: () -> Unit,
+    onLabelClick: (Int) -> Unit,
+    onLabelIconClick: ((Int) -> Unit)? = null
 ) {
-    // TODO delete label
-
     var containerPosition by remember { mutableStateOf(Offset.Zero) }
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
     var isPopupShown by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable {
-                onContainerClick()
-                isPopupShown = true
-            }
-            .onGloballyPositioned {
-                containerPosition = it.positionInRoot()
-            }
-            .onSizeChanged {
-                containerSize = it
-            }
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = name,
-                style = LocalAppTheme.current.typography.bodyLarge
-            )
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = Icons.Outlined.Add,
-                contentDescription = "Label Icon",
-                tint = LocalAppTheme.current.text
-            )
-        }
-        LazyHorizontalStaggeredGrid(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = (maxRows * 36).dp),
-            rows = StaggeredGridCells.FixedSize(28.dp),
-            horizontalItemSpacing = 8.dp,
+    Column {
+        Column(
+            modifier = modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable {
+                    onContainerClick()
+                    isPopupShown = true
+                }
+                .onGloballyPositioned {
+                    containerPosition = it.positionInRoot()
+                }
+                .onSizeChanged {
+                    containerSize = it
+                }
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            itemsIndexed(labels) { index, label ->
-                LabelItem(
-                    text = label,
-                    onClick = {
-                        onLabelClick(index)
-                    }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = name,
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "Label Icon",
+                    tint = LocalAppTheme.current.text
                 )
             }
-        }
-    }
+            if (labels.isNotEmpty()) {
+                val labelsSize = remember(labels) {
+                    if (labels.size > maxRows) maxRows else labels.size
+                }
 
-    if (isPopupShown) {
-       LabelPopup(
-           title = searchTitle,
-           searchedLabels = searchedLabels,
-           searchText = searchText,
-           anchorPosition = containerPosition,
-           anchorSize = containerSize,
-           onLabelClick = onLabelClick,
-           onDismiss = {
-               isPopupShown = false
-           }
-       )
+                LazyHorizontalStaggeredGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height((labelsSize * 36).dp),
+                    rows = StaggeredGridCells.FixedSize(28.dp),
+                    horizontalItemSpacing = 8.dp,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(labels) { index, label ->
+                        LabelItem(
+                            text = label,
+                            onClick = {
+                                onLabelClick(index)
+                            },
+                            onIconClick = onLabelIconClick?.let { { it(index) } }
+                        )
+                    }
+                }
+            }
+        }
+        if (isPopupShown) {
+            LabelPopup(
+                title = searchTitle,
+                searchedLabels = searchedLabels,
+                searchText = searchText,
+                isLoading = isLoading,
+                anchorPosition = containerPosition,
+                anchorSize = containerSize,
+                onSearchedListEndReach = onSearchedListEndReach,
+                onLabelClick = onSearchedLabelClick,
+                onDismiss = {
+                    isPopupShown = false
+                }
+            )
+        }
     }
 }

@@ -53,7 +53,7 @@ suspend inline fun <R> get(
 
 suspend inline fun <R> post(
     urlString: String,
-    body: Any,
+    body: Any? = null,
     params: StringValues? = null,
     headers: StringValues? = null,
     onResponse: (HttpResponse) -> R,
@@ -85,7 +85,7 @@ suspend inline fun <R> post(
 
 suspend inline fun <R> put(
     urlString: String,
-    body: Any,
+    body: Any? = null,
     params: StringValues? = null,
     headers: StringValues? = null,
     onResponse: (HttpResponse) -> R,

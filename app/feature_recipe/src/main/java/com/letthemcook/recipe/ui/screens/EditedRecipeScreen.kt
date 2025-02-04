@@ -105,6 +105,9 @@ fun EditedRecipeScreen(
         }
     }
 
+    val categoriesFilterNames = remember(uiState.categoriesFilter) { uiState.categoriesFilter.map { it.name } }
+    val searchedCategoriesNames = remember(uiState.searchedCategories) { uiState.searchedCategories.map { it.name } }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -314,12 +317,15 @@ fun EditedRecipeScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp),
                     name = "Categories",
-                    labels = uiState.categories.map { it.name }, // TODO optimize!!!
+                    labels = categoriesFilterNames,
                     searchTitle = "Categories",
                     searchText = uiState.categoriesSearchText,
-                    searchedLabels = uiState.searchedCategories.map { it.name },
+                    isLoading = false, //TODO
+                    searchedLabels = searchedCategoriesNames,
                     maxRows = 2,
                     onContainerClick = {},
+                    onSearchedLabelClick = {},
+                    onSearchedListEndReach = {},
                     onLabelClick = {}
                 )
                 WeightedProductsLabelContainer(
@@ -327,7 +333,7 @@ fun EditedRecipeScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp),
                     name = "Products",
-                    productDataList = uiState.products,
+                    productDataList = uiState.productsFilter,
                     searchTitle = "Products",
                     searchText = uiState.productsSearchText,
                     searchedLabels = uiState.searchedProducts,

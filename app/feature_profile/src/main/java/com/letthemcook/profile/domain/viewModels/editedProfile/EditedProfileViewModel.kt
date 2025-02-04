@@ -1,14 +1,12 @@
 package com.letthemcook.profile.domain.viewModels.editedProfile
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.data.remote.authorization.AuthManager
-import com.letthemcook.core.data.remote.file.RemoteFileManager
-import com.letthemcook.core.data.remote.user.UserManager
+import com.letthemcook.core.data.remote.AuthManager
+import com.letthemcook.core.data.remote.RemoteFileManager
+import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.media.compressBitmap
-import com.letthemcook.core.domain.media.toBytes
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.Dispatchers

@@ -1,44 +1,60 @@
 package com.letthemcook.feed.domain.viewModels.search
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.letthemcook.core.domain.model.items.CategoryItemData
-import com.letthemcook.core.domain.model.items.ProductItemData
-import com.letthemcook.core.domain.model.local.FavoredRecipe
+import com.letthemcook.core.domain.model.recipe.Category
+import com.letthemcook.core.domain.model.recipe.Product
+import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.core.domain.model.items.UserItemData
 
 data class SearchUiState(
+    // Common
+    val searchClass: SearchClass = SearchClass.RECIPE,
     val searchText: TextFieldState = TextFieldState(),
-    val searchType: SearchType = SearchType.NAME,
-    val sortType: SortType = SortType.DATE,
-    val searchedRecipes: List<FavoredRecipe> = emptyList(),
+    // Recipes
+    val loadingRecipes: Boolean = false,
+    val recipeSearchType: SearchType = SearchType.NAME,
+    val recipeSortType: SortType = SortType.DATE,
+    val searchedRecipes: List<RecipeItemData> = emptyList(),
     val resultsAmount: Int = 0,
     // Categories
+    val loadingCategories: Boolean = false,
     val categoriesSearchText: TextFieldState = TextFieldState(),
-    val categoriesFilter: List<CategoryItemData> = listOf(
-        CategoryItemData(0, "Dariya Fries"),
-        CategoryItemData(0, "Dariya Fries 1"),
-        CategoryItemData(0, "Dariya Fries  2"),
-        CategoryItemData(0, "Dariya Fries   3"),
-        CategoryItemData(0, "Dariya Fries    4"),
-        CategoryItemData(0, "Dariya Fries     5"),
-        CategoryItemData(0, "Dariya Fries      6"),
-    ),
-    val searchedCategories: List<CategoryItemData> = listOf(CategoryItemData(0, "Dariya Fries")),
+    val categoriesFilter: List<Category> = emptyList(),
+    val searchedCategories: List<Category> = emptyList(),
     // Products
+    val loadingProducts: Boolean = false,
     val productsSearchText: TextFieldState = TextFieldState(),
-    val productsFilter: List<ProductItemData> = listOf(ProductItemData(0, "Renat Tomatoes")),
-    val searchedProducts: List<ProductItemData> = listOf(ProductItemData(0, "Renat Tomatoes"))
+    val productsFilter: List<Product> = emptyList(),
+    val searchedProducts: List<Product> = emptyList(),
+    // Users
+    val loadingUsers: Boolean = false,
+    val searchedUsers: List<UserItemData> = emptyList()
 ) {
-    enum class SearchType {
-        NAME,
-        CATEGORY,
-        PRODUCTS
+    enum class SearchClass {
+        USER,
+        RECIPE
     }
 
-    enum class SortType {
-        DATE,
-        REVIEWS,
-        PREPARATIONS,
-        LIKES,
-        POPULARITY
+    enum class SearchType(val value: String) {
+        NAME("name"),
+        CATEGORY("category"),
+        PRODUCTS("products")
+    }
+
+    enum class SortType(val value: String) {
+        DATE("date"),
+        REVIEWS("reviews"),
+        PREPARATIONS("preparations"),
+        LIKES("likes"),
+        POPULARITY("popularity")
+    }
+
+    fun searchHashCode(): Int {
+        var result = searchText.hashCode()
+        result = 31 * result + recipeSearchType.hashCode()
+        result = 31 * result + recipeSortType.hashCode()
+        result = 31 * result + categoriesFilter.hashCode()
+        result = 31 * result + productsFilter.hashCode()
+        return result
     }
 }

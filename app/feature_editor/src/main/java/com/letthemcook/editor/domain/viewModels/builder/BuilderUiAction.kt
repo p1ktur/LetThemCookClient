@@ -2,7 +2,7 @@ package com.letthemcook.editor.domain.viewModels.builder
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
@@ -22,7 +22,7 @@ sealed interface BuilderUiAction {
     data object TryDemoCooking : BuilderUiAction
 
     // Products
-    data class AddProduct(val product: ProductItemData, val position: Offset) : BuilderUiAction
+    data class AddProduct(val product: Product, val position: Offset) : BuilderUiAction
 
     // Components
     data class AddUnusedComponent(val unusedBlockComponent: UnusedBlockComponent) : BuilderUiAction

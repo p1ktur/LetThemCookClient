@@ -9,8 +9,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.letthemcook.feed.domain.viewModels.savedRecipes.SavedRecipesUiAction
-import com.letthemcook.feed.domain.viewModels.savedRecipes.SavedRecipesUiState
+import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesUiAction
+import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesUiState
 import com.letthemcook.feed.ui.components.RecipeItem
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.NavBar
@@ -19,9 +19,9 @@ import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 
 @Composable
-fun SavedRecipesScreen(
-    uiState: SavedRecipesUiState,
-    onUiAction: (SavedRecipesUiAction) -> Unit
+fun FavoredRecipesScreen(
+    uiState: FavoredRecipesUiState,
+    onUiAction: (FavoredRecipesUiAction) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -32,7 +32,7 @@ fun SavedRecipesScreen(
         ToolBar(
             modifier = Modifier.fillMaxWidth(),
             onBackClick = {
-                onUiAction(SavedRecipesUiAction.NavigateBack)
+                onUiAction(FavoredRecipesUiAction.NavigateBack)
             }
         )
         LazyColumn(
@@ -40,17 +40,17 @@ fun SavedRecipesScreen(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            itemsIndexed(uiState.savedRecipes, key = { _, it -> it.id }) { index, recipeItemData ->
+            itemsIndexed(uiState.favoredRecipes, key = { _, it -> it.id }) { index, recipeItemData ->
                 RecipeItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem(),
                     recipeItemData = recipeItemData,
                     onClick = {
-                        onUiAction(SavedRecipesUiAction.NavigateToRecipe(recipeItemData.id))
+                        onUiAction(FavoredRecipesUiAction.NavigateToRecipe(recipeItemData.id))
                     }
                 )
-                if (index != uiState.savedRecipes.lastIndex) {
+                if (index != uiState.favoredRecipes.lastIndex) {
                     HorizontalDivider(color = LocalAppTheme.current.text)
                 }
             }
@@ -59,10 +59,10 @@ fun SavedRecipesScreen(
             modifier = Modifier.fillMaxWidth(),
             onHomeClick = {},
             onAddClick = {
-                onUiAction(SavedRecipesUiAction.NavigateToAddRecipe)
+                onUiAction(FavoredRecipesUiAction.NavigateToAddRecipe)
             },
             onProfileClick = {
-                onUiAction(SavedRecipesUiAction.NavigateToProfile)
+                onUiAction(FavoredRecipesUiAction.NavigateToProfile)
             }
         )
         BottomInsetSpacer()

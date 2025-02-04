@@ -2,8 +2,8 @@ package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.graphics.ImageBitmap
-import com.letthemcook.core.domain.model.items.CategoryItemData
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Category
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
 import com.letthemcook.recipe.domain.viewModels.reviews.LikeStatus
@@ -20,20 +20,12 @@ data class EditedRecipeUiState(
     val cookingTime: Long = 0L,
     // Categories
     val categoriesSearchText: TextFieldState = TextFieldState(),
-    val categories: List<CategoryItemData> = listOf(
-        CategoryItemData(0, "Dariya Fries"),
-        CategoryItemData(0, "Dariya Fries 1"),
-        CategoryItemData(0, "Dariya Fries  2"),
-        CategoryItemData(0, "Dariya Fries   3"),
-        CategoryItemData(0, "Dariya Fries    4"),
-        CategoryItemData(0, "Dariya Fries     5"),
-        CategoryItemData(0, "Dariya Fries      6"),
-    ),
-    val searchedCategories: List<CategoryItemData> = listOf(CategoryItemData(0, "Dariya Fries")),
+    val categoriesFilter: List<Category> = emptyList(),
+    val searchedCategories: List<Category> = emptyList(),
     // Products
     val productsSearchText: TextFieldState = TextFieldState(),
-    val products: List<WeightedProductItemData> = listOf(WeightedProductItemData(ProductItemData(0, "Renat Tomatoes"), 100, 2)),
-    val searchedProducts: List<ProductItemData> = listOf(ProductItemData(0, "Renat Tomatoes")),
+    val productsFilter: List<WeightedProductItemData> = emptyList(),
+    val searchedProducts: List<Product> = emptyList(),
     // Other
     val image: ImageBitmap? = null,
     val isLiked: LikeStatus = LikeStatus.NONE,

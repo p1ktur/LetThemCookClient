@@ -48,7 +48,7 @@ fun CategoriesRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = searchType == SearchUiState.SearchType.NAME,
-                    label = "Search by date",
+                    label = "Search by name",
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SearchType.NAME)
                     }
@@ -76,7 +76,7 @@ fun CategoriesRadioButtons(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterStart),
                 text = when (searchType) {
-                    SearchUiState.SearchType.NAME -> "Searching by date"
+                    SearchUiState.SearchType.NAME -> "Searching by name"
                     SearchUiState.SearchType.CATEGORY -> "Searching by category"
                     SearchUiState.SearchType.PRODUCTS -> "Searching by products"
                 },

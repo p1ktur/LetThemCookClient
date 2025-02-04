@@ -6,14 +6,14 @@ import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.items.ProductItemData
+import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
 class CanvasDragAndDropManager(
     private val canvasGlobalPosition: Offset,
-    private val unusedProducts: List<ProductItemData>,
+    private val unusedProducts: List<Product>,
     private val unusedBlockComponents: List<UnusedBlockComponent>,
     private val textMeasurer: TextMeasurer,
     private val nameTextStyle: TextStyle,

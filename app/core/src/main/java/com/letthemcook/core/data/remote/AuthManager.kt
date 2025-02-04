@@ -1,7 +1,6 @@
-package com.letthemcook.core.data.remote.authorization
+package com.letthemcook.core.data.remote
 
 import android.content.Context
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.letthemcook.core.domain.http.ClientJson
@@ -16,7 +15,6 @@ import com.letthemcook.core.domain.model.auth.tokens.TokenResponse
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.auth.tokens.TokenCheckResult
 import io.ktor.client.call.body
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.StringValues
 
@@ -173,6 +171,7 @@ class AuthManager(context: Context) {
             onResponse = { response ->
                 val tokenResponse = response.body<TokenResponse>()
 
+                setUser(tokenResponse.user)
                 setAccessToken(tokenResponse.accessToken)
                 setRefreshToken(tokenResponse.refreshToken)
 

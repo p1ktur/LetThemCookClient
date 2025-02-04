@@ -33,10 +33,11 @@ import com.letthemcook.profile.ui.components.RecipesGrid
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.NavBar
 import com.letthemcook.theme.components.bars.ToolBar
+import com.letthemcook.theme.components.buttons.TextButton
+import com.letthemcook.theme.components.images.ProfileImage
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.ui.screens.LoadingScreen
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun ProfileScreen(
@@ -98,33 +99,13 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (uiState.userImage == null) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
-                                    .clip(CircleShape)
-                                    .background(LocalAppTheme.current.screenThree),
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Profile Image",
-                                contentScale = ContentScale.FillWidth,
-                                colorFilter = ColorFilter.tint(LocalAppTheme.current.text, BlendMode.SrcAtop)
-                            )
-                        } else {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
-                                    .clip(CircleShape)
-                                    .background(LocalAppTheme.current.screenThree)
-                                    .clickable {
-                                        onUiAction(ProfileUiAction.ViewMediaFile(uiState.userImage))
-                                    },
-                                bitmap = uiState.userImage.asImageBitmap(),
-                                contentDescription = "Profile Image",
-                                contentScale = ContentScale.Crop
-                            )
-                        }
+                        ProfileImage(
+                            modifier = Modifier.fillMaxWidth(),
+                            bitmap = uiState.userImage,
+                            onClick = { bitmap ->
+                                onUiAction(ProfileUiAction.ViewMediaFile(bitmap))
+                            }
+                        )
                     }
                     Column(
                         modifier = Modifier.weight(0.3f),
@@ -153,6 +134,13 @@ fun ProfileScreen(
                 Text(
                     text = "@${uiState.user.login}",
                     style = LocalAppTheme.current.typography.bodyMedium
+                )
+                TextButton(
+                    modifier = Modifier,
+                    text = if (uiState.user.isFollowed) "Unfollow" else "Follow",
+                    onClick = {
+                        onUiAction(ProfileUiAction.FollowOrUnfollow)
+                    }
                 )
                 if (uiState.user.name != null || uiState.user.surname != null) {
                     Text(
