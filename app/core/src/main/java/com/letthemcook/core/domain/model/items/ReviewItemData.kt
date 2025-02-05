@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 
 data class ReviewItemData(
     val id: String,
-    val authorId: Int,
+    val authorId: String,
     val authorLogin: String,
     val authorBitmap: Bitmap?,
     val text: String,

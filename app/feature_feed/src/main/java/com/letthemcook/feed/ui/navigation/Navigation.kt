@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.letthemcook.core.ui.navigation.NavBarRoutes
+import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesUiAction
 import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesViewModel
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
@@ -26,7 +26,9 @@ sealed interface FeedNavRoutes {
 
 fun NavGraphBuilder.addFeedRoutes(
     navController: NavController,
-    navBarRoutes: NavBarRoutes
+    navBarRoutes: NavBarRoutes,
+    navigateToProfile: (String) -> Unit,
+    navigateToRecipe: (String) -> Unit
 ) {
     composable<FeedNavRoutes.Feed> {
         val viewModel = koinViewModel<FeedViewModel>()
@@ -36,11 +38,11 @@ fun NavGraphBuilder.addFeedRoutes(
             uiState = uiState,
             onUiAction = { action ->
                 when (action) {
-                    FeedUiAction.NavigateToProfile -> navController.navigate(navBarRoutes.profileRoute)
-                    FeedUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
+                    FeedUiAction.NavigateToProfile -> navBarRoutes.navigateToProfile()
+                    FeedUiAction.NavigateToAddRecipe -> navBarRoutes.navigateToNewRecipe()
                     FeedUiAction.NavigateToSearch -> navController.navigate(FeedNavRoutes.Search)
                     FeedUiAction.NavigateToSavedRecipes -> navController.navigate(FeedNavRoutes.FavoredRecipes)
-                    is FeedUiAction.NavigateToRecipe -> Unit //TODO recipe route!!
+                    is FeedUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
@@ -56,8 +58,8 @@ fun NavGraphBuilder.addFeedRoutes(
             onUiAction = { action ->
                 when (action) {
                     SearchUiAction.NavigateBack -> navController.navigateUp()
-                    is SearchUiAction.NavigateToRecipe -> Unit //TODO recipe route!!
-                    is SearchUiAction.NavigateToUser -> Unit //TODO user route!!
+                    is SearchUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
+                    is SearchUiAction.NavigateToUser -> navigateToProfile(action.userId)
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
@@ -73,10 +75,10 @@ fun NavGraphBuilder.addFeedRoutes(
             onUiAction = { action ->
                 when (action) {
                     FavoredRecipesUiAction.NavigateBack -> navController.navigateUp()
-                    FavoredRecipesUiAction.NavigateToFeed -> navController.navigate(navBarRoutes.homeRoute)
-                    FavoredRecipesUiAction.NavigateToProfile -> navController.navigate(navBarRoutes.profileRoute)
-                    FavoredRecipesUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
-                    is FavoredRecipesUiAction.NavigateToRecipe -> Unit //TODO recipe route!!
+                    FavoredRecipesUiAction.NavigateToFeed -> navBarRoutes.navigateToHome()
+                    FavoredRecipesUiAction.NavigateToProfile -> navBarRoutes.navigateToProfile()
+                    FavoredRecipesUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
+                    is FavoredRecipesUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
                 }
                 viewModel.onUiAction(action)
             }

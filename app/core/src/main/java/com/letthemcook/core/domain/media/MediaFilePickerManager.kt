@@ -5,16 +5,19 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.Manifest.permission.READ_MEDIA_VIDEO
 import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+import android.app.Activity.RESULT_OK
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -22,12 +25,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
 import com.letthemcook.core.data.local.files.LocalFileManager
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
-import java.io.File
+import java.io.File as JFile
 import java.util.UUID
 
 class MediaFilePickerManager(
@@ -40,6 +43,9 @@ class MediaFilePickerManager(
     // Common
     private lateinit var cameraPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
     private lateinit var mediaPermissionLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>
+
+    private lateinit var deleteFileLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+    private var onFileDeleted: ((Boolean) -> Unit)? = null
 
     private var currentFileName: String = ""
 
@@ -86,13 +92,13 @@ class MediaFilePickerManager(
                 try {
                     when (_currentFileType) {
                         FileType.IMAGE -> {
-                            val temporaryFile = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temporary.jpg")
+                            val temporaryFile = JFile(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "temporary.jpg")
                             temporaryCameraFileUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", temporaryFile)
 
                             cameraImageLauncher.launch(temporaryCameraFileUri)
                         }
                         FileType.VIDEO -> {
-                            val temporaryFile = File(context.getExternalFilesDir(Environment.DIRECTORY_MOVIES), "temporary.mp4")
+                            val temporaryFile = JFile(context.getExternalFilesDir(Environment.DIRECTORY_MOVIES), "temporary.mp4")
                             temporaryCameraFileUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", temporaryFile)
 
                             cameraVideoLauncher.launch(temporaryCameraFileUri)
@@ -144,6 +150,13 @@ class MediaFilePickerManager(
                 onReceiveMediaFile = null
             }
         }
+
+        // Delete
+        deleteFileLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            onFileDeleted?.invoke(result.resultCode == RESULT_OK)
+        }
     }
 
     fun showDialog(
@@ -167,11 +180,14 @@ class MediaFilePickerManager(
         _currentFileType = fileType
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            mediaPermissionLauncher.launch(arrayOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED))
+            val permissions = arrayOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_VISUAL_USER_SELECTED)
+            mediaPermissionLauncher.launch(permissions)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            mediaPermissionLauncher.launch(arrayOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO))
+            val permissions = arrayOf(READ_MEDIA_IMAGES, READ_MEDIA_VIDEO)
+            mediaPermissionLauncher.launch(permissions)
         } else {
-            mediaPermissionLauncher.launch(arrayOf(READ_EXTERNAL_STORAGE))
+            val permissions = arrayOf(READ_EXTERNAL_STORAGE)
+            mediaPermissionLauncher.launch(permissions)
         }
     }
 
@@ -189,7 +205,7 @@ class MediaFilePickerManager(
         localFileManager.getFileByUid(fileId)?.let { file ->
             when (file.type) {
                 FileType.IMAGE -> {
-                    val bitmap = localFileManager.getFileAsBitmap(file) ?: return false
+                    val bitmap = localFileManager.getFileBytes(file)?.toBitmap() ?: return false
                     val mediaFile = MediaFile.Image(bitmap, file)
                     onReceiveMediaFile(mediaFile)
                 }
@@ -218,12 +234,22 @@ class MediaFilePickerManager(
         }
     }
 
-    suspend fun deleteStoredFile(fileId: String): Boolean {
-        localFileManager.getFileByUid(fileId)?.let { file ->
-            localFileManager.deleteFile(file)
-        } ?: return false
+    suspend fun deleteStoredFile(fileId: String, onFileDeleted: ((Boolean) -> Unit)? = null) {
+        this.onFileDeleted = onFileDeleted
 
-        return true
+        localFileManager.getFileByUid(fileId)?.let { file ->
+            if (localFileManager.deleteFile(file, deleteFileLauncher)) {
+                onFileDeleted?.invoke(true)
+            }
+        }
+    }
+
+    suspend fun deleteStoredFile(file: File, onFileDeleted: ((Boolean) -> Unit)? = null) {
+        this.onFileDeleted = onFileDeleted
+
+        if (localFileManager.deleteFile(file, deleteFileLauncher)) {
+            onFileDeleted?.invoke(true)
+        }
     }
 
     // Private

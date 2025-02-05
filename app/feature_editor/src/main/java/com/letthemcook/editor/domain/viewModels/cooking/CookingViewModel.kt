@@ -37,6 +37,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class CookingViewModel(
+    recipeJson: String,
     private val recipeGraphSerializer: RecipeGraphSerializer
 ) : ViewModel() {
 
@@ -50,7 +51,7 @@ class CookingViewModel(
 
     init {
         viewModelScope.launch {
-            val centralComponent = recipeGraphSerializer.deserializeComponent(testCookData)
+            val centralComponent = recipeGraphSerializer.deserializeComponent(recipeJson)
             val totalTime = centralComponent.getTotalTime()
 
             _uiState.update {

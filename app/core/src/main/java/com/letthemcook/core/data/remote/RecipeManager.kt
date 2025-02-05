@@ -36,7 +36,7 @@ class RecipeManager(
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
                         userId = authManager.getUser()?.id.toString(),
-                        fileId = recipe.imageId.toString(),
+                        fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE
                     )
@@ -80,7 +80,7 @@ class RecipeManager(
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
                         userId = authManager.getUser()?.id.toString(),
-                        fileId = recipe.imageId.toString(),
+                        fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE
                     )
@@ -112,7 +112,7 @@ class RecipeManager(
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
                         userId = authManager.getUser()?.id.toString(),
-                        fileId = recipe.imageId.toString(),
+                        fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE
                     )
@@ -171,8 +171,8 @@ class RecipeManager(
         )
     }
 
-    suspend fun viewRecipe(recipeId: String) {
-        if (!authManager.checkAccessTokenAndTryRefresh()) return
+    suspend fun viewRecipe(recipeId: String): Boolean {
+        if (!authManager.checkAccessTokenAndTryRefresh()) return false
 
         return post(
             urlString = "/recipe_view",
@@ -182,13 +182,13 @@ class RecipeManager(
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
-            onResponse = { },
-            onError = { }
+            onResponse = { true },
+            onError = { false }
         )
     }
 
-    suspend fun prepareRecipe(recipeId: String) {
-        if (!authManager.checkAccessTokenAndTryRefresh()) return
+    suspend fun prepareRecipe(recipeId: String): Boolean {
+        if (!authManager.checkAccessTokenAndTryRefresh()) return false
 
         return post(
             urlString = "/recipe_prepare",
@@ -198,13 +198,13 @@ class RecipeManager(
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
-            onResponse = { },
-            onError = { }
+            onResponse = { true },
+            onError = { false }
         )
     }
 
-    suspend fun reactOnRecipe(recipeId: String, wasLiked: Boolean?, liked: Boolean?) {
-        if (!authManager.checkAccessTokenAndTryRefresh()) return
+    suspend fun reactOnRecipe(recipeId: String, wasLiked: Boolean?, liked: Boolean?): Boolean {
+        if (!authManager.checkAccessTokenAndTryRefresh()) return false
 
         return post(
             urlString = "/recipe_react",
@@ -216,8 +216,8 @@ class RecipeManager(
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
-            onResponse = { },
-            onError = { }
+            onResponse = { true },
+            onError = { false }
         )
     }
 

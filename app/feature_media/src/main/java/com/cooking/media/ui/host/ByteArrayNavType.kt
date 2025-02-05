@@ -1,4 +1,4 @@
-package com.cooking.media.ui.navigation
+package com.cooking.media.ui.host
 
 import android.net.Uri
 import android.os.Bundle

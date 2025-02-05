@@ -9,7 +9,6 @@ import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.items.UserItemData
-import com.letthemcook.core.domain.model.recipe.Category
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.StringValues
@@ -43,7 +42,7 @@ class UserManager(
                 users.map { user ->
                     val params = RemoteFileManager.RequestParams(
                         userId = authManager.getUser()?.id.toString(),
-                        fileId = user.profilePictureId.toString(),
+                        fileId = user.profileBitmapId.toString(),
                         type = FileType.IMAGE
                     )
                     val recipeImage = remoteFileManager.getFile(params)

@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import com.letthemcook.core.domain.model.recipe.Product
+import com.letthemcook.core.domain.model.recipe.WeightedProduct
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
@@ -30,14 +35,25 @@ import kotlin.math.roundToInt
 
 @Composable
 fun WeightedLabelEditPopup(
-    title: String,
-    weightText: TextFieldState,
-    amountText: TextFieldState,
+    chosenProduct: Product,
     anchorPosition: Offset,
     anchorSize: IntSize,
-    onAdd: () -> Unit,
+    onAdd: (WeightedProduct) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val weightText = remember { TextFieldState() }
+    val amountText = remember { TextFieldState() }
+
+    val weightedProduct by remember {
+        derivedStateOf {
+            WeightedProduct(
+                data = chosenProduct,
+                weight = weightText.text.toString().toIntOrNull() ?: 0,
+                amount = amountText.text.toString().toIntOrNull() ?: 0
+            )
+        }
+    }
+
     val popupPositionProvider = remember {
         object : PopupPositionProvider {
             override fun calculatePosition(
@@ -48,7 +64,7 @@ fun WeightedLabelEditPopup(
             ): IntOffset {
                 val delta = 48
 
-                return if (windowSize.height - anchorBounds.height < popupContentSize.height) {
+                return if (anchorBounds.top < windowSize.height / 2) {
                     IntOffset(
                         x = 0,
                         y = anchorPosition.y.roundToInt() + anchorSize.height - delta
@@ -79,7 +95,7 @@ fun WeightedLabelEditPopup(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Add $title",
+                text = "Add $weightedProduct",
                 style = LocalAppTheme.current.typography.bodyLarge
             )
             DigitsTextField(
@@ -100,7 +116,12 @@ fun WeightedLabelEditPopup(
             ) {
                 TextButton(
                     text = "Add",
-                    onClick = onAdd
+                    onClick = {
+                        onAdd(weightedProduct)
+
+                        weightText.clearText()
+                        amountText.clearText()
+                    }
                 )
             }
         }

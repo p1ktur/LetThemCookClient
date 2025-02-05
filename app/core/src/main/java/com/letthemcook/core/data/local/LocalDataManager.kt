@@ -1,52 +1,45 @@
 package com.letthemcook.core.data.local
 
-import com.letthemcook.core.domain.model.local.RecipeJson
-import com.letthemcook.core.domain.model.local.FavoredRecipe
-import com.letthemcook.core.domain.model.local.reactions.RecipeReaction
-import com.letthemcook.core.domain.model.local.reactions.ReviewLike
+import com.letthemcook.core.domain.model.recipe.reactions.RecipeReaction
+import com.letthemcook.core.domain.model.recipe.reactions.ReviewLike
+import com.letthemcook.core.domain.model.recipe.Recipe
 import kotlinx.coroutines.flow.Flow
 
 class LocalDataManager(
-    private val favoredRecipeDao: FavoredRecipeDao,
-    private val recipeJsonDao: RecipeJsonDao,
+    private val recipeDao: RecipeDao,
     private val recipeReactionDao: RecipeReactionDao,
     private val reviewLikeDao: ReviewLikeDao
 ) {
-    //Favored Recipes
-    suspend fun getFavoredRecipes(): List<FavoredRecipe> {
-        return favoredRecipeDao.getFavoredRecipes()
+    // Recipes
+    suspend fun getRecipes(): List<Recipe> {
+        return recipeDao.getRecipes()
     }
 
-    suspend fun getFavoredRecipe(recipeId: String): FavoredRecipe? {
-        return favoredRecipeDao.getFavoredRecipeById(recipeId)
+    suspend fun getRecipe(recipeId: String): Recipe? {
+        return recipeDao.getRecipeById(recipeId)
+    }
+
+    suspend fun getFavoredRecipes(): List<Recipe> {
+        return recipeDao.getFavoredRecipes()
+    }
+
+    suspend fun getFavoredRecipe(recipeId: String): Recipe? {
+        return recipeDao.getFavoredRecipeById(recipeId)
     }
 
     fun getFavoredRecipesAmount(): Flow<Int> {
-        return favoredRecipeDao.getFavoredRecipesAmount()
+        return recipeDao.getFavoredRecipesAmount()
     }
 
-    suspend fun saveFavoredRecipe(favoredRecipe: FavoredRecipe) {
-        favoredRecipeDao.upsertFavoredRecipe(favoredRecipe)
+    suspend fun saveRecipe(recipe: Recipe) {
+        recipeDao.upsertRecipe(recipe)
     }
 
-    suspend fun deleteFavoredRecipe(favoredRecipe: FavoredRecipe) {
-        favoredRecipeDao.deleteFavoredRecipe(favoredRecipe)
+    suspend fun deleteRecipe(recipe: Recipe) {
+        recipeDao.deleteRecipe(recipe)
     }
 
-    //Built Recipes
-    suspend fun getRecipeJson(recipeId: String): String? {
-        return recipeJsonDao.getRecipeJsonById(recipeId)?.jsonString
-    }
-
-    suspend fun saveRecipeJson(recipeId: String, jsonString: String) {
-        recipeJsonDao.upsertRecipeJson(RecipeJson(recipeId, jsonString))
-    }
-
-    suspend fun deleteRecipeJson(recipeId: String, jsonString: String) {
-        recipeJsonDao.deleteRecipeJson(RecipeJson(recipeId, jsonString))
-    }
-
-    //Recipe Reactions
+    // Recipe Reactions
     suspend fun getRecipeReaction(recipeId: String): RecipeReaction? {
         return recipeReactionDao.getRecipeReactionByRecipeId(recipeId)
     }
@@ -59,7 +52,7 @@ class LocalDataManager(
         recipeReactionDao.deleteRecipeReaction(recipeReaction)
     }
 
-    //Recipe Reviews
+    // Recipe Reviews
     suspend fun getReviewLike(reviewId: String): ReviewLike? {
         return reviewLikeDao.getReviewLikeByReviewId(reviewId)
     }

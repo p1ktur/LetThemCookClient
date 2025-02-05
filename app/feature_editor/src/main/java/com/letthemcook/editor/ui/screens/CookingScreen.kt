@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
@@ -18,12 +19,26 @@ import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 @Composable
 fun CookingScreen(
     uiState: CookingUiState,
     onUiAction: (CookingUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setToolBarStatusText("Recipe name") //TODO
+            setOnToolBarBackClick { onUiAction(CookingUiAction.NavigateBack) }
+
+            setShowNavigationBar(false)
+        }
+    }
+
     val textMeasurer = rememberTextMeasurer()
     val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
     val blockComponentNameTextStyle = MaterialTheme.typography.bodyLarge
@@ -34,14 +49,6 @@ fun CookingScreen(
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            barText = "Recipe name",
-            onBackClick = {
-                onUiAction(CookingUiAction.NavigateBack)
-            }
-        )
         CookingControlPanel(
             uiState = uiState,
             onUiAction = onUiAction
@@ -58,6 +65,5 @@ fun CookingScreen(
             blockComponentContentTextStyle = blockComponentContentTextStyle,
             onUiAction = onUiAction
         )
-        BottomInsetSpacer(color = LocalAppTheme.current.screenThree)
     }
 }

@@ -12,6 +12,6 @@ data class RecipeItemData(
     val reviewsAmount: Int,
     val preparationsAmount: Int,
     val description: String,
-    val publicationDate: LocalDateTime,
+    val publicationDate: LocalDateTime?,
     val bitmap: Bitmap? = null
 )

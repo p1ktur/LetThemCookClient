@@ -8,33 +8,38 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesUiAction
 import com.letthemcook.feed.domain.viewModels.favoredRecipes.FavoredRecipesUiState
 import com.letthemcook.feed.ui.components.RecipeItem
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.NavBar
-import com.letthemcook.theme.components.bars.ToolBar
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 @Composable
 fun FavoredRecipesScreen(
     uiState: FavoredRecipesUiState,
     onUiAction: (FavoredRecipesUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setOnToolBarBackClick { onUiAction(FavoredRecipesUiAction.NavigateBack) }
+
+            setShowNavigationBar(true)
+            setOnNavigateToNewRecipe { onUiAction(FavoredRecipesUiAction.NavigateToNewRecipe) }
+            setOnNavigateToProfile { onUiAction(FavoredRecipesUiAction.NavigateToProfile) }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            onBackClick = {
-                onUiAction(FavoredRecipesUiAction.NavigateBack)
-            }
-        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -55,16 +60,5 @@ fun FavoredRecipesScreen(
                 }
             }
         }
-        NavBar(
-            modifier = Modifier.fillMaxWidth(),
-            onHomeClick = {},
-            onAddClick = {
-                onUiAction(FavoredRecipesUiAction.NavigateToAddRecipe)
-            },
-            onProfileClick = {
-                onUiAction(FavoredRecipesUiAction.NavigateToProfile)
-            }
-        )
-        BottomInsetSpacer()
     }
 }

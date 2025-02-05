@@ -27,7 +27,7 @@ class EditedProfileViewModel(
 
     fun onUiAction(action: EditedProfileUiAction) {
         when (action) {
-            EditedProfileUiAction.NavigateToAddRecipe -> Unit
+            EditedProfileUiAction.NavigateToNewRecipe -> Unit
             EditedProfileUiAction.NavigateBack -> Unit
             EditedProfileUiAction.NavigateToHome -> Unit
             EditedProfileUiAction.NavigateToSettings -> Unit
@@ -39,7 +39,7 @@ class EditedProfileViewModel(
             EditedProfileUiAction.ChangePassword -> Unit
 
             EditedProfileUiAction.UpdateUserData -> updateProfileData()
-            is EditedProfileUiAction.UpdateProfilePicture -> updateProfilePicture(action.fileId, action.bitmap)
+            is EditedProfileUiAction.UpdateProfileBitmap -> updateProfileBitmap(action.fileId, action.bitmap)
         }
     }
 
@@ -63,11 +63,12 @@ class EditedProfileViewModel(
         }
     }
 
-    private fun updateProfilePicture(fileId: String, bitmap: Bitmap) {
-        if (uiState.value.user.profilePictureId == null) {
+    private fun updateProfileBitmap(fileId: String, bitmap: Bitmap) {
+        if (uiState.value.user.profileBitmapId == null || uiState.value.userBitmap == null) {
             _uiState.update {
                 it.copy(
-                    user = it.user.copy(profilePictureId = fileId)
+                    user = it.user.copy(profileBitmapId = fileId),
+                    userBitmap = bitmap
                 )
             }
         }

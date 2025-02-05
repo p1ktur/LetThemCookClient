@@ -27,7 +27,6 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.model.items.RecipeItemData
-import com.letthemcook.core.domain.model.local.FavoredRecipe
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable

@@ -75,6 +75,7 @@ import com.letthemcook.theme.components.labels.LabelIcon
 import com.letthemcook.theme.components.labels.LabelItem
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -83,6 +84,19 @@ fun BuilderScreen(
     uiState: BuilderUiState,
     onUiAction: (BuilderUiAction) -> Any?
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setToolBarStatusText("Recipe name") //TODO
+            setOnToolBarBackClick { onUiAction(BuilderUiAction.NavigateBack) }
+
+            setShowNavigationBar(false)
+        }
+    }
+
     val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
     mediaFilePickerManager.RegisterLaunchers()
 
@@ -126,14 +140,6 @@ fun BuilderScreen(
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            barText = "Recipe name",
-            onBackClick = {
-                onUiAction(BuilderUiAction.NavigateBack)
-            }
-        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -342,7 +348,6 @@ fun BuilderScreen(
                 isOutlined = true
             )
         }
-        BottomInsetSpacer(color = LocalAppTheme.current.screenThree)
     }
 
     BlockEditorPopup(

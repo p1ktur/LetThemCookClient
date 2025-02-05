@@ -1,13 +1,14 @@
 package com.letthemcook.app
 
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -15,20 +16,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.cooking.media.ui.navigation.MediaNavRoutes
-import com.cooking.media.ui.navigation.addMediaRoutes
+import com.cooking.media.ui.host.MediaNavRoutes
+import com.letthemcook.theme.ui.navigation.MediaViewerAccess
+import com.cooking.media.ui.host.MediaViewerHost
 import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
 import com.letthemcook.core.data.remote.AuthManager
-import com.letthemcook.core.domain.media.toBytes
 import com.letthemcook.core.domain.model.auth.tokens.TokenCheckResult
-import com.letthemcook.core.domain.model.file.File
-import com.letthemcook.core.ui.navigation.NavBarRoutes
 import com.letthemcook.editor.ui.navigation.EditorNavRoutes
 import com.letthemcook.editor.ui.navigation.addEditorRoutes
 import com.letthemcook.feed.ui.navigation.FeedNavRoutes
@@ -42,23 +41,32 @@ import com.letthemcook.theme.base.Theme
 import com.letthemcook.theme.language.Language
 import com.letthemcook.theme.providers.LanguageStateProvider
 import com.letthemcook.theme.providers.ThemeStateProvider
+import com.letthemcook.theme.screensContainer.ScreensContainer
+import com.letthemcook.theme.ui.navigation.CookingRoutes
+import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import com.letthemcook.theme.ui.screens.LoadingScreen
 import org.koin.android.ext.android.inject
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var navController: NavHostController
+
     private val navBarRoutes = NavBarRoutes(
-        homeRoute = FeedNavRoutes.Feed,
-        addRoute = RecipeNavRoutes.EditedRecipe(null),
-        profileRoute = ProfileNavRoutes.EditedProfile
-//        profileRoute = ProfileNavRoutes.Profile("aa6cc1f7-a6d9-4de1-87dd-3fa62095dd3b")
+        navigateToHome = { navController.navigate(FeedNavRoutes.Feed) },
+        navigateToNewRecipe = { navController.navigate(RecipeNavRoutes.EditedRecipe(null)) },
+        navigateToProfile = { navController.navigate(ProfileNavRoutes.EditedProfile) }
+    )
+
+    private val cookingRoutes = CookingRoutes(
+        navigateToEditor = { navController.navigate(EditorNavRoutes.Builder(it)) },
+        navigateToCooking = { navController.navigate(EditorNavRoutes.Cooking(it)) }
     )
 
     private val authManager by inject<AuthManager>()
 
+    //TODO move media picker dialog onto screenContainer
     //TODO limits on blocks and products and categories
-    //TODO move toolbar and navbar to here
     //TODO check file sizes upon choosing them
     //TODO check internet connection on start and allow offline usage?
 
@@ -71,11 +79,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isLoggedIn = remember { mutableStateOf<Boolean?>(null) }
 
-            val navController = rememberNavController()
+            navController = rememberNavController()
             val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
             val theme by themeStateProvider.getTheme().collectAsState(Theme.LIGHT)
             val language by languageStateProvider.getLanguage().collectAsState(Language.ENGLISH)
+
+            val mediaViewerAccess = remember { mutableStateOf(MediaViewerAccess.Dummy) }
 
             LaunchedEffect(language) {
                 setLocale(
@@ -87,6 +97,8 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(currentBackStackEntry) {
+                mediaViewerAccess.value.stopViewing()
+
                 try {
                     val route = currentBackStackEntry?.toRoute<MediaNavRoutes.MediaViewerForLocal>()
 
@@ -109,40 +121,45 @@ class MainActivity : ComponentActivity() {
                             if (isLoggedIn.value == true) FeedNavRoutes.Feed else AuthNavRoutes.Login
                         }
 
-                        NavHost(
-                            navController = navController,
-                            startDestination = startDestination
-                        ) {
-                            addAuthRoutes(
+                        ScreensContainer {
+                            NavHost(
                                 navController = navController,
-                                logInRoute = FeedNavRoutes.Feed
-                            )
-                            addProfileRoutes(
-                                navController = navController,
-                                logOutRoute = AuthNavRoutes.Login,
-                                navBarRoutes = navBarRoutes,
-                                onViewRecipe = { navController.navigate(RecipeNavRoutes.Recipe(it)) },
-                                onViewMediaLocal = { viewMedia(navController, it) },
-                                onViewMediaImage = { viewMedia(navController, it) }
-                            )
-                            addFeedRoutes(
-                                navController = navController,
-                                navBarRoutes = navBarRoutes
-                            )
-                            addRecipeRoutes(
-                                navController = navController,
-                                navBarRoutes = navBarRoutes,
-                                editorRoute = EditorNavRoutes.Builder,
-                                cookingRoute = EditorNavRoutes.Cooking,
-                                onViewMedia = { viewMedia(navController, it) }
-                            )
-                            addEditorRoutes(
-                                navController = navController,
-                                onViewMedia = { viewMedia(navController, it) }
-                            )
-                            addMediaRoutes(
-                                navController = navController
-                            )
+                                startDestination = startDestination,
+                                enterTransition = { EnterTransition.None },
+                                popEnterTransition = { EnterTransition.None },
+                                exitTransition = { ExitTransition.None },
+                                popExitTransition = { ExitTransition.None }
+                            ) {
+                                addAuthRoutes(
+                                    navController = navController,
+                                    logInRoute = FeedNavRoutes.Feed
+                                )
+                                addProfileRoutes(
+                                    navController = navController,
+                                    logOutRoute = AuthNavRoutes.Login,
+                                    navBarRoutes = navBarRoutes,
+                                    mediaViewerAccessState = mediaViewerAccess,
+                                    navigateToRecipe = ::navigateToRecipe
+                                )
+                                addFeedRoutes(
+                                    navController = navController,
+                                    navBarRoutes = navBarRoutes,
+                                    navigateToProfile = ::navigateToProfile,
+                                    navigateToRecipe = ::navigateToRecipe
+                                )
+                                addRecipeRoutes(
+                                    navController = navController,
+                                    navBarRoutes = navBarRoutes,
+                                    cookingRoutes = cookingRoutes,
+                                    mediaViewerAccessState = mediaViewerAccess,
+                                    navigateToProfile = ::navigateToProfile
+                                )
+                                addEditorRoutes(
+                                    navController = navController,
+                                    mediaViewerAccessState = mediaViewerAccess
+                                )
+                            }
+                            MediaViewerHost(mediaViewerAccess)
                         }
                     }
                     null -> {
@@ -153,12 +170,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun viewMedia(navController: NavController, file: File) {
-        navController.navigate(MediaNavRoutes.MediaViewerForLocal(file))
+    private fun navigateToRecipe(recipeId: String) {
+        navController.navigate(RecipeNavRoutes.Recipe(recipeId))
     }
 
-    private fun viewMedia(navController: NavController, bitmap: Bitmap) {
-        navController.navigate(MediaNavRoutes.MediaViewerImage(bitmap.toBytes()))
+    private fun navigateToProfile(userId: String) {
+        navController.navigate(ProfileNavRoutes.Profile(userId))
     }
 
     private fun setLocale(language: String) {

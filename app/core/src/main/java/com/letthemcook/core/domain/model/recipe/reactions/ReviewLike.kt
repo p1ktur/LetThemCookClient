@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.model.local.reactions
+package com.letthemcook.core.domain.model.recipe.reactions
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

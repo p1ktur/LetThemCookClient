@@ -3,9 +3,9 @@ package com.letthemcook.recipe.domain.viewModels.recipe
 sealed interface RecipeUiAction {
     data object NavigateBack : RecipeUiAction
     data object NavigateToHome : RecipeUiAction
-    data object NavigateToAddRecipe : RecipeUiAction
+    data object NavigateToNewRecipe : RecipeUiAction
     data object NavigateToProfile : RecipeUiAction
-    data class NavigateToOtherProfile(val id: Int) : RecipeUiAction
+    data class NavigateToOtherProfile(val userId: String) : RecipeUiAction
 
     data object Save : RecipeUiAction
     data object RemoveFromSaved : RecipeUiAction

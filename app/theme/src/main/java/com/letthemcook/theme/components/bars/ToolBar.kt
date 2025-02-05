@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -30,7 +31,8 @@ import com.letthemcook.theme.base.LocalAppTheme
 @Composable
 fun ToolBar(
     modifier: Modifier = Modifier,
-    barText: String? = null,
+    color: Color = LocalAppTheme.current.screenThree,
+    statusText: String? = null,
     onBackClick: (() -> Unit)? = null,
     onSettingsClick: (() -> Unit)? = null,
     onSearchClick: (() -> Unit)? = null
@@ -40,7 +42,7 @@ fun ToolBar(
     Row(
         modifier = modifier
             .height(48.dp)
-            .background(LocalAppTheme.current.screenThree)
+            .background(color)
             .drawBehind {
                 drawLine(
                     color = contentColor,
@@ -96,9 +98,9 @@ fun ToolBar(
             )
         } else {
             Text(
-                text = barText ?: stringResource(com.letthemcook.theme.R.string.app_name),
+                text = statusText ?: stringResource(com.letthemcook.theme.R.string.app_name),
                 style = LocalAppTheme.current.typography.titleMedium,
-                fontFamily = if (barText == null) FontFamily(Font(com.letthemcook.theme.R.font.kaushan_script)) else null
+                fontFamily = if (statusText == null) FontFamily(Font(com.letthemcook.theme.R.font.kaushan_script)) else null
             )
         }
     }

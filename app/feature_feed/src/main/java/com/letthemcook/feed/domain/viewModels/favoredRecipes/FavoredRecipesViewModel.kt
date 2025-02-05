@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.data.local.files.LocalFileManager
+import com.letthemcook.core.domain.media.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +24,10 @@ class FavoredRecipesViewModel(
             val recipes = localDataManager
                 .getFavoredRecipes()
                 .map { recipe ->
-                    val bitmap = recipe.imageFile?.let {
-                        localFileManager.getFileAsBitmap(it)
+                    val bitmap = recipe.bitmapId?.let {
+                        localFileManager.getFileByUid(it)?.let { file ->
+                            localFileManager.getFileBytes(file)?.toBitmap()
+                        }
                     }
 
                     recipe.asItemData(bitmap)
@@ -42,7 +45,7 @@ class FavoredRecipesViewModel(
         when (action) {
             FavoredRecipesUiAction.NavigateBack -> Unit
             FavoredRecipesUiAction.NavigateToFeed -> Unit
-            FavoredRecipesUiAction.NavigateToAddRecipe -> Unit
+            FavoredRecipesUiAction.NavigateToNewRecipe -> Unit
             FavoredRecipesUiAction.NavigateToProfile -> Unit
             is FavoredRecipesUiAction.NavigateToRecipe -> Unit
         }

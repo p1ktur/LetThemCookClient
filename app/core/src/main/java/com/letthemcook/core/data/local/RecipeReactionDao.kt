@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.letthemcook.core.domain.model.local.reactions.RecipeReaction
+import com.letthemcook.core.domain.model.recipe.reactions.RecipeReaction
 
 @Dao
 interface RecipeReactionDao {

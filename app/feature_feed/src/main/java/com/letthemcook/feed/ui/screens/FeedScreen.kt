@@ -35,16 +35,27 @@ import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiState
 import com.letthemcook.feed.ui.components.RecipeItem
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.NavBar
-import com.letthemcook.theme.components.bars.ToolBar
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 @Composable
 fun FeedScreen(
     uiState: FeedUiState,
     onUiAction: (FeedUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setOnToolBarSearchClick { onUiAction(FeedUiAction.NavigateToSearch) }
+
+            setShowNavigationBar(true)
+            setOnNavigateToNewRecipe { onUiAction(FeedUiAction.NavigateToAddRecipe) }
+            setOnNavigateToProfile { onUiAction(FeedUiAction.NavigateToProfile) }
+        }
+    }
+
     val columnLazyListState = rememberLazyListState()
 
     val isScrolledToBottom by remember {
@@ -64,13 +75,6 @@ fun FeedScreen(
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            onSearchClick = {
-                onUiAction(FeedUiAction.NavigateToSearch)
-            }
-        )
         if (uiState.recipes.isEmpty()) {
             if (uiState.favoredRecipesAmount > 0) {
                 Row(
@@ -190,17 +194,5 @@ fun FeedScreen(
                 }
             }
         }
-
-        NavBar(
-            modifier = Modifier.fillMaxWidth(),
-            onHomeClick = {},
-            onAddClick = {
-                onUiAction(FeedUiAction.NavigateToAddRecipe)
-            },
-            onProfileClick = {
-                onUiAction(FeedUiAction.NavigateToProfile)
-            }
-        )
-        BottomInsetSpacer()
     }
 }

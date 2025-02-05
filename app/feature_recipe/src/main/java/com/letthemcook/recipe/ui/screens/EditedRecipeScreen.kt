@@ -1,7 +1,6 @@
 package com.letthemcook.recipe.ui.screens
 
-import android.graphics.Bitmap
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -10,25 +9,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
@@ -41,52 +38,75 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
-import com.letthemcook.core.domain.model.file.getRecipeFilesPrefix
-import com.letthemcook.core.domain.model.file.getRecipePictureFileName
-import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
-import com.letthemcook.recipe.ui.components.ReviewItem
+import com.letthemcook.recipe.domain.viewModels.editedRecipe.SaveStatus
+import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import com.letthemcook.recipe.ui.components.dialogs.ReviewTextFieldDialog
 import com.letthemcook.recipe.ui.components.popups.WeightedProductsLabelContainer
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.NavBar
-import com.letthemcook.theme.components.bars.ToolBar
+import com.letthemcook.theme.components.buttons.IconButton
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
+import com.letthemcook.theme.components.images.RecipeImage
 import com.letthemcook.theme.components.labels.EditedLabelContainer
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
-import com.letthemcook.theme.components.textFields.BorderlessTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
+import com.letthemcook.theme.components.textFields.SingleLineTextField
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import java.util.UUID
 
 @Composable
 fun EditedRecipeScreen(
     uiState: EditedRecipeUiState,
-    reviewsUiState: ReviewsUiState,
     onUiAction: (EditedRecipeUiAction) -> Unit
 ) {
-    // Media
-    val recipePictureName = getRecipePictureFileName(uiState.id)
-    val recipeFileName = getRecipeFilesPrefix(uiState.id)
-    var recipePictureBitmap: Bitmap? by remember { mutableStateOf(null) }
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
 
+            setShowToolBar(true)
+            setOnToolBarBackClick { onUiAction(EditedRecipeUiAction.NavigateBack) }
+
+            setShowNavigationBar(true)
+            setOnNavigateToNewRecipe {
+                if (!uiState.recipeIsNew) {
+                    onUiAction(EditedRecipeUiAction.NavigateToNewRecipe)
+                }
+            }
+            setOnNavigateToProfile { onUiAction(EditedRecipeUiAction.NavigateToProfile) }
+        }
+    }
+
+    LaunchedEffect(uiState.saveStatus) {
+        screenContainer.setToolBarStatusText(
+            value = when (uiState.saveStatus) {
+                SaveStatus.NO_CHANGES -> null
+                SaveStatus.NOT_SAVED -> "Not saved"
+                SaveStatus.SAVING -> "Saving..."
+                SaveStatus.SAVED -> "Saved"
+            }
+        )
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    // Media
     val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
     mediaFilePickerManager.RegisterLaunchers()
 
@@ -95,11 +115,15 @@ fun EditedRecipeScreen(
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            mediaFilePickerManager.getStoredFile(recipePictureName) {
-                recipePictureBitmap = (it as? MediaFile.Image)?.bitmap
+            uiState.recipeBitmapId?.let { fileId ->
+                mediaFilePickerManager.getStoredFile(fileId) { file ->
+                    (file as? MediaFile.Image)?.let { mediaFile ->
+                        onUiAction(EditedRecipeUiAction.UpdateRecipeBitmap(fileId, mediaFile.bitmap))
+                    }
+                }
             }
 
-            mediaFilePickerManager.getStoredFilesIndexed(recipeFileName, 0) {
+            mediaFilePickerManager.getStoredFilesIndexed(uiState.recipeId, 0) {
                 onUiAction(EditedRecipeUiAction.AddFile(it.file))
             }
         }
@@ -108,311 +132,385 @@ fun EditedRecipeScreen(
     val categoriesFilterNames = remember(uiState.categoriesFilter) { uiState.categoriesFilter.map { it.name } }
     val searchedCategoriesNames = remember(uiState.searchedCategories) { uiState.searchedCategories.map { it.name } }
 
+    // TODO add save button to save changes
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            onBackClick = {
-                onUiAction(EditedRecipeUiAction.NavigateBack)
-            }
-        )
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(rememberScrollState()), // TODO nested scroll!!
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(top = 12.dp)
         ) {
             Box(
+                modifier = Modifier.size(140.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                RecipeImage(
+                    modifier = Modifier.width(120.dp),
+                    bitmap = uiState.recipeBitmap,
+                    clipToRoundedRect = true,
+                    onClick = { bitmap ->
+                        onUiAction(EditedRecipeUiAction.ViewRecipeBitmap(bitmap))
+                    }
+                )
+                IconButton(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.BottomEnd),
+                    icon = Icons.Outlined.AddAPhoto,
+                    onClick = {
+                        val fileId = uiState.recipeBitmapId ?: UUID.randomUUID().toString()
+                        mediaFilePickerManager.showDialog(FileType.IMAGE, fileId) {
+                            (it as? MediaFile.Image)?.let { mediaFile ->
+                                onUiAction(EditedRecipeUiAction.UpdateRecipeBitmap(fileId, mediaFile.bitmap))
+                            }
+                        }
+                    }
+                )
+            }
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(5f / 4f)
+                    .padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    bitmap = recipePictureBitmap?.asImageBitmap()
-                        ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
-                    contentDescription = "Recipe Image",
-                    contentScale = ContentScale.FillBounds
+                SingleLineTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = uiState.name,
+                    labelText = "Name",
+                    placeholderText = "Type name"
                 )
-                Icon(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            if (uiState.isPublished) {
+                Text(
+                    text = if (uiState.publicationDate == null) {
+                        "Archived"
+                    } else {
+                        "Published: ${uiState.publicationDate.prettyString()}"
+                    },
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(
+                        modifier = Modifier.size(120.dp, 40.dp),
+                        text = if (uiState.publicationDate != null) {
+                            "Unpublish"
+                        } else {
+                            "Publish"
+                        },
+                        onClick = {
+                            if (uiState.publicationDate != null) {
                                 onUiAction(EditedRecipeUiAction.Archive)
                             } else {
                                 onUiAction(EditedRecipeUiAction.Publish)
                             }
                         }
-                        .padding(8.dp)
-                        .align(Alignment.TopEnd),
-                    imageVector = if (uiState.isPublished) {
-                        Icons.Default.Archive
-                    } else {
-                        Icons.Default.Publish
-                    },
-                    contentDescription = "Publish Button",
-                    tint = LocalAppTheme.current.text
-                )
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.BottomStart),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = uiState.authorLogin,
-                        style = LocalAppTheme.current.typography.bodyMedium
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        BorderlessTextField(
-                            modifier = Modifier.weight(1f),
-                            state = uiState.name,
-                            placeholderText = "Type name"
-                        )
+                    if (uiState.saveStatus == SaveStatus.NOT_SAVED) {
                         Icon(
                             modifier = Modifier
                                 .size(40.dp)
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(6.dp))
                                 .clickable {
-                                    mediaFilePickerManager.showDialog(FileType.IMAGE, recipePictureName) {
-                                        recipePictureBitmap = (it as? MediaFile.Image)?.bitmap
-                                    }
-                                }
-                                .padding(8.dp),
-                            imageVector = Icons.Outlined.AddAPhoto,
-                            contentDescription = "Camera Button",
+                                    onUiAction(EditedRecipeUiAction.SaveChanges)
+                                },
+                            imageVector = Icons.Outlined.Save,
+                            contentDescription = "Save Icon",
                             tint = LocalAppTheme.current.text
-                        )
-                    }
-                }
-                TextButton(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .align(Alignment.TopCenter),
-                    text = "Edit recipe",
-                    onClick = {
-                        onUiAction(EditedRecipeUiAction.StartEditing)
-                    }
-                )
-            }
-            HorizontalDivider(color = LocalAppTheme.current.text)
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = uiState.dislikesAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Outlined.ThumbDown,
-                    contentDescription = "Dislikes Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Outlined.ThumbUp,
-                    contentDescription = "Likes Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Text(
-                    text = uiState.likesAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = uiState.preparationsAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
-                    contentDescription = "Preparations Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    imageVector = Icons.AutoMirrored.Outlined.Comment,
-                    contentDescription = "Reviews Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Text(
-                    text = uiState.reviewsAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
-            }
-            MultiLineTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                state = uiState.description,
-                labelText = "Description"
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                uiState.files.forEach { file ->
-                    Icon(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .clickable {
-                                onUiAction(EditedRecipeUiAction.ViewMediaFile(file))
-                            }
-                            .padding(4.dp),
-                        imageVector = when (file.type) {
-                            FileType.IMAGE -> Icons.Outlined.Image
-                            FileType.VIDEO -> Icons.Outlined.VideoFile
-                            FileType.ANY -> Icons.Outlined.FilePresent
-                        },
-                        contentDescription = "File Icon",
-                        tint = LocalAppTheme.current.text
-                    )
-                }
-                // TODO make delete files
-                Icon(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable {
-                            mediaFilePickerManager.showDialog(FileType.ANY, recipeFileName + uiState.files.size) {
-                                onUiAction(EditedRecipeUiAction.AddFile(it.file))
-                            }
-                        }
-                        .padding(4.dp),
-                    imageVector = Icons.Outlined.AttachFile,
-                    contentDescription = "Attach File Icon",
-                    tint = LocalAppTheme.current.text
-                )
-            }
-            HorizontalDivider(color = LocalAppTheme.current.text)
-            Column {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "Cooking time: " + uiState.cookingTime.toShortTimeString(),
-                    style = LocalAppTheme.current.typography.bodyLarge
-                )
-                EditedLabelContainer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    name = "Categories",
-                    labels = categoriesFilterNames,
-                    searchTitle = "Categories",
-                    searchText = uiState.categoriesSearchText,
-                    isLoading = false, //TODO
-                    searchedLabels = searchedCategoriesNames,
-                    maxRows = 2,
-                    onContainerClick = {},
-                    onSearchedLabelClick = {},
-                    onSearchedListEndReach = {},
-                    onLabelClick = {}
-                )
-                WeightedProductsLabelContainer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    name = "Products",
-                    productDataList = uiState.productsFilter,
-                    searchTitle = "Products",
-                    searchText = uiState.productsSearchText,
-                    searchedLabels = uiState.searchedProducts,
-                    maxRows = 2,
-                    onLabelCreate = { data ->
-                        onUiAction(EditedRecipeUiAction.AddWeightedProduct(data))
-                    },
-                    onContainerClick = {},
-                    onLabelClick = {}
-                )
-                // Provide db of categories and products from server and change text in zvit
-            }
-            if (uiState.isPublished) {
-                HorizontalDivider(color = LocalAppTheme.current.text)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Reviews",
-                        style = LocalAppTheme.current.typography.bodyMedium
-                    )
-                    Icon(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                isReviewTextFieldDialogShown = true
-                            }
-                            .padding(4.dp),
-                        imageVector = Icons.Outlined.AddAPhoto,
-                        contentDescription = "Camera Button",
-                        tint = LocalAppTheme.current.text
-                    )
-                }
-                // TODO add nested scroll
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    items(reviewsUiState.reviews, key = { it.id }) { reviewData ->
-                        ReviewItem(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateItem(),
-                            reviewItemData = reviewData,
-                            onProfileClick = {
-                                onUiAction(EditedRecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
-                            },
-                            onLikeClick = {
-                                if (reviewData.isLiked) {
-                                    onUiAction(EditedRecipeUiAction.DislikeReview(reviewData.id))
-                                } else {
-                                    onUiAction(EditedRecipeUiAction.LikeReview(reviewData.id))
-                                }
-                            }
                         )
                     }
                 }
             }
         }
-        NavBar(
-            modifier = Modifier.fillMaxWidth(),
-            onHomeClick = {
-                onUiAction(EditedRecipeUiAction.NavigateToHome)
+        Text(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            text = if (uiState.cookingTime != null) {
+                "Cooking time: " + uiState.cookingTime.toShortTimeString()
+            } else {
+                "No cooking yet"
             },
-            onAddClick = {},
-            onProfileClick = {
-                onUiAction(EditedRecipeUiAction.NavigateToProfile)
+            style = LocalAppTheme.current.typography.bodyLarge
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            TextButton(
+                modifier = Modifier.size(120.dp, 40.dp),
+                text = "Edit",
+                onClick = {
+                    onUiAction(EditedRecipeUiAction.EditCooking(uiState.recipeJson))
+                }
+            )
+            if (uiState.recipeJson != null) {
+                TextButton(
+                    modifier = Modifier.size(120.dp, 40.dp),
+                    text = "Cook",
+                    onClick = {
+                        onUiAction(EditedRecipeUiAction.Cook(uiState.recipeJson))
+                    }
+                )
+            }
+        }
+        HorizontalDivider(color = LocalAppTheme.current.text)
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = uiState.dislikesAmount.toString(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.ThumbDown,
+                contentDescription = "Dislikes Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.ThumbUp,
+                contentDescription = "Likes Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = uiState.likesAmount.toString(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = uiState.preparationsAmount.toString(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                contentDescription = "Preparations Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.AutoMirrored.Outlined.Comment,
+                contentDescription = "Reviews Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = uiState.reviewsAmount.toString(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+        }
+        MultiLineTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            state = uiState.description,
+            labelText = "Description",
+            placeholderText = "Type description"
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            text = "Attachments",
+            style = LocalAppTheme.current.typography.bodyMedium
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable {
+                        mediaFilePickerManager.showDialog(FileType.ANY, UUID.randomUUID().toString()) {
+                            onUiAction(EditedRecipeUiAction.AddFile(it.file))
+                        }
+                    }
+                    .padding(4.dp),
+                imageVector = Icons.Outlined.AttachFile,
+                contentDescription = "Attach File Icon",
+                tint = LocalAppTheme.current.text
+            )
+            uiState.attachments.forEachIndexed { index, file ->
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            onUiAction(EditedRecipeUiAction.SelectMediaFile(index))
+                        }
+                        .padding(4.dp),
+                    imageVector = when (file.type) {
+                        FileType.IMAGE -> Icons.Outlined.Image
+                        FileType.VIDEO -> Icons.Outlined.VideoFile
+                        FileType.ANY -> Icons.Outlined.FilePresent
+                    },
+                    contentDescription = "File Icon",
+                    tint = LocalAppTheme.current.text
+                )
+            }
+        }
+        uiState.selectedAttachment?.let { attachment ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = when (attachment.type) {
+                        FileType.IMAGE -> "Image"
+                        FileType.VIDEO -> "Video"
+                        FileType.ANY -> "File"
+                    },
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            onUiAction(EditedRecipeUiAction.ViewMediaFile(attachment))
+                        }
+                        .padding(4.dp),
+                    imageVector = when (attachment.type) {
+                        FileType.IMAGE -> Icons.Outlined.Image
+                        FileType.VIDEO -> Icons.Outlined.VideoFile
+                        FileType.ANY -> Icons.Outlined.FilePresent
+                    },
+                    contentDescription = "View File Icon",
+                    tint = LocalAppTheme.current.text
+                )
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            val index = uiState.attachments.indexOf(attachment)
+
+                            coroutineScope.launch(Dispatchers.IO) {
+                                mediaFilePickerManager.deleteStoredFile(attachment) { wasDeleted ->
+                                    if (wasDeleted) onUiAction(EditedRecipeUiAction.DeleteFile(index))
+                                }
+                            }
+                        }
+                        .padding(4.dp),
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete File Icon",
+                    tint = LocalAppTheme.current.text
+                )
+            }
+        }
+        HorizontalDivider(color = LocalAppTheme.current.text)
+        EditedLabelContainer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            name = "Categories",
+            labels = categoriesFilterNames,
+            searchTitle = "Categories",
+            searchText = uiState.categoriesSearchText,
+            isLoading = uiState.loadingCategories,
+            searchedLabels = searchedCategoriesNames,
+            maxRows = 2,
+            onContainerClick = {
+                onUiAction(EditedRecipeUiAction.LoadCategories) },
+            onSearchedLabelClick = { index ->
+                onUiAction(EditedRecipeUiAction.AddCategory(index)) },
+            onSearchedListEndReach = {
+                onUiAction(EditedRecipeUiAction.LoadCategories) },
+            onLabelClick = { index ->
+                onUiAction(EditedRecipeUiAction.RemoveCategory(index))
             }
         )
-        BottomInsetSpacer()
+        WeightedProductsLabelContainer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            name = "Products",
+            weightedProducts = uiState.productsFilter,
+            searchTitle = "Products",
+            searchText = uiState.productsSearchText,
+            isLoading = uiState.loadingProducts,
+            searchedProducts = uiState.searchedProducts,
+            maxRows = 2,
+            onContainerClick = {
+                onUiAction(EditedRecipeUiAction.LoadProducts) },
+            onLabelCreate = { weightedProduct ->
+                onUiAction(EditedRecipeUiAction.AddWeightedProduct(weightedProduct)) },
+            onSearchedListEndReach = {
+                onUiAction(EditedRecipeUiAction.LoadProducts) },
+            onLabelClick = { index ->
+                onUiAction(EditedRecipeUiAction.RemoveProduct(index))
+            }
+        )
+        Spacer(modifier = Modifier.height(144.dp))
     }
+
+    //TODO move this all to simple recipe and return to normal column and verticalScroll!
+//    items(reviewsUiState.reviews, key = { it.id }) { reviewData ->
+//        ReviewItem(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .animateItem(),
+//            reviewItemData = reviewData,
+//            onProfileClick = {
+//                onUiAction(EditedRecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
+//            },
+//            onLikeClick = {
+//                if (reviewData.isLiked) {
+//                    onUiAction(EditedRecipeUiAction.DislikeReview(reviewData.id))
+//                } else {
+//                    onUiAction(EditedRecipeUiAction.LikeReview(reviewData.id))
+//                }
+//            }
+//        )
+//    }
+//    HorizontalDivider(color = LocalAppTheme.current.text)
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 16.dp),
+//        horizontalArrangement = Arrangement.SpaceBetween
+//    ) {
+//        Text(
+//            text = "Reviews",
+//            style = LocalAppTheme.current.typography.bodyMedium
+//        )
+//        Icon(
+//            modifier = Modifier
+//                .size(32.dp)
+//                .clip(CircleShape)
+//                .clickable {
+//                    isReviewTextFieldDialogShown = true
+//                }
+//                .padding(4.dp),
+//            imageVector = Icons.Outlined.AddComment,
+//            contentDescription = "Add Review Button",
+//            tint = LocalAppTheme.current.text
+//        )
+//    }
 
     MediaPickMethodDialog(mediaFilePickerManager)
 
+    //TODO move this all to simple recipe and return to normal column and verticalScroll!
     ReviewTextFieldDialog(
         isShown = isReviewTextFieldDialogShown,
         reviewState = uiState.reviewText,

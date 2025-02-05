@@ -37,11 +37,13 @@ import com.letthemcook.theme.base.LocalAppTheme
 fun SingleLineTextField(
     modifier: Modifier,
     state: TextFieldState,
-    labelText: String,
+    labelText: String? = null,
+    placeholderText: String? = null,
     isPhoneNumber: Boolean = false,
     isPassword: Boolean = false,
     textStyle: TextStyle = LocalAppTheme.current.typography.bodyLarge,
     labelTextStyle: TextStyle = LocalAppTheme.current.typography.labelLarge,
+    placeholderTextStyle: TextStyle = LocalAppTheme.current.typography.bodyLarge,
     textColor: Color = LocalAppTheme.current.text,
     backgroundColor: Color = LocalAppTheme.current.background
 ) {
@@ -86,15 +88,26 @@ fun SingleLineTextField(
                 }
             }
         )
-        Text(
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .background(backgroundColor)
-                .padding(horizontal = 4.dp)
-                .align(Alignment.TopStart),
-            text = labelText,
-            style = labelTextStyle.copy(color = textColor)
-        )
+        labelText?.let {
+            Text(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .background(backgroundColor)
+                    .padding(horizontal = 4.dp)
+                    .align(Alignment.TopStart),
+                text = it,
+                style = labelTextStyle.copy(color = textColor)
+            )
+        }
+        if (state.text.isEmpty()) placeholderText?.let {
+            Text(
+                modifier = Modifier
+                    .padding(start = 10.dp, top = 14.dp, bottom = 6.dp)
+                    .align(Alignment.CenterStart),
+                text = it,
+                style = placeholderTextStyle
+            )
+        }
         if (isPassword) {
             Icon(
                 modifier = Modifier

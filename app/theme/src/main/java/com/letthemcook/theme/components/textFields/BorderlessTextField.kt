@@ -32,7 +32,6 @@ fun BorderlessTextField(
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp)
                 .align(Alignment.CenterStart),
             state = state,
             textStyle = textStyle.copy(color = textColor),
@@ -41,9 +40,7 @@ fun BorderlessTextField(
         )
         if (state.text.isEmpty()) {
             Text(
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .align(Alignment.CenterStart),
+                modifier = Modifier.align(Alignment.CenterStart),
                 text = placeholderText,
                 style = placeholderTextStyle,
                 color = textColor

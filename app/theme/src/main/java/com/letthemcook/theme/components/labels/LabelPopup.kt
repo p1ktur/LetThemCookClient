@@ -1,5 +1,6 @@
 package com.letthemcook.theme.components.labels
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -50,7 +51,7 @@ fun LabelPopup(
             ): IntOffset {
                 val delta = 48
 
-                return if (windowSize.height - anchorBounds.height > popupContentSize.height) {
+                return if (anchorBounds.top < windowSize.height / 2) {
                     IntOffset(
                         x = 0,
                         y = anchorPosition.y.roundToInt() + anchorSize.height - delta

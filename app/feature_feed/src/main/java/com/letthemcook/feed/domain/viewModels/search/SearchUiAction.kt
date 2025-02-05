@@ -2,8 +2,8 @@ package com.letthemcook.feed.domain.viewModels.search
 
 sealed interface SearchUiAction {
     data object NavigateBack : SearchUiAction
-    data class NavigateToRecipe(val id: String) : SearchUiAction
-    data class NavigateToUser(val id: String) : SearchUiAction
+    data class NavigateToRecipe(val recipeId: String) : SearchUiAction
+    data class NavigateToUser(val userId: String) : SearchUiAction
 
     data class SetSortType(val type: SearchUiState.SortType) : SearchUiAction
     data class SetSearchType(val type: SearchUiState.SearchType) : SearchUiAction

@@ -5,7 +5,7 @@ import com.letthemcook.theme.language.Language
 sealed interface SettingsUiAction {
     data object NavigateBack : SettingsUiAction
     data object NavigateToHome : SettingsUiAction
-    data object NavigateToAddRecipe : SettingsUiAction
+    data object NavigateToNewRecipe : SettingsUiAction
     data object NavigateToProfile : SettingsUiAction
 
     data object ToggleTheme : SettingsUiAction

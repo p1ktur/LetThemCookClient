@@ -28,6 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,7 @@ import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.labels.LabelContainer
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 @Composable
 fun RecipeScreen(
@@ -59,6 +61,21 @@ fun RecipeScreen(
     reviewsUiState: ReviewsUiState,
     onUiAction: (RecipeUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setOnToolBarBackClick { onUiAction(RecipeUiAction.NavigateBack) }
+
+            setShowNavigationBar(true)
+            setOnNavigateToHome { onUiAction(RecipeUiAction.NavigateToHome) }
+            setOnNavigateToNewRecipe { onUiAction(RecipeUiAction.NavigateToNewRecipe) }
+            setOnNavigateToProfile { onUiAction(RecipeUiAction.NavigateToProfile) }
+        }
+    }
+
     var isReviewTextFieldDialogShown by remember { mutableStateOf(false) }
 
     Column(
@@ -66,13 +83,6 @@ fun RecipeScreen(
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            onBackClick = {
-                onUiAction(RecipeUiAction.NavigateBack)
-            }
-        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -266,19 +276,6 @@ fun RecipeScreen(
                 }
             }
         }
-        NavBar(
-            modifier = Modifier.fillMaxWidth(),
-            onHomeClick = {
-                onUiAction(RecipeUiAction.NavigateToHome)
-            },
-            onAddClick = {
-                onUiAction(RecipeUiAction.NavigateToAddRecipe)
-            },
-            onProfileClick = {
-                onUiAction(RecipeUiAction.NavigateToProfile)
-            }
-        )
-        BottomInsetSpacer()
     }
 
     ReviewTextFieldDialog(

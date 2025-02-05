@@ -2,6 +2,7 @@ package com.letthemcook.profile.domain.viewModels.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.theme.base.Theme
 import com.letthemcook.theme.language.Language
 import com.letthemcook.theme.providers.LanguageStateProvider
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val themeStateProvider: ThemeStateProvider,
-    private val languageStateProvider: LanguageStateProvider
+    private val languageStateProvider: LanguageStateProvider,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -46,7 +48,7 @@ class SettingsViewModel(
         when (action) {
             SettingsUiAction.NavigateBack -> Unit
             SettingsUiAction.NavigateToHome -> Unit
-            SettingsUiAction.NavigateToAddRecipe -> Unit
+            SettingsUiAction.NavigateToNewRecipe -> Unit
             SettingsUiAction.NavigateToProfile -> Unit
 
             SettingsUiAction.ToggleTheme -> toggleTheme()
@@ -69,6 +71,6 @@ class SettingsViewModel(
     }
 
     private fun logOut() {
-
+        authManager.forgetUserAndTokens()
     }
 }

@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BuilderViewModel(
+    recipeJson: String?,
     private val recipeGraphSerializer: RecipeGraphSerializer
 ) : ViewModel() {
 
@@ -108,6 +109,8 @@ class BuilderViewModel(
 
         return null
     }
+
+    fun getRecipeJson(): String = recipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
 
     // ACTIONS
 

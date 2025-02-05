@@ -1,22 +1,24 @@
 package com.letthemcook.core.data.local.files
 
+import android.app.RecoverableSecurityException
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.provider.MediaStore
-import com.letthemcook.core.domain.media.toBitmap
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import java.util.UUID
+
 
 class LocalFileManager(
     private val context: Context,
     private val dao: FileDao
 ) {
 
-    fun getFileAsBitmap(file: File): Bitmap? {
+    fun getFileBytes(file: File): ByteArray? {
         if (file.type != FileType.IMAGE) return null
 
         val resolver = context.contentResolver
@@ -27,7 +29,7 @@ class LocalFileManager(
             bytes = inputStream.readBytes()
         }
 
-        return bytes?.toBitmap()
+        return bytes
     }
 
     suspend fun getFileByUid(uid: String): File? {
@@ -37,18 +39,18 @@ class LocalFileManager(
     suspend fun saveFile(
         bytes: ByteArray,
         type: FileType,
-        name: String = UUID.randomUUID().toString()
+        uid: String = UUID.randomUUID().toString()
     ): File? {
         val resolver = context.contentResolver
 
         val contentValues = when (type) {
             FileType.IMAGE -> ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, "$name.jpg")
+                put(MediaStore.Images.Media.DISPLAY_NAME, "$uid.jpg")
                 put(MediaStore.Images.Media.MIME_TYPE, type.mimeType)
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/LetThemCook")
             }
             FileType.VIDEO -> ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, "$name.mp4")
+                put(MediaStore.Images.Media.DISPLAY_NAME, "$uid.mp4")
                 put(MediaStore.Images.Media.MIME_TYPE, type.mimeType)
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Movies/LetThemCook")
             }
@@ -76,7 +78,7 @@ class LocalFileManager(
                 outputStream.write(bytes)
             }
 
-            File(uid = name, uri = it, type = type).apply {
+            File(uid = uid, uri = it, type = type).apply {
                 dao.upsertFile(this)
             }
         }
@@ -92,11 +94,29 @@ class LocalFileManager(
         return file
     }
 
-    suspend fun deleteFile(file: File) {
+    suspend fun deleteFile(
+        file: File,
+        deleteFileLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+    ): Boolean {
         val resolver = context.contentResolver
+        var shouldInvokeCallback: Boolean
 
-        resolver.delete(file.uri, null, null)
+        try {
+            shouldInvokeCallback = resolver.delete(file.uri, null, null) > 0
+        } catch (e: SecurityException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val recoverableSecurityException = e as? RecoverableSecurityException
+                recoverableSecurityException?.userAction?.actionIntent?.intentSender?.let { intentSender ->
+                    val senderRequest = IntentSenderRequest.Builder(intentSender).build()
+                    deleteFileLauncher.launch(senderRequest)
+                }
+            }
+
+            shouldInvokeCallback = false
+        }
 
         dao.deleteFile(file)
+
+        return shouldInvokeCallback
     }
 }

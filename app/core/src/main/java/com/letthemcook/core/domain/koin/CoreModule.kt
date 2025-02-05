@@ -19,11 +19,10 @@ val koinCoreModule = module {
     single { LocalFileManager(androidContext(), get()) }
 
     single { LocalDataDatabase.getInstance(androidContext()) }
-    single { get<LocalDataDatabase>().getFavoredRecipeDao() }
-    single { get<LocalDataDatabase>().getRecipeJsonDao() }
+    single { get<LocalDataDatabase>().getRecipeDao() }
     single { get<LocalDataDatabase>().getRecipeReactionDao() }
     single { get<LocalDataDatabase>().getReviewLikeDao() }
-    single { LocalDataManager(get(), get(), get(), get()) }
+    single { LocalDataManager(get(), get(), get()) }
 
     single { MediaFilePickerManager(androidContext(), get()) }
 

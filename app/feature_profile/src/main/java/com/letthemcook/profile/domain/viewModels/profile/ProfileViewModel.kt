@@ -30,7 +30,7 @@ class ProfileViewModel(
                     )
                 }
 
-                user.profilePictureId?.let { fileId ->
+                user.profileBitmapId?.let { fileId ->
                     val params = RemoteFileManager.RequestParams(
                         userId = userId,
                         fileId = fileId,
@@ -40,7 +40,7 @@ class ProfileViewModel(
 
                     _uiState.update {
                         it.copy(
-                            userImage = bytes?.toBitmap()
+                            userBitmap = bytes?.toBitmap()
                         )
                     }
                 }
@@ -52,7 +52,7 @@ class ProfileViewModel(
 
     fun onUiAction(action: ProfileUiAction) {
         when (action) {
-            ProfileUiAction.NavigateToAddRecipe -> Unit
+            ProfileUiAction.NavigateToNewRecipe -> Unit
             ProfileUiAction.NavigateBack -> Unit
             ProfileUiAction.NavigateToHome -> Unit
             ProfileUiAction.NavigateToEditedProfile -> Unit

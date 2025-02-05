@@ -1,39 +1,38 @@
 package com.letthemcook.theme.components.bars
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun NavBar(
     modifier: Modifier = Modifier,
-    onHomeClick: () -> Unit,
-    onAddClick: () -> Unit,
-    onProfileClick: () -> Unit
+    color: Color = LocalAppTheme.current.background,
+    onHomeClick: (() -> Unit)? = null,
+    onNewRecipeClick: (() -> Unit)? = null,
+    onProfileClick: (() -> Unit)? = null
 ) {
     val contentColor = LocalAppTheme.current.text
 
     Row(
         modifier = modifier
             .height(36.dp)
+            .background(color)
             .drawBehind {
                 drawLine(
                     color = contentColor,
@@ -59,10 +58,10 @@ fun NavBar(
                 .weight(1f)
                 .fillMaxHeight()
                 .run {
-                    onAddClick?.let { this.clickable(onClick = onAddClick) } ?: this
+                    onNewRecipeClick?.let { this.clickable(onClick = onNewRecipeClick) } ?: this
                 },
             imageVector = Icons.Outlined.Add,
-            contentDescription = "Add Button",
+            contentDescription = "New Recipe Button",
             tint = contentColor
         )
         Icon(

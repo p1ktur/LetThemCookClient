@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
 import com.letthemcook.feed.domain.viewModels.search.SearchUiAction
 import com.letthemcook.feed.domain.viewModels.search.SearchUiState
 import com.letthemcook.feed.ui.components.CategoriesRadioButtons
@@ -43,6 +44,7 @@ import com.letthemcook.theme.components.labels.EditedLabelContainer
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.components.textFields.SearchTextField
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import com.letthemcook.theme.ui.screens.LoadingScreen
 
 @Composable
@@ -50,6 +52,15 @@ fun SearchScreen(
     uiState: SearchUiState,
     onUiAction: (SearchUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+            setShowToolBar(false)
+            setShowNavigationBar(false)
+        }
+    }
+
     val textColor = LocalAppTheme.current.text
 
     val categoriesFilterNames = remember(uiState.categoriesFilter) { uiState.categoriesFilter.map { it.name } }
@@ -76,7 +87,6 @@ fun SearchScreen(
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -292,7 +302,6 @@ fun SearchScreen(
                 }
             }
         }
-        BottomInsetSpacer()
     }
 
     // TODO button to scroll to top when lazyColumn is scrolled

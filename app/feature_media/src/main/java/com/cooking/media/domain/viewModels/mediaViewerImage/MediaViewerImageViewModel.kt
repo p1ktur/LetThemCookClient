@@ -14,7 +14,7 @@ class MediaViewerImageViewModel(
 
     fun onUiAction(action: MediaViewerImageUiAction) {
         when (action) {
-            MediaViewerImageUiAction.NavigateBack -> Unit
+            MediaViewerImageUiAction.Close -> Unit
         }
     }
 }

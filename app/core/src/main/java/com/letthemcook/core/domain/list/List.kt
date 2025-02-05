@@ -11,3 +11,8 @@ inline fun <T> List<T>.forEachReversedIndexed(action: (Int, T) -> Unit) {
         action(i, get(i))
     }
 }
+
+fun <T> List<T>.filterOn(other: List<T>): List<T> {
+    val filtered = filter { other.contains(it) }
+    return filtered + other.filterNot { contains(it) }
+}

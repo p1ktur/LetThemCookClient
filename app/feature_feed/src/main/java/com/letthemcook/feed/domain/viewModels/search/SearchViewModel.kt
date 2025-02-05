@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.UserManager
+import com.letthemcook.core.domain.list.filterOn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -416,10 +417,5 @@ class SearchViewModel(
                 )
             }
         }
-    }
-
-    private fun <T> List<T>.filterOn(other: List<T>): List<T> {
-        val filtered = filter { other.contains(it) }
-        return filtered + other.filterNot { contains(it) }
     }
 }

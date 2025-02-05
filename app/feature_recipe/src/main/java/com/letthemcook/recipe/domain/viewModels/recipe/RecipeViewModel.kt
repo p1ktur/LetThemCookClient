@@ -21,7 +21,7 @@ class RecipeViewModel(
         when (action) {
             RecipeUiAction.NavigateBack -> Unit
             RecipeUiAction.NavigateToHome -> Unit
-            RecipeUiAction.NavigateToAddRecipe -> Unit
+            RecipeUiAction.NavigateToNewRecipe -> Unit
             RecipeUiAction.NavigateToProfile -> Unit
             is RecipeUiAction.NavigateToOtherProfile -> Unit
 

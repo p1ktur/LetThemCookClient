@@ -23,22 +23,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.letthemcook.profile.domain.viewModels.settings.SettingsUiAction
 import com.letthemcook.profile.domain.viewModels.settings.SettingsUiState
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.base.Theme
-import com.letthemcook.theme.components.bars.NavBar
-import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.buttons.SwitchButton
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.language.Language
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 // TODO check dark theme for feed and editor and cooking!
 
@@ -47,18 +44,26 @@ fun SettingsScreen(
     uiState: SettingsUiState,
     onUiAction: (SettingsUiAction) -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+    LaunchedEffect(Unit) {
+        screenContainer.apply {
+            clearToDefaults()
+
+            setShowToolBar(true)
+            setOnToolBarBackClick { onUiAction(SettingsUiAction.NavigateBack) }
+
+            setShowNavigationBar(true)
+            setOnNavigateToHome { onUiAction(SettingsUiAction.NavigateToHome) }
+            setOnNavigateToNewRecipe { onUiAction(SettingsUiAction.NavigateToNewRecipe) }
+            setOnNavigateToProfile { onUiAction(SettingsUiAction.NavigateToProfile) }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        TopInsetSpacer()
-        ToolBar(
-            modifier = Modifier.fillMaxWidth(),
-            onBackClick = {
-                onUiAction(SettingsUiAction.NavigateBack)
-            }
-        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -218,18 +223,5 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-        NavBar(
-            modifier = Modifier.fillMaxWidth(),
-            onHomeClick = {
-                onUiAction(SettingsUiAction.NavigateToHome)
-            },
-            onAddClick = {
-                onUiAction(SettingsUiAction.NavigateToAddRecipe)
-            },
-            onProfileClick = {
-                onUiAction(SettingsUiAction.NavigateToProfile)
-            }
-        )
-        BottomInsetSpacer()
     }
 }

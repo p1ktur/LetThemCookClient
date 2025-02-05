@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
@@ -33,7 +32,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.model.recipe.Product
-import com.letthemcook.recipe.domain.model.data.WeightedProductItemData
+import com.letthemcook.core.domain.model.recipe.WeightedProduct
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.LabelItem
 import com.letthemcook.theme.components.labels.LabelPopup
@@ -42,13 +41,15 @@ import com.letthemcook.theme.components.labels.LabelPopup
 fun WeightedProductsLabelContainer(
     modifier: Modifier = Modifier,
     name: String,
-    productDataList: List<WeightedProductItemData>,
+    weightedProducts: List<WeightedProduct>,
     searchTitle: String,
     searchText: TextFieldState,
-    searchedLabels: List<Product>,
+    isLoading: Boolean,
+    searchedProducts: List<Product>,
     maxRows: Int = 3,
-    onLabelCreate: (WeightedProductItemData) -> Unit,
     onContainerClick: () -> Unit,
+    onLabelCreate: (WeightedProduct) -> Unit,
+    onSearchedListEndReach: () -> Unit,
     onLabelClick: (Int) -> Unit
 ) {
     // TODO delete label
@@ -61,109 +62,97 @@ fun WeightedProductsLabelContainer(
     var isPopupShown by remember { mutableStateOf(false) }
     var isEditPopupShown by remember { mutableStateOf(false) }
 
-    var chosenProductItem: Product? by remember { mutableStateOf(null) }
-    val weightText = remember { TextFieldState() }
-    val amountText = remember { TextFieldState() }
+    var chosenProduct: Product? by remember { mutableStateOf(null) }
 
-    val labelsList = remember(productDataList) { productDataList.map { it.toString() } }
+    val productLabels = remember(searchedProducts) { searchedProducts.map { it.name } }
+    val labelsList = remember(weightedProducts) { weightedProducts.map { it.toString() } }
 
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable {
-                onContainerClick()
-                isPopupShown = true
-            }
-            .onGloballyPositioned {
-                containerPosition = it.positionInRoot()
-            }
-            .onSizeChanged {
-                containerSize = it
-            }
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = name,
-                style = LocalAppTheme.current.typography.bodyLarge
-            )
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = Icons.Outlined.Add,
-                contentDescription = "Label Icon",
-                tint = LocalAppTheme.current.text
-            )
-        }
-        LazyHorizontalStaggeredGrid(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = (maxRows * 36).dp),
-            rows = StaggeredGridCells.FixedSize(28.dp),
-            horizontalItemSpacing = 8.dp,
+    Column {
+        Column(
+            modifier = modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable {
+                    onContainerClick()
+                    isPopupShown = true
+                }
+                .onGloballyPositioned {
+                    containerPosition = it.positionInRoot()
+                }
+                .onSizeChanged {
+                    containerSize = it
+                }
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            itemsIndexed(labelsList) { index, label ->
-                LabelItem(
-                    text = label,
-                    onClick = {
-                        onLabelClick(index)
-                    }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = name,
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "Label Icon",
+                    tint = LocalAppTheme.current.text
                 )
             }
-        }
-    }
-
-    if (isPopupShown) {
-        LabelPopup(
-            title = searchTitle,
-            searchedLabels = searchedLabels.map { it.name }, // TODO optimize
-            searchText = searchText,
-            isLoading = false, // TODO
-            anchorPosition = containerPosition,
-            anchorSize = containerSize,
-            onLabelClick = { labelIndex ->
-                chosenProductItem = searchedLabels[labelIndex]
-                isPopupShown = false
-                isEditPopupShown = true
-            },
-            onSearchedListEndReach = {
-                //TODO
-            },
-            onDismiss = {
-                isPopupShown = false
-            }
-        )
-    }
-
-    if (isEditPopupShown) {
-        WeightedLabelEditPopup(
-            title = chosenProductItem?.name ?: "",
-            weightText = weightText,
-            amountText = amountText,
-            anchorPosition = containerPosition,
-            anchorSize = containerSize,
-            onAdd = {
-                try {
-                    val data = WeightedProductItemData(
-                        chosenProductItem ?: return@WeightedLabelEditPopup,
-                        weightText.text.toString().toInt(),
-                        amountText.text.toString().toInt()
+            LazyHorizontalStaggeredGrid(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = (maxRows * 36).dp),
+                rows = StaggeredGridCells.FixedSize(28.dp),
+                horizontalItemSpacing = 8.dp,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(labelsList) { index, label ->
+                    LabelItem(
+                        text = label,
+                        onClick = {
+                            onLabelClick(index)
+                        }
                     )
-                    onLabelCreate(data)
-
-                    weightText.clearText()
-                    amountText.clearText()
-                    isEditPopupShown = false
-                } catch (_: Exception) {
-
                 }
-            },
-            onDismiss = {
-                isEditPopupShown = false
             }
-        )
+        }
+        if (isPopupShown) {
+            LabelPopup(
+                title = searchTitle,
+                searchedLabels = productLabels,
+                searchText = searchText,
+                isLoading = isLoading,
+                anchorPosition = containerPosition,
+                anchorSize = containerSize,
+                onLabelClick = { labelIndex ->
+                    chosenProduct = searchedProducts[labelIndex]
+                    isPopupShown = false
+                    isEditPopupShown = true
+                },
+                onSearchedListEndReach = onSearchedListEndReach,
+                onDismiss = {
+                    isPopupShown = false
+                }
+            )
+        }
+        if (isEditPopupShown) chosenProduct?.let { chosenProduct ->
+            WeightedLabelEditPopup(
+                chosenProduct = chosenProduct,
+                anchorPosition = containerPosition,
+                anchorSize = containerSize,
+                onAdd = { weightedProduct ->
+                    try {
+                        onLabelCreate(weightedProduct)
+                    } finally {
+                        isPopupShown = true
+                        isEditPopupShown = false
+                    }
+                },
+                onDismiss = {
+                    isPopupShown = true
+                    isEditPopupShown = false
+                }
+            )
+        }
     }
 }

@@ -9,6 +9,6 @@ import org.koin.dsl.module
 val koinEditorModule = module {
     single { RecipeGraphSerializer(get()) }
 
-    viewModel { BuilderViewModel(get()) }
-    viewModel { CookingViewModel(get()) }
+    viewModel { (recipeJson: String?) -> BuilderViewModel(recipeJson, get()) }
+    viewModel { CookingViewModel(get(), get()) }
 }

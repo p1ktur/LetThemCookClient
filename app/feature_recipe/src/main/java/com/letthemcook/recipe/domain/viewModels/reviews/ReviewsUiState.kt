@@ -6,7 +6,7 @@ data class ReviewsUiState(
     val reviews: List<ReviewItemData> = listOf(
         ReviewItemData(
             id = "test_recipe",
-            authorId = 0,
+            authorId = "",
             authorLogin = "@username",
             authorBitmap = null,
             text = "I really like it!",

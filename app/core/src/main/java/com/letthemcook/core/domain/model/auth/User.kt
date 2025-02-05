@@ -18,7 +18,7 @@ data class User(
     val surname: String?,
     val about: String?,
     @Serializable(with = LocalDateTimeSerializer::class) val birthDate: LocalDateTime?,
-    val profilePictureId: String?,
+    val profileBitmapId: String?,
     val averageRating: Float = 0f,
     val totalRecipes: Int = 0,
     val totalPreparations: Int = 0,
@@ -38,7 +38,7 @@ data class User(
             name = name,
             surname = surname,
             totalFollowers = totalFollowers,
-            profilePictureId = profilePictureId,
+            profileBitmapId = profileBitmapId,
             bitmap = bitmap
         )
     }

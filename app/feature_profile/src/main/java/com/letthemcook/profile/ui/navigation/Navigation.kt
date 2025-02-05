@@ -1,7 +1,7 @@
 package com.letthemcook.profile.ui.navigation
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
@@ -10,8 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
-import com.letthemcook.core.domain.model.file.File
-import com.letthemcook.core.ui.navigation.NavBarRoutes
+import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileViewModel
 import com.letthemcook.profile.domain.viewModels.passwordChange.PasswordChangeUiAction
@@ -24,6 +23,7 @@ import com.letthemcook.profile.ui.screens.EditedProfileScreen
 import com.letthemcook.profile.ui.screens.PasswordChangeScreen
 import com.letthemcook.profile.ui.screens.ProfileScreen
 import com.letthemcook.profile.ui.screens.SettingsScreen
+import com.letthemcook.theme.ui.navigation.MediaViewerAccess
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -40,9 +40,8 @@ fun NavGraphBuilder.addProfileRoutes(
     navController: NavController,
     logOutRoute: Any,
     navBarRoutes: NavBarRoutes,
-    onViewRecipe: (String) -> Unit,
-    onViewMediaLocal: (File) -> Unit,
-    onViewMediaImage: (Bitmap) -> Unit
+    mediaViewerAccessState: State<MediaViewerAccess>,
+    navigateToRecipe: (String) -> Unit
 ) {
     composable<ProfileNavRoutes.EditedProfile> {
         val authManager = koinInject<AuthManager>()
@@ -61,11 +60,11 @@ fun NavGraphBuilder.addProfileRoutes(
             onUiAction = { action ->
                 when (action) {
                     EditedProfileUiAction.NavigateBack -> navController.navigateUp()
-                    EditedProfileUiAction.NavigateToHome -> navController.navigate(navBarRoutes.homeRoute)
-                    EditedProfileUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
+                    EditedProfileUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
+                    EditedProfileUiAction.NavigateToNewRecipe ->navBarRoutes.navigateToNewRecipe()
                     EditedProfileUiAction.NavigateToSettings -> navController.navigate(ProfileNavRoutes.Settings)
-                    is EditedProfileUiAction.ViewMediaFile -> onViewMediaLocal(action.file)
-                    is EditedProfileUiAction.ViewRecipe -> onViewRecipe(action.recipeId)
+                    is EditedProfileUiAction.ViewMediaFile -> mediaViewerAccessState.value.viewBitmap(action.bitmap)
+                    is EditedProfileUiAction.ViewRecipe -> navigateToRecipe(action.recipeId)
                     EditedProfileUiAction.ChangePassword -> navController.navigate(ProfileNavRoutes.PasswordChange)
                     else -> Unit
                 }
@@ -85,10 +84,10 @@ fun NavGraphBuilder.addProfileRoutes(
             onUiAction = { action ->
                 when (action) {
                     ProfileUiAction.NavigateBack -> navController.navigateUp()
-                    ProfileUiAction.NavigateToHome -> navController.navigate(navBarRoutes.homeRoute)
-                    ProfileUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
+                    ProfileUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
+                    ProfileUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
 
-                    is ProfileUiAction.ViewMediaFile -> onViewMediaImage(action.bitmap)
+                    is ProfileUiAction.ViewMediaFile -> mediaViewerAccessState.value.viewBitmap(action.bitmap)
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
@@ -104,8 +103,8 @@ fun NavGraphBuilder.addProfileRoutes(
             onUiAction = { action ->
                 when (action) {
                     SettingsUiAction.NavigateBack -> navController.navigateUp()
-                    SettingsUiAction.NavigateToHome -> navController.navigate(navBarRoutes.homeRoute)
-                    SettingsUiAction.NavigateToAddRecipe -> navController.navigate(navBarRoutes.addRoute)
+                    SettingsUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
+                    SettingsUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
                     SettingsUiAction.NavigateToProfile -> navController.navigateUp()
                     SettingsUiAction.LogOut -> navController.navigate(logOutRoute)
                     else -> Unit

@@ -7,13 +7,13 @@ import com.letthemcook.core.domain.http.ClientJson
 import com.letthemcook.core.domain.http.HttpResult
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.post
+import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.auth.login.LoginAuthResult
 import com.letthemcook.core.domain.model.auth.login.LoginData
 import com.letthemcook.core.domain.model.auth.registration.RegistrationAuthResult
 import com.letthemcook.core.domain.model.auth.registration.RegistrationData
-import com.letthemcook.core.domain.model.auth.tokens.TokenResponse
-import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.auth.tokens.TokenCheckResult
+import com.letthemcook.core.domain.model.auth.tokens.TokenResponse
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.StringValues

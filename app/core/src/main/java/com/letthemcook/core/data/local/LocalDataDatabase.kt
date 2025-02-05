@@ -5,23 +5,30 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.letthemcook.core.domain.dataConvertion.typeConvertion.CategoryListConverter
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.FileConverter
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.LocalDateTimeConverter
-import com.letthemcook.core.domain.model.local.RecipeJson
-import com.letthemcook.core.domain.model.local.FavoredRecipe
-import com.letthemcook.core.domain.model.local.reactions.RecipeReaction
-import com.letthemcook.core.domain.model.local.reactions.ReviewLike
+import com.letthemcook.core.domain.dataConvertion.typeConvertion.StringListConverter
+import com.letthemcook.core.domain.dataConvertion.typeConvertion.WeightedProductListConverter
+import com.letthemcook.core.domain.model.recipe.reactions.RecipeReaction
+import com.letthemcook.core.domain.model.recipe.reactions.ReviewLike
+import com.letthemcook.core.domain.model.recipe.Recipe
 
 @Database(
-    entities = [FavoredRecipe::class, RecipeJson::class, RecipeReaction::class, ReviewLike::class],
+    entities = [Recipe::class, RecipeReaction::class, ReviewLike::class],
     exportSchema = false,
     version = 1
 )
-@TypeConverters(value = [FileConverter::class, LocalDateTimeConverter::class])
+@TypeConverters(value = [
+    FileConverter::class,
+    LocalDateTimeConverter::class,
+    StringListConverter::class,
+    WeightedProductListConverter::class,
+    CategoryListConverter::class
+])
 abstract class LocalDataDatabase : RoomDatabase() {
 
-    abstract fun getFavoredRecipeDao(): FavoredRecipeDao
-    abstract fun getRecipeJsonDao(): RecipeJsonDao
+    abstract fun getRecipeDao(): RecipeDao
     abstract fun getRecipeReactionDao(): RecipeReactionDao
     abstract fun getReviewLikeDao(): ReviewLikeDao
 

@@ -2,6 +2,7 @@ package com.letthemcook.theme.base
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
@@ -123,7 +124,7 @@ class AppTheme(val theme: Theme) {
         }
 }
 
-val LocalAppTheme = staticCompositionLocalOf { AppTheme(Theme.LIGHT) }
+val LocalAppTheme = compositionLocalOf { AppTheme(Theme.LIGHT) }
 
 @Composable
 fun LetThemCookTheme(
