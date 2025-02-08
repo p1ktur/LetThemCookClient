@@ -19,10 +19,13 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +51,11 @@ fun SingleLineTextField(
     backgroundColor: Color = LocalAppTheme.current.background
 ) {
     var passwordIsShown by remember { mutableStateOf(false) }
+
+    val stateText by snapshotFlow { state.text }.collectAsState("")
+    val showPlaceholder by remember {
+        derivedStateOf { stateText.isEmpty() }
+    }
 
     Box(
         modifier = modifier
@@ -99,7 +107,7 @@ fun SingleLineTextField(
                 style = labelTextStyle.copy(color = textColor)
             )
         }
-        if (state.text.isEmpty()) placeholderText?.let {
+        if (showPlaceholder) placeholderText?.let {
             Text(
                 modifier = Modifier
                     .padding(start = 10.dp, top = 14.dp, bottom = 6.dp)

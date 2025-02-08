@@ -32,7 +32,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
 import com.letthemcook.feed.domain.viewModels.search.SearchUiAction
 import com.letthemcook.feed.domain.viewModels.search.SearchUiState
 import com.letthemcook.feed.ui.components.CategoriesRadioButtons
@@ -41,8 +40,6 @@ import com.letthemcook.feed.ui.components.RecipeItem
 import com.letthemcook.feed.ui.components.UserItem
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.EditedLabelContainer
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.components.textFields.SearchTextField
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import com.letthemcook.theme.ui.screens.LoadingScreen
@@ -303,6 +300,4 @@ fun SearchScreen(
             }
         }
     }
-
-    // TODO button to scroll to top when lazyColumn is scrolled
 }

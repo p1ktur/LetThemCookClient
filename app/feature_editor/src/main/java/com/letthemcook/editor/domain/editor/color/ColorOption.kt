@@ -1,7 +1,5 @@
 package com.letthemcook.editor.domain.editor.color
 
-import android.graphics.Color.BLACK
-import android.graphics.Color.GRAY
 import androidx.compose.ui.graphics.Color
 
 enum class ColorOption(val color: Color) {

@@ -2,6 +2,7 @@ package com.letthemcook.profile.domain.viewModels.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.media.toBitmap
@@ -13,13 +14,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    userId: String,
+    private val userId: String,
     private val userManager: UserManager,
-    remoteFileManager: RemoteFileManager
+    remoteFileManager: RemoteFileManager,
+    private val recipeManager: RecipeManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var lastRecipePage = 0
+    private var allRecipePagesReached = false
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -46,7 +51,7 @@ class ProfileViewModel(
                 }
             }
 
-            // TODO Load recipes
+            loadRecipes()
         }
     }
 
@@ -56,10 +61,39 @@ class ProfileViewModel(
             ProfileUiAction.NavigateBack -> Unit
             ProfileUiAction.NavigateToHome -> Unit
             ProfileUiAction.NavigateToEditedProfile -> Unit
+            is ProfileUiAction.NavigateToRecipe -> Unit
 
             is ProfileUiAction.ViewMediaFile -> Unit
 
+            ProfileUiAction.LoadRecipes -> loadRecipes()
+
             ProfileUiAction.FollowOrUnfollow -> followOrUnfollow()
+        }
+    }
+
+    private fun loadRecipes() {
+        _uiState.update {
+            it.copy(
+                loadingRecipes = true
+            )
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val perPage = 20
+            val reviews = recipeManager.getUserRecipes(
+                page = lastRecipePage++,
+                perPage = perPage,
+                userId = userId
+            )
+
+            if (reviews.size < perPage) allRecipePagesReached = true
+
+            _uiState.update {
+                it.copy(
+                    recipes = it.recipes + reviews,
+                    loadingRecipes = false
+                )
+            }
         }
     }
 

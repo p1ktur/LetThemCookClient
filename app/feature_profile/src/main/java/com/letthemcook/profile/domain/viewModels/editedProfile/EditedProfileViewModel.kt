@@ -3,10 +3,13 @@ package com.letthemcook.profile.domain.viewModels.editedProfile
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.local.LocalDataManager
+import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.media.compressBitmap
+import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.Dispatchers
@@ -14,12 +17,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class EditedProfileViewModel(
-    user: User,
+    private val user: User,
     private val authManager: AuthManager,
     private val userManager: UserManager,
-    private val remoteFileManager: RemoteFileManager
+    private val remoteFileManager: RemoteFileManager,
+    private val localFileManager: LocalFileManager,
+    private val localDataManager: LocalDataManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditedProfileUiState(user = user))
@@ -32,14 +38,59 @@ class EditedProfileViewModel(
             EditedProfileUiAction.NavigateToHome -> Unit
             EditedProfileUiAction.NavigateToSettings -> Unit
 
+            is EditedProfileUiAction.NavigateToRecipe -> Unit
+            is EditedProfileUiAction.NavigateToEditRecipe -> Unit
+
+            EditedProfileUiAction.NavigateToChangePassword -> Unit
+
             is EditedProfileUiAction.ViewMediaFile -> Unit
 
-            is EditedProfileUiAction.ViewRecipe -> Unit
+            EditedProfileUiAction.LoadRecipes -> loadRecipes()
 
-            EditedProfileUiAction.ChangePassword -> Unit
+            is EditedProfileUiAction.SetBirthDate -> setBirthDate(action.date)
 
             EditedProfileUiAction.UpdateUserData -> updateProfileData()
             is EditedProfileUiAction.UpdateProfileBitmap -> updateProfileBitmap(action.fileId, action.bitmap)
+        }
+    }
+
+    private fun loadRecipes() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allRecipes = localDataManager.getRecipes().map { recipe ->
+                val recipeBitmap = recipe.bitmapId?.let {
+                    localFileManager.getFileByUid(it)?.let { file ->
+                        localFileManager.getFileBytes(file)?.toBitmap()
+                    }
+                }
+
+                recipe.asItemData(recipeBitmap)
+            }
+
+            _uiState.update { state ->
+                state.copy(
+                    publishedRecipes = allRecipes.filter { it.publicationDate != null },
+                    archivedRecipes = allRecipes.filter { it.publicationDate == null }
+                )
+            }
+
+            userManager.getUser(user.id)?.let { remoteData ->
+                val updatedUser = uiState.value.user.copy(
+                    totalRecipes = remoteData.totalRecipes,
+                    totalPreparations = remoteData.totalPreparations,
+                    totalFollowers = remoteData.totalFollowers,
+                    averageRating = remoteData.averageRating
+                )
+
+                authManager.setUser(updatedUser)
+            }
+        }
+    }
+
+    private fun setBirthDate(date: LocalDateTime) {
+        _uiState.update {
+            it.copy(
+                birthDate = date
+            )
         }
     }
 
@@ -52,6 +103,7 @@ class EditedProfileViewModel(
                     surname = it.surname.text.toString(),
                     email = it.email.text.toString(),
                     phone = it.phoneNumber.text.toString(),
+                    birthDate = it.birthDate
                 )
             )
         }

@@ -7,8 +7,11 @@ sealed interface ProfileUiAction {
     data object NavigateToHome : ProfileUiAction
     data object NavigateToNewRecipe : ProfileUiAction
     data object NavigateToEditedProfile : ProfileUiAction
+    data class NavigateToRecipe(val recipeId: String) : ProfileUiAction
 
     data class ViewMediaFile(val bitmap: Bitmap) : ProfileUiAction
+
+    data object LoadRecipes : ProfileUiAction
 
     data object FollowOrUnfollow : ProfileUiAction
 }

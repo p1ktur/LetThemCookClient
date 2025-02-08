@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilePresent
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.outlined.VideoFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +55,7 @@ import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.SingleLineTextField
+import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -64,7 +67,15 @@ sealed interface BlockEditorState {
     data class EditingBlock(val component: BlockComponent) : BlockEditorState
 }
 
-// TODO delete file or edit it
+private data class BlockEditorFields(
+    val colorOption: ColorOption = ColorOption.WHITE,
+    val nameText: String = "",
+    val descriptionText: String = "",
+    val timeHoursText: String = "",
+    val timeMinutesText: String = "",
+    val timeSecondsText: String = "",
+    val blockFile: File? = null
+)
 
 @Composable
 fun BlockEditorPopup(
@@ -74,11 +85,18 @@ fun BlockEditorPopup(
     anchorSize: IntSize,
     onEdit: (String, String, Int, Int, Int, ColorOption, File?) -> Unit,
     onViewMediaFile: (File) -> Unit,
-    onSaveState: (BlockEditorState) -> Unit,
+    onRestoreState: (BlockEditorState) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val screenContainer = LocalScreenContainer.current
+
+    var lastBlockEditorFields: BlockEditorFields? by remember { mutableStateOf(null) }
+    var lastBlockEditorState by remember { mutableStateOf(state) }
+
     val coroutineScope = rememberCoroutineScope()
     val isMediaPickerDialogShown by remember { mediaFilePickerManager.isDialogShown }
+
+    var showEmptyNameError by remember { mutableStateOf(false) }
 
     var colorOption by remember(state) {
         mutableStateOf(
@@ -160,7 +178,49 @@ fun BlockEditorPopup(
         }
     }
 
-    if (state == BlockEditorState.Hidden || isMediaPickerDialogShown) return
+    LaunchedEffect(screenContainer.viewingMedia) {
+        if (!screenContainer.viewingMedia && lastBlockEditorState != BlockEditorState.Hidden) {
+            onRestoreState(lastBlockEditorState)
+        }
+    }
+
+    LaunchedEffect(state) {
+        if (state != BlockEditorState.Hidden) lastBlockEditorFields?.let {
+
+            colorOption = it.colorOption
+
+            nameText.apply {
+                clearText()
+                edit { append(it.nameText) }
+            }
+
+            descriptionText.apply {
+                clearText()
+                edit { append(it.descriptionText) }
+            }
+
+            timeHoursText.apply {
+                clearText()
+                edit { append(it.timeHoursText) }
+            }
+
+            timeMinutesText.apply {
+                clearText()
+                edit { append(it.timeMinutesText) }
+            }
+
+            timeSecondsText.apply {
+                clearText()
+                edit { append(it.timeSecondsText) }
+            }
+
+            blockFile = it.blockFile
+
+            lastBlockEditorFields = null
+        }
+    }
+
+    if (state == BlockEditorState.Hidden || isMediaPickerDialogShown || screenContainer.viewingMedia) return
 
     val popupPositionProvider = remember {
         object : PopupPositionProvider {
@@ -223,7 +283,25 @@ fun BlockEditorPopup(
                 selectedOption = colorOption,
                 onOptionSelect = { colorOption = it }
             )
-            //TODO name cannot be empty so show error
+            if (showEmptyNameError) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(12.dp),
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "Error Show Icon",
+                        tint = LocalAppTheme.current.errorText
+                    )
+                    Text(
+                        text = "Block name cannot be empty.",
+                        style = LocalAppTheme.current.typography.bodySmall,
+                        color = LocalAppTheme.current.errorText
+                    )
+                }
+            }
             SingleLineTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = nameText,
@@ -307,7 +385,17 @@ fun BlockEditorPopup(
                                     blockFile = it.file
                                 }
                             } else blockFile?.let {
-                                onSaveState(state)
+                                lastBlockEditorFields = BlockEditorFields(
+                                    colorOption = colorOption,
+                                    nameText = nameText.text.toString(),
+                                    descriptionText = descriptionText.text.toString(),
+                                    timeHoursText = timeHoursText.text.toString(),
+                                    timeMinutesText = timeMinutesText.text.toString(),
+                                    timeSecondsText = timeSecondsText.text.toString(),
+                                    blockFile = blockFile
+                                )
+                                lastBlockEditorState = state
+
                                 onDismiss()
                                 onViewMediaFile(it)
                             }
@@ -343,7 +431,8 @@ fun BlockEditorPopup(
                             .size(40.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .clickable {
-                                val blockId = (state as? BlockEditorState.EditingBlock)?.component?.id
+                                val blockId =
+                                    (state as? BlockEditorState.EditingBlock)?.component?.id
                                         ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
                                         ?: return@clickable
 
@@ -365,13 +454,20 @@ fun BlockEditorPopup(
                 TextButton(
                     text = buttonText,
                     onClick = {
+                        if (nameText.text.isEmpty()) {
+                            showEmptyNameError = true
+                            return@TextButton
+                        } else {
+                            showEmptyNameError = false
+                        }
+
                         try {
                             onEdit(
                                 nameText.text.toString(),
                                 descriptionText.text.toString(),
-                                timeHoursText.text.toString().toInt(),
-                                timeMinutesText.text.toString().toInt(),
-                                timeSecondsText.text.toString().toInt(),
+                                timeHoursText.text.toString().toIntOrNull() ?: 0,
+                                timeMinutesText.text.toString().toIntOrNull() ?: 0,
+                                timeSecondsText.text.toString().toIntOrNull() ?: 0,
                                 colorOption,
                                 blockFile
                             )

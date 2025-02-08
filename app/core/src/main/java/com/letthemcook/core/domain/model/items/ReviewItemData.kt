@@ -8,6 +8,6 @@ data class ReviewItemData(
     val authorLogin: String,
     val authorBitmap: Bitmap?,
     val text: String,
-    val likesAmount: Int,
+    var likesAmount: Int,
     val isLiked: Boolean,
 )

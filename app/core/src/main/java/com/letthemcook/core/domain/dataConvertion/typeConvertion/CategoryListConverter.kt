@@ -1,9 +1,7 @@
 package com.letthemcook.core.domain.dataConvertion.typeConvertion
 
 import androidx.room.TypeConverter
-import com.letthemcook.core.domain.model.file.File
-import com.letthemcook.core.domain.model.recipe.Category
-import com.letthemcook.core.domain.model.recipe.WeightedProduct
+import com.letthemcook.core.domain.model.remote.Category
 import kotlinx.serialization.json.Json
 
 class CategoryListConverter {

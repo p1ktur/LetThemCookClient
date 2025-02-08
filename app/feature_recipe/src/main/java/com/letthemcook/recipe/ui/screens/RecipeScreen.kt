@@ -1,34 +1,46 @@
 package com.letthemcook.recipe.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.outlined.AddAPhoto
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.FilePresent
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.outlined.VideoFile
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,29 +48,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.format.toShortTimeString
+import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.recipe.domain.model.LoadingStatus
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiState
-import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
 import com.letthemcook.recipe.ui.components.ReviewItem
 import com.letthemcook.recipe.ui.components.dialogs.ReviewTextFieldDialog
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.NavBar
-import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.buttons.TextButton
+import com.letthemcook.theme.components.images.RecipeImage
 import com.letthemcook.theme.components.labels.LabelContainer
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
+import com.letthemcook.theme.ui.screens.LoadingScreen
 
 @Composable
 fun RecipeScreen(
     uiState: RecipeUiState,
-    reviewsUiState: ReviewsUiState,
     onUiAction: (RecipeUiAction) -> Unit
 ) {
     val screenContainer = LocalScreenContainer.current
@@ -78,202 +89,358 @@ fun RecipeScreen(
 
     var isReviewTextFieldDialogShown by remember { mutableStateOf(false) }
 
-    Column(
+    val categoryLabelNames = remember(uiState.categories) { uiState.categories.map { it.name } }
+    val productLabelNames = remember(uiState.products) { uiState.products.map { it.toString() } }
+
+    val lazyGridState = rememberLazyStaggeredGridState()
+
+    val isScrolledToBottom by remember {
+        derivedStateOf {
+            !lazyGridState.canScrollForward && lazyGridState.canScrollBackward
+        }
+    }
+
+    LaunchedEffect(isScrolledToBottom) {
+        if (isScrolledToBottom && !uiState.loadingReviews && uiState.reviews.isNotEmpty()) {
+            onUiAction(RecipeUiAction.LoadReviews)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        onUiAction(RecipeUiAction.LoadData)
+    }
+
+    when (uiState.loadingStatus) {
+        LoadingStatus.LOADING -> {
+            LoadingScreen()
+            return
+        }
+        LoadingStatus.FAILED -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(LocalAppTheme.current.background),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Failed to load recipe.",
+                    style = LocalAppTheme.current.typography.bodyLarge
+                )
+                if (uiState.isOwner) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    TextButton(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .size(120.dp, 40.dp),
+                        text = "Edit",
+                        onClick = {
+                            onUiAction(RecipeUiAction.EditRecipe)
+                        }
+                    )
+                }
+            }
+            return
+        }
+        LoadingStatus.SUCCESS -> Unit
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(LocalAppTheme.current.background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(5f / 4f)
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    bitmap = uiState.image
-                        ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
-                    contentDescription = "Recipe Image",
-                    contentScale = ContentScale.FillBounds
-                )
-                Icon(
+                Row(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            if (uiState.isSaved) {
-                                onUiAction(RecipeUiAction.RemoveFromSaved)
-                            } else {
-                                onUiAction(RecipeUiAction.Save)
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                ) {
+                    if (uiState.recipeBitmap != null) {
+                        RecipeImage(
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .width(140.dp),
+                            bitmap = uiState.recipeBitmap,
+                            clipToRoundedRect = true,
+                            onClick = { bitmap ->
+                                onUiAction(RecipeUiAction.ViewRecipeBitmap(bitmap))
                             }
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .basicMarquee(),
+                            text = uiState.name,
+                            style = LocalAppTheme.current.typography.bodyLarge,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = if (uiState.cookingTime != null) {
+                                "Cooking time: " + uiState.cookingTime.toShortTimeString()
+                            } else {
+                                "No cooking yet"
+                            },
+                            style = LocalAppTheme.current.typography.bodyLarge
+                        )
+                        if (uiState.recipeJson != null && uiState.recipeJson != "null") {
+                            TextButton(
+                                modifier = Modifier.size(120.dp, 40.dp),
+                                text = "Cook",
+                                onClick = {
+                                    onUiAction(RecipeUiAction.Cook(uiState.recipeJson))
+                                }
+                            )
                         }
-                        .padding(4.dp)
-                        .align(Alignment.TopEnd),
-                    imageVector = if (uiState.isSaved) {
-                        Icons.Default.Bookmark
-                    } else {
-                        Icons.Default.BookmarkBorder
-                    },
-                    contentDescription = "Save   Button",
-                    tint = LocalAppTheme.current.text
-                )
-                Column(
+                        if (uiState.isOwner) {
+                            TextButton(
+                                modifier = Modifier.size(120.dp, 40.dp),
+                                text = "Edit",
+                                onClick = {
+                                    onUiAction(RecipeUiAction.EditRecipe)
+                                }
+                            )
+                        }
+                    }
+                }
+                HorizontalDivider(color = LocalAppTheme.current.text)
+                Row(
                     modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.BottomStart),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(horizontal = 12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = uiState.authorLogin,
+                        text = uiState.dislikesAmount.cute(),
                         style = LocalAppTheme.current.typography.bodyMedium
                     )
+                    Icon(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                if (uiState.likeStatus == LikeStatus.DISLIKED) {
+                                    onUiAction(RecipeUiAction.UnDislikeRecipe)
+                                } else {
+                                    onUiAction(RecipeUiAction.DislikeRecipe)
+                                }
+                            },
+                        imageVector = if (uiState.likeStatus == LikeStatus.DISLIKED) {
+                            Icons.Filled.ThumbDown
+                        } else {
+                            Icons.Outlined.ThumbDown
+                        },
+                        contentDescription = "Dislikes Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                if (uiState.likeStatus == LikeStatus.LIKED) {
+                                    onUiAction(RecipeUiAction.UnlikeRecipe)
+                                } else {
+                                    onUiAction(RecipeUiAction.LikeRecipe)
+                                }
+                            },
+                        imageVector = if (uiState.likeStatus == LikeStatus.LIKED) {
+                            Icons.Filled.ThumbUp
+                        } else {
+                            Icons.Outlined.ThumbUp
+                        },
+                        contentDescription = "Likes Icon",
+                        tint = LocalAppTheme.current.text
+                    )
                     Text(
-                        text = uiState.name,
+                        text = uiState.likesAmount.cute(),
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (!uiState.isOwner) {
+                        Icon(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    if (uiState.isFavored) {
+                                        onUiAction(RecipeUiAction.RemoveFromFavored)
+                                    } else {
+                                        onUiAction(RecipeUiAction.Favor)
+                                    }
+                                },
+                            imageVector = if (uiState.isFavored) {
+                                Icons.Filled.Bookmark
+                            } else {
+                                Icons.Outlined.Bookmark
+                            },
+                            contentDescription = "Favor Button",
+                            tint = LocalAppTheme.current.text
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    Text(
+                        text = uiState.preparationsAmount.cute(),
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                        contentDescription = "Preparations Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.AutoMirrored.Outlined.Comment,
+                        contentDescription = "Reviews Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                    Text(
+                        text = uiState.reviewsAmount.cute(),
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                }
+                if (uiState.description.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        text = uiState.description,
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
                 }
-                TextButton(
+                if (uiState.attachments.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        text = "Attachments",
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        uiState.attachments.forEachIndexed { index, file ->
+                            Icon(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .clickable {
+                                        onUiAction(RecipeUiAction.ViewMediaFile(file))
+                                    }
+                                    .padding(4.dp),
+                                imageVector = when (file.type) {
+                                    FileType.IMAGE -> Icons.Outlined.Image
+                                    FileType.VIDEO -> Icons.Outlined.VideoFile
+                                    FileType.ANY -> Icons.Outlined.FilePresent
+                                },
+                                contentDescription = "File Icon",
+                                tint = LocalAppTheme.current.text
+                            )
+                        }
+                    }
+                }
+                HorizontalDivider(color = LocalAppTheme.current.text)
+                Column {
+                    LabelContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        name = "Categories",
+                        labels = categoryLabelNames,
+                        maxRows = 2,
+                        onLabelClick = {}
+                    )
+                    LabelContainer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        name = "Products",
+                        labels = productLabelNames,
+                        maxRows = 2,
+                        onLabelClick = {}
+                    )
+                }
+            }
+        }
+        item {
+            Column(
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .fillMaxWidth()
+                    .animateItem(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                HorizontalDivider(color = LocalAppTheme.current.text)
+                Row(
                     modifier = Modifier
-                        .padding(12.dp)
-                        .align(Alignment.TopCenter),
-                    text = "Start cooking",
-                    onClick = {
-                        onUiAction(RecipeUiAction.StartCooking)
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Reviews",
+                        style = LocalAppTheme.current.typography.bodyMedium
+                    )
+                    Icon(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                isReviewTextFieldDialogShown = true
+                            }
+                            .padding(4.dp),
+                        imageVector = Icons.AutoMirrored.Outlined.Comment,
+                        contentDescription = "Add Review Button",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
+            }
+        }
+        if (uiState.reviews.isNotEmpty()) {
+            itemsIndexed(uiState.reviews, key = { _, it -> "${it.id}_${it.likesAmount}" }) { index, reviewData ->
+                ReviewItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem(),
+                    reviewItemData = reviewData,
+                    onProfileClick = {
+                        onUiAction(RecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
+                    },
+                    onLikeClick = {
+                        if (reviewData.isLiked) {
+                            onUiAction(RecipeUiAction.UnlikeReview(index))
+                        } else {
+                            onUiAction(RecipeUiAction.LikeReview(index))
+                        }
                     }
                 )
             }
-            HorizontalDivider(color = LocalAppTheme.current.text)
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
+        } else {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = uiState.dislikesAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodySmall
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "No reviews yet",
+                    style = LocalAppTheme.current.typography.bodyMedium,
+                    textAlign = TextAlign.Center
                 )
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.Outlined.ThumbDown,
-                    contentDescription = "Dislikes Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.Outlined.ThumbUp,
-                    contentDescription = "Likes Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Text(
-                    text = uiState.likesAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodySmall
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = uiState.preparationsAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodySmall
-                )
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
-                    contentDescription = "Preparations Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.AutoMirrored.Outlined.Comment,
-                    contentDescription = "Reviews Icon",
-                    tint = LocalAppTheme.current.text
-                )
-                Text(
-                    text = uiState.reviewsAmount.toString(),
-                    style = LocalAppTheme.current.typography.bodySmall
-                )
-            }
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = uiState.description,
-                style = LocalAppTheme.current.typography.bodyMedium
-            )
-            HorizontalDivider(color = LocalAppTheme.current.text)
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = "Cooking time: " + uiState.cookingTime.toShortTimeString(),
-                style = LocalAppTheme.current.typography.bodyLarge
-            )
-            LabelContainer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                name = "Categories",
-                labels = uiState.categories,
-                maxRows = 2,
-                onLabelClick = {}
-            )
-            LabelContainer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                name = "Products",
-                labels = uiState.products,
-                maxRows = 2,
-                onLabelClick = {}
-            )
-            HorizontalDivider(color = LocalAppTheme.current.text)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Reviews",
-                    style = LocalAppTheme.current.typography.bodyMedium
-                )
-                Icon(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            isReviewTextFieldDialogShown = true
-                        }
-                        .padding(4.dp),
-                    imageVector = Icons.Outlined.AddAPhoto,
-                    contentDescription = "Camera Button",
-                    tint = LocalAppTheme.current.text
-                )
-            }
-            // TODO add nested scroll
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                items(reviewsUiState.reviews, key = { it.id }) { reviewData ->
-                    ReviewItem(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateItem(),
-                        reviewItemData = reviewData,
-                        onProfileClick = {
-                            onUiAction(RecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
-                        },
-                        onLikeClick = {
-                            if (reviewData.isLiked) {
-                                onUiAction(RecipeUiAction.DislikeReview(reviewData.id))
-                            } else {
-                                onUiAction(RecipeUiAction.LikeReview(reviewData.id))
-                            }
-                        }
-                    )
-                }
             }
         }
     }

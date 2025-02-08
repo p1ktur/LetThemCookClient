@@ -2,8 +2,8 @@ package com.letthemcook.editor.domain.viewModels.builder
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -13,16 +13,14 @@ sealed interface BuilderUiAction {
     data object NavigateBack : BuilderUiAction
     data object NavigateToTutorial : BuilderUiAction
 
-    data class ViewMediaFile(val file: File) : BuilderUiAction
-    data object StopViewingMediaFile : BuilderUiAction
+    data class ViewMediaFile(val blockId: String, val file: File) : BuilderUiAction
 
     // Common
-    data object FetchData : BuilderUiAction
     data object SaveChanges : BuilderUiAction
     data object TryDemoCooking : BuilderUiAction
 
     // Products
-    data class AddProduct(val product: Product, val position: Offset) : BuilderUiAction
+    data class AddProduct(val weightedProduct: WeightedProduct, val position: Offset) : BuilderUiAction
 
     // Components
     data class AddUnusedComponent(val unusedBlockComponent: UnusedBlockComponent) : BuilderUiAction
@@ -46,5 +44,4 @@ sealed interface BuilderUiAction {
 
     // Block Editor
     data class SetBlockEditorState(val state: BlockEditorState) : BuilderUiAction
-    data class SaveBlockEditorState(val state: BlockEditorState?) : BuilderUiAction
 }

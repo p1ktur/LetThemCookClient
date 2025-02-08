@@ -1,13 +1,15 @@
 package com.letthemcook.core.data.remote
 
+import android.util.Log
+import com.letthemcook.core.domain.http.delete
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.post
 import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
-import com.letthemcook.core.domain.model.recipe.Category
+import com.letthemcook.core.domain.model.remote.Category
 import com.letthemcook.core.domain.model.items.RecipeItemData
-import com.letthemcook.core.domain.model.recipe.Product
-import com.letthemcook.core.domain.model.recipe.Recipe
+import com.letthemcook.core.domain.model.remote.Product
+import com.letthemcook.core.domain.model.remote.Recipe
 import io.ktor.client.call.body
 import io.ktor.util.StringValues
 import java.net.URLEncoder
@@ -129,7 +131,7 @@ class RecipeManager(
         if (!authManager.checkAccessTokenAndTryRefresh()) return null
 
         return get(
-            urlString = "/recipes",
+            urlString = "/recipe",
             params = StringValues.build {
                 append("recipeId", recipeId)
             },
@@ -137,7 +139,9 @@ class RecipeManager(
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
             onResponse = { it.body<Recipe>() },
-            onError = { null }
+            onError = {
+                Log.d("TAG", "$it")
+                null }
         )
     }
 
@@ -145,7 +149,7 @@ class RecipeManager(
         if (!authManager.checkAccessTokenAndTryRefresh()) return false
 
         return post(
-            urlString = "/recipes",
+            urlString = "/recipe",
             body = recipe,
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
@@ -158,8 +162,8 @@ class RecipeManager(
     suspend fun unpublishRecipe(recipeId: String): Boolean {
         if (!authManager.checkAccessTokenAndTryRefresh()) return false
 
-        return post(
-            urlString = "/recipes",
+        return delete(
+            urlString = "/recipe",
             params = StringValues.build {
                 append("recipeId", recipeId)
             },

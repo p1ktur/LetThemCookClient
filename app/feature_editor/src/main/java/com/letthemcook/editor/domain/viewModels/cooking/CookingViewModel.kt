@@ -4,6 +4,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.local.files.LocalFileManager
+import com.letthemcook.core.data.remote.RemoteFileManager
+import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.cooking.CookingState
 import com.letthemcook.editor.domain.cooking.track.EmptyTrackData
@@ -16,6 +19,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.cook
 import com.letthemcook.editor.domain.editor.components.prototype.countFinishedAndTotal
 import com.letthemcook.editor.domain.editor.components.prototype.decreaseCookingTimer
 import com.letthemcook.editor.domain.editor.components.prototype.doForEveryChild
+import com.letthemcook.editor.domain.editor.components.prototype.doForEveryChildAsync
 import com.letthemcook.editor.domain.editor.components.prototype.finish
 import com.letthemcook.editor.domain.editor.components.prototype.firstInHierarchy
 import com.letthemcook.editor.domain.editor.components.prototype.getPointerContainer
@@ -26,8 +30,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.restore
 import com.letthemcook.editor.domain.editor.components.prototype.toTrackData
 import com.letthemcook.editor.domain.editor.geometry.limit
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
-import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
-import com.letthemcook.editor.ui.components.popups.BlockEditorState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,19 +38,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CookingViewModel(
+    ownerId: String,
+    recipeId: String,
     recipeJson: String,
-    private val recipeGraphSerializer: RecipeGraphSerializer
+    recipeName: String,
+    private val recipeGraphSerializer: RecipeGraphSerializer,
+    localFileManager: LocalFileManager,
+    remoteFileManager: RemoteFileManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CookingUiState())
+    private val _uiState = MutableStateFlow(CookingUiState(ownerId, recipeId, recipeName))
     val uiState = _uiState.asStateFlow()
 
     private val components get() = listOf(uiState.value.centralComponent)
 
     private var cookingJob: Job? = null
     private var pointerDownJob: Job? = null
+
+    var viewMediaFile: ((String, File) -> Unit)? = null
 
     init {
         viewModelScope.launch {
@@ -64,6 +75,32 @@ class CookingViewModel(
 
             delay(100)
             updateCanvasCounter()
+
+            withContext(Dispatchers.IO) {
+                components.doForEveryChildAsync {
+                    (this as? BlockComponent)?.let { component ->
+                        component.file?.let { file ->
+                            val localBytes = localFileManager.getFileBytes(file)
+
+                            if (localBytes == null) {
+                                val params = RemoteFileManager.RequestParams(
+                                    userId = ownerId,
+                                    fileId = file.uid,
+                                    recipeId = recipeId,
+                                    blockId = id,
+                                    type = file.type
+                                )
+
+                                val remoteBytes = remoteFileManager.getFile(params)
+
+                                if (remoteBytes != null) {
+                                    localFileManager.createTemporaryFile(file.uid, file.type, remoteBytes)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -71,8 +108,7 @@ class CookingViewModel(
         when (action) {
             CookingUiAction.NavigateBack -> Unit
 
-            is CookingUiAction.ViewMediaFile -> Unit
-            CookingUiAction.StopViewingMediaFile -> stopViewingMediaFile()
+            is CookingUiAction.ViewMediaFile -> viewMediaFile?.invoke(action.blockId, action.file)
 
             // Cooking
             CookingUiAction.StartCooking -> startCooking()
@@ -98,15 +134,6 @@ class CookingViewModel(
     }
 
     // ACTIONS
-
-    private fun stopViewingMediaFile() {
-        _uiState.update {
-            it.copy(
-                viewedMediaFile = null
-            )
-        }
-    }
-
     // Cooking
 
     private fun startCooking() {
@@ -313,13 +340,10 @@ class CookingViewModel(
 
                 if (containerBlockComponent != null && containerBlockComponent is BlockComponent) {
                     val containment = containerBlockComponent.containsPointer(checkOffset, true)
+                    val file = containerBlockComponent.file
 
-                    if (containment == BlockContainment.FileIcon) {
-                        _uiState.update {
-                            it.copy(
-                                viewedMediaFile = containerBlockComponent.file
-                            )
-                        }
+                    if (containment == BlockContainment.FileIcon && file != null) {
+                        viewMediaFile?.invoke(containerBlockComponent.id, file)
                     } else {
                         selectBlock(containerBlockComponent)
                     }

@@ -7,6 +7,7 @@ import com.letthemcook.core.data.local.LocalDataDatabase
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
+import com.letthemcook.core.data.remote.ReviewManager
 import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.media.MediaFilePickerManager
 import org.koin.android.ext.koin.androidContext
@@ -30,5 +31,6 @@ val koinCoreModule = module {
     single { AuthManager(androidContext()) }
     single { RecipeManager(get(), get()) }
     single { RemoteFileManager(get()) }
+    single { ReviewManager(get(), get(), get(), get()) }
     single { UserManager(get(), get()) }
 }

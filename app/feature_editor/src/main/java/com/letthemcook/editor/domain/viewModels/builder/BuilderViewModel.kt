@@ -4,7 +4,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.letthemcook.core.domain.model.recipe.Product
+import com.letthemcook.core.data.local.LocalDataManager
+import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.remote.WeightedProduct
+import com.letthemcook.editor.data.UnusedBlocksDao
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
@@ -20,6 +23,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.definePointRela
 import com.letthemcook.editor.domain.editor.components.prototype.doForEveryChild
 import com.letthemcook.editor.domain.editor.components.prototype.findInHierarchy
 import com.letthemcook.editor.domain.editor.components.prototype.getPointerContainer
+import com.letthemcook.editor.domain.editor.components.prototype.getTotalTime
 import com.letthemcook.editor.domain.editor.components.prototype.insertBottomComponent
 import com.letthemcook.editor.domain.editor.components.prototype.insertLeftComponent
 import com.letthemcook.editor.domain.editor.components.prototype.insertRightComponent
@@ -28,8 +32,8 @@ import com.letthemcook.editor.domain.editor.components.prototype.pointInBounds
 import com.letthemcook.editor.domain.editor.components.prototype.removeFromHierarchy
 import com.letthemcook.editor.domain.editor.geometry.limit
 import com.letthemcook.editor.domain.serialization.RecipeGraphSerializer
-import com.letthemcook.editor.domain.viewModels.cooking.testCookData
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,11 +42,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BuilderViewModel(
+    ownerId: String,
+    recipeId: String,
     recipeJson: String?,
-    private val recipeGraphSerializer: RecipeGraphSerializer
+    recipeName: String,
+    weightedProducts: List<WeightedProduct>,
+    private val recipeGraphSerializer: RecipeGraphSerializer,
+    private val unusedBlocksDao: UnusedBlocksDao,
+    localDataManager: LocalDataManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(BuilderUiState())
+    private val _uiState = MutableStateFlow(BuilderUiState(ownerId, recipeId, recipeName))
     val uiState = _uiState.asStateFlow()
 
     private var retainProductOnBlock = false
@@ -51,18 +61,71 @@ class BuilderViewModel(
 
     private var pointerDownJob: Job? = null
 
+    var viewMediaFile: ((String, File) -> Unit)? = null
+
     init {
-        viewModelScope.launch {
-            val centralComponent = recipeGraphSerializer.deserializeComponent(testCookData)
+        if (recipeJson != null) {
+            viewModelScope.launch {
+                val centralComponent = recipeGraphSerializer.deserializeComponent(recipeJson)
+
+                _uiState.update {
+                    it.copy(
+                        centralComponent = centralComponent
+                    )
+                }
+
+                val unusedProducts = mutableListOf<WeightedProduct>()
+
+                weightedProducts.forEach { product ->
+                    if (product.amount == 0) {
+                        unusedProducts.add(product)
+                    } else {
+                        repeat(product.amount) {
+                            unusedProducts.add(product.copy(amount = 0))
+                        }
+                    }
+                }
+
+                components.doForEveryChild {
+                    (this as? BlockComponent)?.let { component ->
+                        val toRemove = mutableListOf<WeightedProduct>()
+
+                        component.products.forEach { product ->
+                            val index = unusedProducts.indexOfFirst { it.data.id == product.data.id }
+                            if (index >= 0) {
+                                unusedProducts.removeAt(index)
+                            } else {
+                                toRemove.add(product)
+                            }
+                        }
+
+                        component.products.removeAll(toRemove)
+                    }
+                }
+
+                _uiState.update {
+                    it.copy(
+                        unusedProducts = unusedProducts
+                    )
+                }
+
+                delay(100)
+                updateCanvasCounter()
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            // check for left undeleted blocks of deleted recipes
+            val recipeIds = localDataManager.getRecipeIds()
+            if (recipeIds.isNotEmpty()) {
+                unusedBlocksDao.deleteLeftOnes(recipeIds)
+            }
 
             _uiState.update {
                 it.copy(
-                    centralComponent = centralComponent
+                    unusedBlockComponents = unusedBlocksDao.getBlocksByRecipeId(recipeId)
                 )
             }
-
-            delay(100)
-            updateCanvasCounter()
         }
     }
 
@@ -71,16 +134,14 @@ class BuilderViewModel(
             BuilderUiAction.NavigateBack -> Unit
             BuilderUiAction.NavigateToTutorial -> Unit
 
-            is BuilderUiAction.ViewMediaFile -> Unit
-            BuilderUiAction.StopViewingMediaFile -> stopViewingMediaFile()
+            is BuilderUiAction.ViewMediaFile -> viewMediaFile?.invoke(action.blockId, action.file)
 
             // Common
-            BuilderUiAction.FetchData -> fetchData()
             BuilderUiAction.SaveChanges -> Unit
-            BuilderUiAction.TryDemoCooking -> return prepareCookingData()
+            BuilderUiAction.TryDemoCooking -> Unit
 
             // Products
-            is BuilderUiAction.AddProduct -> return addProduct(action.product, action.position)
+            is BuilderUiAction.AddProduct -> return addProduct(action.weightedProduct, action.position)
 
             // Components
             is BuilderUiAction.AddUnusedComponent -> addUnusedComponent(action.unusedBlockComponent)
@@ -104,44 +165,24 @@ class BuilderViewModel(
 
             // Block Editor
             is BuilderUiAction.SetBlockEditorState -> setBlockEditorState(action.state)
-            is BuilderUiAction.SaveBlockEditorState -> saveBlockEditorState(action.state)
         }
 
         return null
     }
 
-    fun getRecipeJson(): String = recipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
-
-    // ACTIONS
-
-    private fun stopViewingMediaFile() {
-        _uiState.update {
-            it.copy(
-                viewedMediaFile = null
-            )
+    fun getRecipeJson(): String {
+        return if (uiState.value.centralComponent is EmptyComponent) {
+            "null"
+        } else {
+            prepareCookingData().toString()
         }
     }
 
-    // Common
-
-    private fun fetchData() {
-//        if (serverRepository.authenticatedType.value is AuthType.Student) return
-//
-//        taskId?.let { id ->
-//            viewModelScope.launch(Dispatchers.IO) {
-//                val task = serverRepository.getTask(id)
-//
-//                if (task != null && task.diagramJson.length > 5) {
-//                    val decodedDiagramJson = URLDecoder.decode(task.diagramJson, "utf-8")
-//
-//                    val saveData = ServerJson.get().decodeFromString<SaveData>(decodedDiagramJson)
-//                    applySaveData(saveData)
-//                }
-//            }
-//        }
+    fun getCookingTime(): Long {
+        return uiState.value.centralComponent.getTotalTime()
     }
 
-    private fun prepareCookingData(): String? {
+    fun prepareCookingData(): String? {
         return try {
             recipeGraphSerializer.serializeToJson(uiState.value.centralComponent)
         } catch (_: Exception) {
@@ -149,9 +190,11 @@ class BuilderViewModel(
         }
     }
 
+    // ACTIONS
+
     // Products
 
-    private fun addProduct(product: Product, position: Offset): BlockComponent? {
+    private fun addProduct(product: WeightedProduct, position: Offset): BlockComponent? {
         return getBlockUnderPosition(scaleAndTranslate(position))?.let { containedBlock ->
             _uiState.update {
                 it.copy(
@@ -159,7 +202,7 @@ class BuilderViewModel(
                 )
             }
 
-            containedBlock.productNames.add(product)
+            containedBlock.products.add(product)
             containedBlock.tryRecalculateSize()
 
             updateCanvasCounter()
@@ -170,6 +213,10 @@ class BuilderViewModel(
     // Components
 
     private fun addUnusedComponent(unusedBlockComponent: UnusedBlockComponent) {
+        viewModelScope.launch(Dispatchers.IO) {
+            unusedBlocksDao.upsertUnusedBlock(unusedBlockComponent)
+        }
+
         _uiState.update {
             it.copy(
                 unusedBlockComponents = it.unusedBlockComponents + unusedBlockComponent
@@ -179,6 +226,10 @@ class BuilderViewModel(
 
     private fun updateUnusedComponent(oldComponent: UnusedBlockComponent, newComponent: UnusedBlockComponent) {
         val oldComponentIndex = uiState.value.unusedBlockComponents.indexOf(oldComponent)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            unusedBlocksDao.upsertUnusedBlock(newComponent)
+        }
 
         _uiState.update {
             it.copy(
@@ -233,6 +284,10 @@ class BuilderViewModel(
             }
         }
 
+        viewModelScope.launch(Dispatchers.IO) {
+            unusedBlocksDao.deleteById(unusedBlockComponent.id)
+        }
+
         _uiState.update {
             it.copy(
                 unusedBlockComponents = it.unusedBlockComponents.minus(unusedBlockComponent),
@@ -261,15 +316,21 @@ class BuilderViewModel(
         if (!retainProductOnBlock) {
             _uiState.update {
                 it.copy(
-                    unusedProducts = it.unusedProducts + componentToRemove.productNames
+                    unusedProducts = it.unusedProducts + componentToRemove.products
                 )
             }
-            componentToRemove.productNames.clear()
+            componentToRemove.products.clear()
+        }
+
+        val unusedBlockComponent = componentToRemove.toUnusedBlockComponent(uiState.value.recipeId)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            unusedBlocksDao.upsertUnusedBlock(unusedBlockComponent)
         }
 
         _uiState.update {
             it.copy(
-                unusedBlockComponents = it.unusedBlockComponents + componentToRemove.toUnusedBlockComponent()
+                unusedBlockComponents = it.unusedBlockComponents + unusedBlockComponent
             )
         }
 
@@ -344,7 +405,7 @@ class BuilderViewModel(
                         return@launch
                     }
                     is BlockContainment.ProductLabel -> {
-                        val product = containedBlock.productNames.removeAt(containment.index)
+                        val product = containedBlock.products.removeAt(containment.index)
 
                         _uiState.update {
                             it.copy(
@@ -397,13 +458,10 @@ class BuilderViewModel(
 
                 if (containerBlockComponent != null && containerBlockComponent is BlockComponent) {
                     val containment = containerBlockComponent.containsPointer(checkOffset, true)
+                    val file = containerBlockComponent.file
 
-                    if (containment == BlockContainment.FileIcon) {
-                        _uiState.update {
-                            it.copy(
-                                viewedMediaFile = containerBlockComponent.file
-                            )
-                        }
+                    if (containment == BlockContainment.FileIcon && file != null) {
+                        viewMediaFile?.invoke(containerBlockComponent.id, file)
                     } else {
                         setBlockEditorState(BlockEditorState.EditingBlock(containerBlockComponent))
                     }
@@ -440,7 +498,7 @@ class BuilderViewModel(
                 }
             }
             componentFocus is ComponentFocus.Product -> {
-                val movedProduct = componentFocus.data
+                val movedProduct = componentFocus.weightedProduct
                 val productAdded = addProduct(
                     product = movedProduct,
                     position = uiState.value.canvasUiState.pointerMoveOffset ?:
@@ -505,14 +563,6 @@ class BuilderViewModel(
         _uiState.update {
             it.copy(
                 blockEditorState = state
-            )
-        }
-    }
-
-    private fun saveBlockEditorState(state: BlockEditorState?) {
-        _uiState.update {
-            it.copy(
-                savedBlockEditorState = state
             )
         }
     }

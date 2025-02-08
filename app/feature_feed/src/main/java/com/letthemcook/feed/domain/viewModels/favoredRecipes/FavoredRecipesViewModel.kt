@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.data.local.files.LocalFileManager
+import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.items.RecipeItemData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class FavoredRecipesViewModel(
     localDataManager: LocalDataManager,
-    localFileManager: LocalFileManager
+    localFileManager: LocalFileManager,
+    recipeManager: RecipeManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoredRecipesUiState())
@@ -21,16 +24,36 @@ class FavoredRecipesViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            val recipes = localDataManager
+            val recipes = mutableListOf<RecipeItemData>()
+            localDataManager
                 .getFavoredRecipes()
-                .map { recipe ->
-                    val bitmap = recipe.bitmapId?.let {
-                        localFileManager.getFileByUid(it)?.let { file ->
-                            localFileManager.getFileBytes(file)?.toBitmap()
+                .forEach { recipe ->
+                    var currentRecipe = recipe
+                    val remoteRecipe = recipeManager.getRecipe(recipe.id)
+
+                    if (remoteRecipe != null && remoteRecipe.hashCode() != recipe.hashCode()) {
+                        currentRecipe = remoteRecipe
+
+                        localDataManager.saveRecipe(remoteRecipe)
+                    } else if (remoteRecipe == null) {
+                        currentRecipe.bitmapId?.let {
+                            localFileManager.getFileByUid(it)?.let { file ->
+                                localFileManager.deleteFile(file)
+                            }
                         }
+
+                        localDataManager.deleteRecipeById(currentRecipe.id)
                     }
 
-                    recipe.asItemData(bitmap)
+                    if (remoteRecipe != null) {
+                        val bitmap = currentRecipe.bitmapId?.let {
+                            localFileManager.getFileByUid(it)?.let { file ->
+                                localFileManager.getFileBytes(file)?.toBitmap()
+                            }
+                        }
+
+                        recipes.add(currentRecipe.asItemData(bitmap))
+                    }
                 }
 
             _uiState.update {

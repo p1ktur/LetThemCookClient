@@ -66,7 +66,7 @@ class AuthManager(context: Context) {
         sharedPreferences.edit().putString(accessTokenKey, token).apply()
     }
 
-    fun getRefreshToken(): String? {
+    private fun getRefreshToken(): String? {
         return sharedPreferences.getString(refreshTokenKey, null)
     }
 

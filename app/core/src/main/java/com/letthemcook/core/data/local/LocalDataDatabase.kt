@@ -10,9 +10,9 @@ import com.letthemcook.core.domain.dataConvertion.typeConvertion.FileConverter
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.LocalDateTimeConverter
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.StringListConverter
 import com.letthemcook.core.domain.dataConvertion.typeConvertion.WeightedProductListConverter
-import com.letthemcook.core.domain.model.recipe.reactions.RecipeReaction
-import com.letthemcook.core.domain.model.recipe.reactions.ReviewLike
-import com.letthemcook.core.domain.model.recipe.Recipe
+import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
+import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
+import com.letthemcook.core.domain.model.remote.Recipe
 
 @Database(
     entities = [Recipe::class, RecipeReaction::class, ReviewLike::class],

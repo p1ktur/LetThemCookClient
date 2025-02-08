@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.letthemcook.editor.domain.editor.color.ColorOption
-import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun ColorChooser(

@@ -6,14 +6,14 @@ import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.recipe.Product
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
 class CanvasDragAndDropManager(
     private val canvasGlobalPosition: Offset,
-    private val unusedProducts: List<Product>,
+    private val unusedProducts: List<WeightedProduct>,
     private val unusedBlockComponents: List<UnusedBlockComponent>,
     private val textMeasurer: TextMeasurer,
     private val nameTextStyle: TextStyle,
@@ -43,7 +43,7 @@ class CanvasDragAndDropManager(
                 val productId = clipData.getItemAt(0).text.toString().toIntOrNull()
 
                 productId?.let {
-                    unusedProducts.find { it.id == productId }?.let {
+                    unusedProducts.find { it.data.id == productId }?.let {
                         val productBlock = onUiAction(BuilderUiAction.AddProduct(it, position)) as? BlockComponent
 
                         productBlock?.calculateSize(textMeasurer, nameTextStyle, contentTextStyle)

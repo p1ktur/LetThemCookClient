@@ -1,8 +1,8 @@
 package com.letthemcook.feed.domain.viewModels.search
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.letthemcook.core.domain.model.recipe.Category
-import com.letthemcook.core.domain.model.recipe.Product
+import com.letthemcook.core.domain.model.remote.Category
+import com.letthemcook.core.domain.model.remote.Product
 import com.letthemcook.core.domain.model.items.RecipeItemData
 import com.letthemcook.core.domain.model.items.UserItemData
 

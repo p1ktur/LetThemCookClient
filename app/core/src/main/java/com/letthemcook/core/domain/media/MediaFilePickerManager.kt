@@ -8,11 +8,11 @@ import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.graphics.ImageDecoder
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -30,8 +30,8 @@ import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File as JFile
 import java.util.UUID
+import java.io.File as JFile
 
 class MediaFilePickerManager(
     private val context: Context,
@@ -67,8 +67,6 @@ class MediaFilePickerManager(
             ActivityResultContracts.TakePicture()
         ) { isNewImageCaptured ->
             if (!isNewImageCaptured) return@rememberLauncherForActivityResult
-
-            // TODO for video also
 
             coroutineScope.launch(Dispatchers.IO) {
                 processImageUri(temporaryCameraFileUri)
@@ -253,6 +251,7 @@ class MediaFilePickerManager(
     }
 
     // Private
+    @Suppress("DEPRECATION")
     private suspend fun processImageUri(uri: Uri) {
         try {
             val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -283,8 +282,21 @@ class MediaFilePickerManager(
     private suspend fun processVideoUri(uri: Uri) {
         try {
             val bytes = context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                inputStream.readBytes()
+                val bytes = inputStream.readBytes()
+                if (bytes.size > 20 * 1024 * 1024) {
+                    compressVideoWithSizeLimit(context, uri)
+                } else {
+                    bytes
+                }
             } ?: return
+
+            val videoDuration = getVideoDuration(uri)
+
+            if (videoDuration > 300_000L) {
+                Toast.makeText(context, "Video must not be longer than 5 minutes.", Toast.LENGTH_LONG).show()
+                onReceiveMediaFile = null
+                return
+            }
 
             val existingFile = localFileManager.getFileByUid(currentFileName)
             existingFile?.type = _currentFileType
@@ -300,5 +312,19 @@ class MediaFilePickerManager(
             onReceiveMediaFile?.invoke(mediaFile)
             onReceiveMediaFile = null
         } finally { }
+    }
+
+    private fun getVideoDuration(uri: Uri): Long {
+        val retriever = MediaMetadataRetriever()
+
+        return try {
+            retriever.setDataSource(context, uri)
+            val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            duration?.toLong() ?: 0L
+        } catch (_: Exception) {
+            0L
+        } finally {
+            retriever.release()
+        }
     }
 }

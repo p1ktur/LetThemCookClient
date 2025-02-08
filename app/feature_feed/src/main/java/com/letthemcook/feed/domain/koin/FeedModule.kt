@@ -9,5 +9,5 @@ import org.koin.dsl.module
 val koinFeedModule = module {
     viewModel { FeedViewModel(get(), get()) }
     viewModel { SearchViewModel(get(), get()) }
-    viewModel { FavoredRecipesViewModel(get(), get()) }
+    viewModel { FavoredRecipesViewModel(get(), get(), get()) }
 }

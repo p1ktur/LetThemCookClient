@@ -1,9 +1,6 @@
 package com.letthemcook.core.domain.dataConvertion.typeConvertion
 
-import android.net.Uri
 import androidx.room.TypeConverter
-import com.letthemcook.core.domain.dataConvertion.serialization.LocalDateTimeSerializer
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

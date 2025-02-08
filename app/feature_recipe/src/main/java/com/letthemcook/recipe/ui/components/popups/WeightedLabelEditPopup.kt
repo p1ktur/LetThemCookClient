@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import com.letthemcook.core.domain.model.recipe.Product
-import com.letthemcook.core.domain.model.recipe.WeightedProduct
+import com.letthemcook.core.domain.model.remote.Product
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField

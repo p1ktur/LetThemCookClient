@@ -19,11 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.model.recipe.Product
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.dataConvertion.serialization.OffsetSerializer
 import com.letthemcook.core.domain.dataConvertion.serialization.SizeSerializer
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
@@ -48,10 +48,10 @@ import kotlin.math.max
 data class BlockComponent(
     val id: String = UUID.randomUUID().toString(),
     // Data
-    var name: String = "Recipe Block",
-    var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
+    var name: String = "",
+    var description: String = "",
     var time: Long = 0L,
-    val productNames: MutableList<Product> = mutableListOf(),
+    val products: MutableList<WeightedProduct> = mutableListOf(),
     @Transient override var parentComponent: ComposedComponent? = null,
     var cookingState: BlockCookingState = BlockCookingState.NOT_REACHED,
     var file: File? = null,
@@ -163,9 +163,9 @@ data class BlockComponent(
         )
         contentHeightSum += timeTextLayout.size.height
 
-        val productTextLayouts = productNames.map {
+        val productTextLayouts = products.map {
             textMeasurer.measure(
-                text = it.name,
+                text = it.toString(),
                 style = contentTextStyle
             ).apply {
                 productsContentHeightSum += size.height + DRAW_PADDING * 3
@@ -212,7 +212,7 @@ data class BlockComponent(
             ),
             topLeft = position.copy(y = position.y + COMPONENT_PADDING),
             size = this.size.copy(
-                width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
+                width = -productsTopWidth + if (products.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
                 height = this.size.height - 2 * COMPONENT_PADDING
             ),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
@@ -222,7 +222,7 @@ data class BlockComponent(
             color = currentFrameColor,
             topLeft = position.copy(y = position.y + COMPONENT_PADDING),
             size = this.size.copy(
-                width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
+                width = -productsTopWidth + if (products.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width,
                 height = this.size.height - 2 * COMPONENT_PADDING
             ),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
@@ -359,9 +359,9 @@ data class BlockComponent(
         )
 
         var productsTopWidth = 0f
-        val productTextLayouts = productNames.map {
+        val productTextLayouts = products.map {
             textMeasurer.measure(
-                text = it.name,
+                text = it.data.name,
                 style = contentTextStyle
             ).apply {
                 productsTopWidth = max(productsTopWidth, this.size.width.toFloat())
@@ -379,7 +379,7 @@ data class BlockComponent(
             ),
             topLeft = position,
             size = size.copy(
-                width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width
+                width = -productsTopWidth + if (products.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width
             ),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
             style = Fill
@@ -388,7 +388,7 @@ data class BlockComponent(
             color = currentFrameColor,
             topLeft = position,
             size = size.copy(
-                width = -productsTopWidth + if (productNames.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width
+                width = -productsTopWidth + if (products.isNotEmpty()) this.size.width + DRAW_PADDING else this.size.width
             ),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
             style = Stroke(4f)
@@ -508,9 +508,9 @@ data class BlockComponent(
         )
         contentHeightSum += timeTextLayout.size.height
 
-        val productTextLayouts = productNames.map {
+        val productTextLayouts = products.map {
             textMeasurer.measure(
-                text = it.name,
+                text = it.data.name,
                 style = contentTextStyle
             ).apply {
                 productsContentHeightSum += size.height + DRAW_PADDING * 3
@@ -569,11 +569,11 @@ data class BlockComponent(
     fun containsPointer(pointerPosition: Offset, isDown: Boolean): BlockContainment {
         var containment: BlockContainment = BlockContainment.None
 
-        if (productNames.isNotEmpty()) {
+        if (products.isNotEmpty()) {
             val productsTopWidth = cachedDrawnProductLabelSizes.maxOf { it.width }
             var productCurrentPosition = position.plus(Offset(size.width - DRAW_PADDING * 2 - productsTopWidth, DRAW_PADDING + COMPONENT_PADDING))
 
-            for (index in productNames.indices) {
+            for (index in products.indices) {
                 val widthRange = productCurrentPosition.x..productCurrentPosition.x + cachedDrawnProductLabelSizes[index].width + DRAW_PADDING * 4
                 val heightRange = productCurrentPosition.y..productCurrentPosition.y + cachedDrawnProductLabelSizes[index].height + DRAW_PADDING * 2
 
@@ -611,8 +611,17 @@ data class BlockComponent(
 
     // Component
 
-    fun toUnusedBlockComponent(): UnusedBlockComponent {
-        return UnusedBlockComponent(id, name, description, time, productNames, colorOption, file)
+    fun toUnusedBlockComponent(recipeId: String): UnusedBlockComponent {
+        return UnusedBlockComponent(
+            id,
+            recipeId = recipeId,
+            name = name,
+            description = description,
+            time = time,
+            products = products,
+            colorOption = colorOption,
+            file = file
+        )
     }
 
     // Cooking
@@ -646,7 +655,7 @@ data class BlockComponent(
         if (id != other.id) return false
         if (name != other.name) return false
         if (description != other.description) return false
-        if (productNames.hashCode() != other.productNames.hashCode()) return false
+        if (products.hashCode() != other.products.hashCode()) return false
         if (position != other.position) return false
         if (size != other.size) return false
         if (cookingState != other.cookingState) return false
@@ -658,7 +667,7 @@ data class BlockComponent(
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + description.hashCode()
-        result = 31 * result + productNames.hashCode()
+        result = 31 * result + products.hashCode()
         result = 31 * result + position.hashCode()
         result = 31 * result + size.hashCode()
         result = 31 * result + cookingState.hashCode()

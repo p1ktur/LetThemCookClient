@@ -293,6 +293,19 @@ suspend fun List<Component>.doForEveryChildAsync(action: suspend Component.() ->
     childrenList.forEach { it?.doForEveryChildAsync(action) }
 }
 
+fun Component.countBlocks(): Int {
+    var count = 0
+
+    if (this is BlockComponent) return 1
+    if (this is ComposedComponent) {
+        components.doForEveryChild {
+            (this as? BlockComponent)?.let { count++ }
+        }
+    }
+
+    return count
+}
+
 fun Component.firstInHierarchy(): Component {
     return when (this) {
         is VerticalComposedComponent -> components.first().firstInHierarchy()

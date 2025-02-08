@@ -133,7 +133,7 @@ fun BlockInfo(
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    onUiAction(CookingUiAction.ViewMediaFile(file))
+                                    onUiAction(CookingUiAction.ViewMediaFile(selectedBlock.id, file))
                                 }
                                 .padding(4.dp),
                             imageVector = when (file.type) {

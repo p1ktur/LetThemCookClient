@@ -1,8 +1,6 @@
 package com.letthemcook.core.domain.dataConvertion.typeConvertion
 
 import androidx.room.TypeConverter
-import com.letthemcook.core.domain.model.file.File
-import kotlinx.serialization.json.Json
 
 class StringListConverter {
 

@@ -2,12 +2,14 @@ package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import com.letthemcook.core.domain.model.file.File
-import com.letthemcook.core.domain.model.recipe.Category
-import com.letthemcook.core.domain.model.recipe.Product
-import com.letthemcook.core.domain.model.recipe.Recipe
-import com.letthemcook.core.domain.model.recipe.WeightedProduct
-import com.letthemcook.recipe.domain.viewModels.reviews.LikeStatus
+import com.letthemcook.core.domain.model.remote.Category
+import com.letthemcook.core.domain.model.remote.Product
+import com.letthemcook.core.domain.model.remote.Recipe
+import com.letthemcook.core.domain.model.remote.WeightedProduct
+import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.recipe.domain.model.SaveStatus
 import java.time.LocalDateTime
 
 data class EditedRecipeUiState(
@@ -53,9 +55,13 @@ data class EditedRecipeUiState(
         isLiked: LikeStatus,
         attachments: List<File>
     ): EditedRecipeUiState {
+        name.clearText()
+        name.edit { append(recipe.name) }
+
+        description.clearText()
+        description.edit { append(recipe.description) }
+
         return copy(
-            name = TextFieldState(recipe.name ?: ""),
-            description = TextFieldState(recipe.description ?: ""),
             likesAmount = recipe.likesAmount,
             dislikesAmount = recipe.dislikesAmount,
             viewsAmount = recipe.viewsAmount,

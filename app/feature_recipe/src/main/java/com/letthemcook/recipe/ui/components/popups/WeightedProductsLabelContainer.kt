@@ -31,8 +31,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.letthemcook.core.domain.model.recipe.Product
-import com.letthemcook.core.domain.model.recipe.WeightedProduct
+import com.letthemcook.core.domain.model.remote.Product
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.labels.LabelItem
 import com.letthemcook.theme.components.labels.LabelPopup
@@ -52,10 +52,6 @@ fun WeightedProductsLabelContainer(
     onSearchedListEndReach: () -> Unit,
     onLabelClick: (Int) -> Unit
 ) {
-    // TODO delete label
-    // TODO edit label
-    // TODO when adding label: show edit popup onto this label
-
     var containerPosition by remember { mutableStateOf(Offset.Zero) }
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 

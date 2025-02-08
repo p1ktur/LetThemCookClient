@@ -1,7 +1,7 @@
 package com.letthemcook.app
 
 import android.app.Application
-import com.cooking.media.domain.koin.koinMediaModule
+import com.letthemcook.media.domain.koin.koinMediaModule
 import com.letthemcook.auth.domain.koin.koinAuthModule
 import com.letthemcook.core.domain.koin.koinCoreModule
 import com.letthemcook.editor.domain.koin.koinEditorModule

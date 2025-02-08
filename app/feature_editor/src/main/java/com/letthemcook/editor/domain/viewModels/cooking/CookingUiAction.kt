@@ -8,8 +8,7 @@ import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 sealed interface CookingUiAction {
     data object NavigateBack : CookingUiAction
 
-    data class ViewMediaFile(val file: File) : CookingUiAction
-    data object StopViewingMediaFile : CookingUiAction
+    data class ViewMediaFile(val blockId: String, val file: File) : CookingUiAction
 
     // Cooking
     data object StartCooking : CookingUiAction

@@ -9,6 +9,7 @@ constraintLayout = "2.2.0"
 coreKtx = "1.15.0"
 datastorePreferences = "1.1.2"
 espressoCore = "3.6.1"
+ffMpegKit = "6.0-2"
 gradlePlugin = "3.4.3"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -25,7 +26,7 @@ mediaExoplayerDash = "1.5.1"
 mediaUi = "1.5.1"
 securityCrypto = "1.1.0-alpha06"
 serializationJson = "1.8.0"
-serializationJsonPlugin = "2.0.20"
+serializationJsonPlugin = "2.1.10"
 room = "2.6.1"
 
 [libraries]
@@ -55,6 +56,7 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+ffmpeg-kit-full = { module = "com.arthenica:ffmpeg-kit-full", version.ref = "ffMpegKit" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradlePlugin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinAndroid" }

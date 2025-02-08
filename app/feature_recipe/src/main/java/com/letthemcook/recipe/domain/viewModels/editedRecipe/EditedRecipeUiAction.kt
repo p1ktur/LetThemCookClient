@@ -2,18 +2,18 @@ package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import android.graphics.Bitmap
 import com.letthemcook.core.domain.model.file.File
-import com.letthemcook.core.domain.model.file.FileType
-import com.letthemcook.core.domain.model.recipe.WeightedProduct
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 
 sealed interface EditedRecipeUiAction {
     data object NavigateBack : EditedRecipeUiAction
+    data object PopToProfile : EditedRecipeUiAction
     data object NavigateToHome : EditedRecipeUiAction
     data object NavigateToNewRecipe : EditedRecipeUiAction
     data object NavigateToProfile : EditedRecipeUiAction
     data class NavigateToOtherProfile(val userId: String) : EditedRecipeUiAction
 
     data object SaveChanges : EditedRecipeUiAction
-    data class UpdateRecipeJson(val recipeJson: String) : EditedRecipeUiAction
+    data class UpdateRecipeJson(val recipeJson: String?, val cookingTime: Long?) : EditedRecipeUiAction
 
     data class SelectMediaFile(val index: Int) : EditedRecipeUiAction
     data class ViewMediaFile(val file: File) : EditedRecipeUiAction
@@ -35,13 +35,4 @@ sealed interface EditedRecipeUiAction {
     data object Archive : EditedRecipeUiAction
     data class EditCooking(val recipeJson: String?) : EditedRecipeUiAction
     data class Cook(val recipeJson: String): EditedRecipeUiAction
-
-    data object LikeRecipe : EditedRecipeUiAction
-    data object UnlikeRecipe : EditedRecipeUiAction
-    data object DislikeRecipe : EditedRecipeUiAction
-    data object UnDislikeRecipe : EditedRecipeUiAction
-
-    data object SendReview : EditedRecipeUiAction
-    data class LikeReview(val id: String) : EditedRecipeUiAction
-    data class DislikeReview(val id: String) : EditedRecipeUiAction
 }

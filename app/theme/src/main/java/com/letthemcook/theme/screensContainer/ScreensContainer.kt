@@ -25,6 +25,8 @@ typealias Function = (() -> Unit)?
 class ScreenContainer {
     // Common
     fun clearToDefaults() {
+        setViewingMedia(false)
+
         setToolBarStatusText(null)
         setOnToolBarBackClick(null)
         setOnToolBarSettingsClick(null)
@@ -33,6 +35,13 @@ class ScreenContainer {
         setOnNavigateToHome(null)
         setOnNavigateToNewRecipe(null)
         setOnNavigateToProfile(null)
+    }
+
+    private val _viewingMedia = mutableStateOf(false)
+    val viewingMedia by _viewingMedia
+
+    fun setViewingMedia(value: Boolean) {
+        _viewingMedia.value = value
     }
 
     // Tool Bar
@@ -153,9 +162,12 @@ fun ScreensContainer(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .background(LocalAppTheme.current.background),
             contentAlignment = Alignment.Center,
-            content = content
+            content = {
+                content()
+            }
         )
         if (LocalScreenContainer.current.showNavigationBar) {
             NavBar(

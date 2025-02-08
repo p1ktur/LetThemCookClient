@@ -70,36 +70,38 @@ fun CookingControlPanel(
                 text = "$leftTimeText / $totalTimeText",
                 style = LocalAppTheme.current.typography.bodyMedium
             )
-            when (uiState.cookingState) {
-                CookingState.NOT_STARTED, CookingState.PAUSED -> {
-                    Icon(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                onUiAction(CookingUiAction.StartCooking)
-                            }
-                            .padding(4.dp)
-                            .align(Alignment.Center),
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play Button",
-                        tint = LocalAppTheme.current.text
-                    )
-                }
-                CookingState.STARTED -> {
-                    Icon(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                onUiAction(CookingUiAction.PauseCooking)
-                            }
-                            .padding(4.dp)
-                            .align(Alignment.Center),
-                        imageVector = Icons.Default.Pause,
-                        contentDescription = "Pause Button",
-                        tint = LocalAppTheme.current.text
-                    )
+            if (uiState.cookingProgress < 1f) {
+                when (uiState.cookingState) {
+                    CookingState.NOT_STARTED, CookingState.PAUSED -> {
+                        Icon(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    onUiAction(CookingUiAction.StartCooking)
+                                }
+                                .padding(4.dp)
+                                .align(Alignment.Center),
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Play Button",
+                            tint = LocalAppTheme.current.text
+                        )
+                    }
+                    CookingState.STARTED -> {
+                        Icon(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    onUiAction(CookingUiAction.PauseCooking)
+                                }
+                                .padding(4.dp)
+                                .align(Alignment.Center),
+                            imageVector = Icons.Default.Pause,
+                            contentDescription = "Pause Button",
+                            tint = LocalAppTheme.current.text
+                        )
+                    }
                 }
             }
             if (uiState.cookingState != CookingState.NOT_STARTED) {

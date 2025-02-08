@@ -1,6 +1,6 @@
 package com.letthemcook.recipe.ui.screens
 
-import androidx.compose.animation.animateContentSize
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,20 +45,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
+import com.letthemcook.recipe.domain.model.EditingError
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
-import com.letthemcook.recipe.domain.viewModels.editedRecipe.SaveStatus
-import com.letthemcook.recipe.domain.viewModels.reviews.ReviewsUiState
-import com.letthemcook.recipe.ui.components.dialogs.ReviewTextFieldDialog
+import com.letthemcook.recipe.domain.model.SaveStatus
+import com.letthemcook.recipe.ui.components.EditingError
 import com.letthemcook.recipe.ui.components.popups.WeightedProductsLabelContainer
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.IconButton
 import com.letthemcook.theme.components.buttons.TextButton
+import com.letthemcook.theme.components.dialogs.AreYouSureDialog
+import com.letthemcook.theme.components.dialogs.AreYouSureDialogConfig
 import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
 import com.letthemcook.theme.components.images.RecipeImage
 import com.letthemcook.theme.components.labels.EditedLabelContainer
@@ -75,21 +79,71 @@ fun EditedRecipeScreen(
     uiState: EditedRecipeUiState,
     onUiAction: (EditedRecipeUiAction) -> Unit
 ) {
+    val wasPublished = remember { uiState.publicationDate != null }
+
+    // Save Dialog
+    var saveDialogConfig: AreYouSureDialogConfig? by remember { mutableStateOf(null) }
+    val saveDialogConfigDefault = remember {
+        AreYouSureDialogConfig(
+            titleText = "Exit recipe editing?",
+            bodyText = "There are may be unsaved changes. Are you sure you want to exit?",
+            onOk = {},
+            onDismiss = { saveDialogConfig = null }
+        )
+    }
+
     val screenContainer = LocalScreenContainer.current
     LaunchedEffect(Unit) {
         screenContainer.apply {
             clearToDefaults()
 
             setShowToolBar(true)
-            setOnToolBarBackClick { onUiAction(EditedRecipeUiAction.NavigateBack) }
+            setOnToolBarBackClick {
+                if (uiState.saveStatus == SaveStatus.NOT_SAVED) {
+                    saveDialogConfig = saveDialogConfigDefault.copy(
+                        onOk = {
+                            if (wasPublished) {
+                                onUiAction(EditedRecipeUiAction.PopToProfile)
+                            } else {
+                                onUiAction(EditedRecipeUiAction.NavigateBack)
+                            }
+                            saveDialogConfig = null
+                        }
+                    )
+                } else {
+                    onUiAction(EditedRecipeUiAction.NavigateBack)
+                }
+            }
 
             setShowNavigationBar(true)
             setOnNavigateToNewRecipe {
-                if (!uiState.recipeIsNew) {
-                    onUiAction(EditedRecipeUiAction.NavigateToNewRecipe)
+                if (uiState.saveStatus != SaveStatus.NOT_SAVED) {
+                    saveDialogConfig = saveDialogConfigDefault.copy(
+                        onOk = {
+                            if (!uiState.recipeIsNew) {
+                                onUiAction(EditedRecipeUiAction.NavigateToNewRecipe)
+                            }
+                            saveDialogConfig = null
+                        }
+                    )
+                } else {
+                    if (!uiState.recipeIsNew) {
+                        onUiAction(EditedRecipeUiAction.NavigateToNewRecipe)
+                    }
                 }
             }
-            setOnNavigateToProfile { onUiAction(EditedRecipeUiAction.NavigateToProfile) }
+            setOnNavigateToProfile {
+                if (uiState.saveStatus != SaveStatus.NOT_SAVED) {
+                    saveDialogConfig = saveDialogConfigDefault.copy(
+                        onOk = {
+                            onUiAction(EditedRecipeUiAction.NavigateToProfile)
+                            saveDialogConfig = null
+                        }
+                    )
+                } else {
+                    onUiAction(EditedRecipeUiAction.NavigateToProfile)
+                }
+            }
         }
     }
 
@@ -110,9 +164,6 @@ fun EditedRecipeScreen(
     val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
     mediaFilePickerManager.RegisterLaunchers()
 
-    // Reviews
-    var isReviewTextFieldDialogShown by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             uiState.recipeBitmapId?.let { fileId ->
@@ -129,10 +180,21 @@ fun EditedRecipeScreen(
         }
     }
 
+    // Other
     val categoriesFilterNames = remember(uiState.categoriesFilter) { uiState.categoriesFilter.map { it.name } }
     val searchedCategoriesNames = remember(uiState.searchedCategories) { uiState.searchedCategories.map { it.name } }
 
-    // TODO add save button to save changes
+    var editingError: EditingError? by remember { mutableStateOf(null) }
+    val editingTooManyError: EditingError? by remember {
+        derivedStateOf {
+            when {
+                uiState.categoriesFilter.size > 20 -> EditingError.TooManyCategories
+                uiState.productsFilter.size > 20 -> EditingError.TooManyProducts
+                else -> null
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -140,10 +202,9 @@ fun EditedRecipeScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        EditingError(editingError ?: editingTooManyError)
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Box(
                 modifier = Modifier.size(140.dp),
@@ -208,7 +269,12 @@ fun EditedRecipeScreen(
                             if (uiState.publicationDate != null) {
                                 onUiAction(EditedRecipeUiAction.Archive)
                             } else {
-                                onUiAction(EditedRecipeUiAction.Publish)
+                                if (uiState.name.text.isEmpty()) {
+                                    editingError = EditingError.EmptyName
+                                } else {
+                                    editingError = null
+                                    onUiAction(EditedRecipeUiAction.Publish)
+                                }
                             }
                         }
                     )
@@ -270,7 +336,7 @@ fun EditedRecipeScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = uiState.dislikesAmount.toString(),
+                text = uiState.dislikesAmount.cute(),
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Icon(
@@ -286,12 +352,12 @@ fun EditedRecipeScreen(
                 tint = LocalAppTheme.current.text
             )
             Text(
-                text = uiState.likesAmount.toString(),
+                text = uiState.likesAmount.cute(),
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = uiState.preparationsAmount.toString(),
+                text = uiState.preparationsAmount.cute(),
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Icon(
@@ -307,7 +373,7 @@ fun EditedRecipeScreen(
                 tint = LocalAppTheme.current.text
             )
             Text(
-                text = uiState.reviewsAmount.toString(),
+                text = uiState.reviewsAmount.cute(),
                 style = LocalAppTheme.current.typography.bodyMedium
             )
         }
@@ -337,7 +403,10 @@ fun EditedRecipeScreen(
                     .size(40.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .clickable {
-                        mediaFilePickerManager.showDialog(FileType.ANY, UUID.randomUUID().toString()) {
+                        mediaFilePickerManager.showDialog(
+                            FileType.ANY,
+                            UUID.randomUUID().toString()
+                        ) {
                             onUiAction(EditedRecipeUiAction.AddFile(it.file))
                         }
                     }
@@ -464,62 +533,7 @@ fun EditedRecipeScreen(
         Spacer(modifier = Modifier.height(144.dp))
     }
 
-    //TODO move this all to simple recipe and return to normal column and verticalScroll!
-//    items(reviewsUiState.reviews, key = { it.id }) { reviewData ->
-//        ReviewItem(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .animateItem(),
-//            reviewItemData = reviewData,
-//            onProfileClick = {
-//                onUiAction(EditedRecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
-//            },
-//            onLikeClick = {
-//                if (reviewData.isLiked) {
-//                    onUiAction(EditedRecipeUiAction.DislikeReview(reviewData.id))
-//                } else {
-//                    onUiAction(EditedRecipeUiAction.LikeReview(reviewData.id))
-//                }
-//            }
-//        )
-//    }
-//    HorizontalDivider(color = LocalAppTheme.current.text)
-//    Row(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(horizontal = 16.dp),
-//        horizontalArrangement = Arrangement.SpaceBetween
-//    ) {
-//        Text(
-//            text = "Reviews",
-//            style = LocalAppTheme.current.typography.bodyMedium
-//        )
-//        Icon(
-//            modifier = Modifier
-//                .size(32.dp)
-//                .clip(CircleShape)
-//                .clickable {
-//                    isReviewTextFieldDialogShown = true
-//                }
-//                .padding(4.dp),
-//            imageVector = Icons.Outlined.AddComment,
-//            contentDescription = "Add Review Button",
-//            tint = LocalAppTheme.current.text
-//        )
-//    }
-
     MediaPickMethodDialog(mediaFilePickerManager)
 
-    //TODO move this all to simple recipe and return to normal column and verticalScroll!
-    ReviewTextFieldDialog(
-        isShown = isReviewTextFieldDialogShown,
-        reviewState = uiState.reviewText,
-        onSendReview = {
-            onUiAction(EditedRecipeUiAction.SendReview)
-            isReviewTextFieldDialogShown = false
-        },
-        onDismiss = {
-            isReviewTextFieldDialogShown = false
-        }
-    )
+    AreYouSureDialog(saveDialogConfig)
 }

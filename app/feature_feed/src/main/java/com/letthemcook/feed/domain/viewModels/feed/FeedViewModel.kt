@@ -2,7 +2,6 @@ package com.letthemcook.feed.domain.viewModels.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.data.remote.RecipeManager
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.KoinApplication.Companion.init
 
 class FeedViewModel(
     private val recipeManager: RecipeManager,

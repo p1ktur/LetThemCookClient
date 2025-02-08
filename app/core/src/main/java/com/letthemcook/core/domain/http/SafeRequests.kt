@@ -1,6 +1,5 @@
 package com.letthemcook.core.domain.http
 
-import android.util.Log
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -16,8 +15,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.util.StringValues
-import io.ktor.utils.io.ByteChannel
-import io.ktor.utils.io.writeByteArray
 
 // Default
 

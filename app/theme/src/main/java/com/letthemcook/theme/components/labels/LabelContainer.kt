@@ -1,18 +1,15 @@
 package com.letthemcook.theme.components.labels
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +43,10 @@ fun LabelContainer(
         if (isScrolledToBottom && !isLoading) onScrolledToEnd?.invoke()
     }
 
+    val labelsSize = remember(labels) {
+        if (labels.size > maxRows) maxRows else labels.size
+    }
+
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -59,7 +60,7 @@ fun LabelContainer(
         LazyHorizontalStaggeredGrid(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = (maxRows * 36).dp),
+                .height((labelsSize * 36).dp),
             state = lazyGridState,
             rows = StaggeredGridCells.FixedSize(28.dp),
             horizontalItemSpacing = 8.dp,

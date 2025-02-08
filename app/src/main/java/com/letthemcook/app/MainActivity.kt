@@ -1,7 +1,11 @@
 package com.letthemcook.app
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -10,20 +14,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.cooking.media.ui.host.MediaNavRoutes
-import com.letthemcook.theme.ui.navigation.MediaViewerAccess
-import com.cooking.media.ui.host.MediaViewerHost
 import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
 import com.letthemcook.core.data.remote.AuthManager
@@ -32,6 +35,8 @@ import com.letthemcook.editor.ui.navigation.EditorNavRoutes
 import com.letthemcook.editor.ui.navigation.addEditorRoutes
 import com.letthemcook.feed.ui.navigation.FeedNavRoutes
 import com.letthemcook.feed.ui.navigation.addFeedRoutes
+import com.letthemcook.media.ui.host.MediaNavRoutes
+import com.letthemcook.media.ui.host.MediaViewerHost
 import com.letthemcook.profile.ui.navigation.ProfileNavRoutes
 import com.letthemcook.profile.ui.navigation.addProfileRoutes
 import com.letthemcook.recipe.ui.navigation.RecipeNavRoutes
@@ -43,6 +48,7 @@ import com.letthemcook.theme.providers.LanguageStateProvider
 import com.letthemcook.theme.providers.ThemeStateProvider
 import com.letthemcook.theme.screensContainer.ScreensContainer
 import com.letthemcook.theme.ui.navigation.CookingRoutes
+import com.letthemcook.theme.ui.navigation.MediaViewerAccess
 import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import com.letthemcook.theme.ui.screens.LoadingScreen
 import org.koin.android.ext.android.inject
@@ -59,16 +65,18 @@ class MainActivity : ComponentActivity() {
     )
 
     private val cookingRoutes = CookingRoutes(
-        navigateToEditor = { navController.navigate(EditorNavRoutes.Builder(it)) },
-        navigateToCooking = { navController.navigate(EditorNavRoutes.Cooking(it)) }
+        navigateToEditor = { ownerId, recipeId, recipeJson, recipeName, products ->
+            navController.navigate(EditorNavRoutes.Builder(ownerId, recipeId, recipeJson, recipeName, products))
+        },
+        navigateToCooking = { ownerId, recipeId, recipeJson, recipeName ->
+            navController.navigate(EditorNavRoutes.Cooking(ownerId, recipeId, recipeName, recipeJson))
+        }
     )
 
     private val authManager by inject<AuthManager>()
 
-    //TODO move media picker dialog onto screenContainer
-    //TODO limits on blocks and products and categories
-    //TODO check file sizes upon choosing them
-    //TODO check internet connection on start and allow offline usage?
+    // TODO move media picker dialog onto screenContainer
+    // TODO localize everything
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +91,7 @@ class MainActivity : ComponentActivity() {
             val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
             val theme by themeStateProvider.getTheme().collectAsState(Theme.LIGHT)
-            val language by languageStateProvider.getLanguage().collectAsState(Language.ENGLISH)
+            val language by languageStateProvider.getLanguage().collectAsState(Language.fromLocale())
 
             val mediaViewerAccess = remember { mutableStateOf(MediaViewerAccess.Dummy) }
 
@@ -121,6 +129,12 @@ class MainActivity : ComponentActivity() {
                             if (isLoggedIn.value == true) FeedNavRoutes.Feed else AuthNavRoutes.Login
                         }
 
+                        LaunchedEffect(isLoggedIn.value) {
+                            if (isLoggedIn.value == false) {
+                                navController.navigate(navController.navigate(AuthNavRoutes.Login))
+                            }
+                        }
+
                         ScreensContainer {
                             NavHost(
                                 navController = navController,
@@ -139,7 +153,8 @@ class MainActivity : ComponentActivity() {
                                     logOutRoute = AuthNavRoutes.Login,
                                     navBarRoutes = navBarRoutes,
                                     mediaViewerAccessState = mediaViewerAccess,
-                                    navigateToRecipe = ::navigateToRecipe
+                                    navigateToRecipe = ::navigateToRecipe,
+                                    navigateToEditRecipe = ::navigateToEditRecipe
                                 )
                                 addFeedRoutes(
                                     navController = navController,
@@ -152,6 +167,7 @@ class MainActivity : ComponentActivity() {
                                     navBarRoutes = navBarRoutes,
                                     cookingRoutes = cookingRoutes,
                                     mediaViewerAccessState = mediaViewerAccess,
+                                    rawProfileRoute = ProfileNavRoutes.EditedProfile,
                                     navigateToProfile = ::navigateToProfile
                                 )
                                 addEditorRoutes(
@@ -174,6 +190,10 @@ class MainActivity : ComponentActivity() {
         navController.navigate(RecipeNavRoutes.Recipe(recipeId))
     }
 
+    private fun navigateToEditRecipe(recipeId: String) {
+        navController.navigate(RecipeNavRoutes.EditedRecipe(recipeId))
+    }
+
     private fun navigateToProfile(userId: String) {
         navController.navigate(ProfileNavRoutes.Profile(userId))
     }
@@ -190,7 +210,36 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun SetAuthChecker(isLoggedIn: MutableState<Boolean?>) {
+        val connectivityManager = remember { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+
+        var hasConnection by remember {
+            val network = connectivityManager.activeNetwork
+
+            mutableStateOf(network.checkConnectivity(connectivityManager))
+        }
+
+        val networkCallback = remember {
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    hasConnection = true
+                }
+
+                override fun onLost(network: Network) {
+                    hasConnection = false
+                }
+            }
+        }
+
         LaunchedEffect(Unit) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        }
+
+        LaunchedEffect(hasConnection) {
+            if (!hasConnection) {
+                isLoggedIn.value = authManager.getUser() != null
+                return@LaunchedEffect
+            }
+
             val rtResult = authManager.checkRefreshToken()
 
             if (rtResult == TokenCheckResult.OK) {
@@ -201,5 +250,18 @@ class MainActivity : ComponentActivity() {
                 authManager.forgetUserAndTokens()
             }
         }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                connectivityManager.unregisterNetworkCallback(networkCallback)
+            }
+        }
+    }
+
+    private fun Network?.checkConnectivity(connectivityManager: ConnectivityManager): Boolean {
+        val capabilities = connectivityManager.getNetworkCapabilities(this)
+
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true &&
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 }

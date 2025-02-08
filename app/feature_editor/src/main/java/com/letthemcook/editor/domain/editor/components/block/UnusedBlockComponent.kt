@@ -2,19 +2,23 @@ package com.letthemcook.editor.domain.editor.components.block
 
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
-import com.letthemcook.core.domain.model.recipe.Product
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.letthemcook.core.domain.model.file.File
+import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
+@Entity
 data class UnusedBlockComponent(
-    val id: String = UUID.randomUUID().toString(),
-    var name: String = "Recipe Block",
-    var description: String = "Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block Recipe Block",
+    @PrimaryKey(autoGenerate = false) val id: String = UUID.randomUUID().toString(),
+    val recipeId: String,
+    var name: String = "",
+    var description: String = "",
     var time: Long = 0L,
-    val productNames: MutableList<Product> = mutableListOf(),
+    var products: MutableList<WeightedProduct> = mutableListOf(),
     var colorOption: ColorOption = ColorOption.WHITE,
     var file: File? = null
 ) {
@@ -30,7 +34,7 @@ data class UnusedBlockComponent(
             name,
             description,
             time,
-            productNames,
+            products,
             colorOption = colorOption,
             file = file
         ).apply {

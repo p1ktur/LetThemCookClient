@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.model.items.RecipeItemData
 import com.letthemcook.theme.base.LocalAppTheme
 
@@ -80,7 +81,7 @@ fun RecipeItem(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = recipeItemData.dislikesAmount.toString(),
+                        text = recipeItemData.dislikesAmount.cute(),
                         style = LocalAppTheme.current.typography.bodySmall
                     )
                     Icon(
@@ -96,7 +97,7 @@ fun RecipeItem(
                         tint = LocalAppTheme.current.text
                     )
                     Text(
-                        text = recipeItemData.likesAmount.toString(),
+                        text = recipeItemData.likesAmount.cute(),
                         style = LocalAppTheme.current.typography.bodySmall
                     )
                 }
@@ -108,7 +109,7 @@ fun RecipeItem(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = recipeItemData.preparationsAmount.toString(),
+                            text = recipeItemData.preparationsAmount.cute(),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                         Icon(
@@ -123,7 +124,7 @@ fun RecipeItem(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = recipeItemData.reviewsAmount.toString(),
+                            text = recipeItemData.reviewsAmount.cute(),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                         Icon(

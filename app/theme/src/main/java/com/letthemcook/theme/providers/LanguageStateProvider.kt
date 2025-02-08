@@ -18,7 +18,7 @@ class LanguageStateProvider(private val context: Context) {
 
     fun getLanguage(): Flow<Language> {
         return context.dataStore.data.map { preferences ->
-            preferences[languageKey].toTheme() ?: Language.ENGLISH
+            preferences[languageKey].toTheme() ?: Language.fromLocale()
         }
     }
 

@@ -8,10 +8,11 @@ import android.provider.MediaStore
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.core.net.toUri
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import java.util.UUID
-
+import java.io.File as JFile
 
 class LocalFileManager(
     private val context: Context,
@@ -19,8 +20,6 @@ class LocalFileManager(
 ) {
 
     fun getFileBytes(file: File): ByteArray? {
-        if (file.type != FileType.IMAGE) return null
-
         val resolver = context.contentResolver
 
         var bytes: ByteArray? = null
@@ -84,6 +83,21 @@ class LocalFileManager(
         }
     }
 
+    fun createTemporaryFile(uid: String, type: FileType, bytes: ByteArray): File {
+        val cacheDir = context.cacheDir
+
+        val jFile = JFile.createTempFile(uid, type.ext(), cacheDir)
+        jFile.deleteOnExit()
+
+        jFile.writeBytes(bytes)
+
+        return File(
+            uid = uid,
+            type = type,
+            uri = jFile.toUri()
+        )
+    }
+
     fun updateFile(file: File, bytes: ByteArray): File {
         val resolver = context.contentResolver
 
@@ -92,6 +106,18 @@ class LocalFileManager(
         }
 
         return file
+    }
+
+    suspend fun deleteFile(file: File): Boolean {
+        val resolver = context.contentResolver
+
+        return try {
+            resolver.delete(file.uri, null, null) > 0
+        } catch (e: SecurityException) {
+            false
+        }.apply {
+            dao.deleteFile(file)
+        }
     }
 
     suspend fun deleteFile(

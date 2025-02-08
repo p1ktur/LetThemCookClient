@@ -208,7 +208,7 @@ fun RecipeCanvas(
                             labelDrawOffset = labelDrawOffset.zoom(uiState.canvasUiState.center, uiState.canvasUiState.zoom) - uiState.canvasUiState.offset
 
                             val productNameLayout = textMeasurer.measure(
-                                text = uiState.componentFocus.data.name,
+                                text = uiState.componentFocus.weightedProduct.toString(),
                                 style = blockComponentContentTextStyle
                             )
 

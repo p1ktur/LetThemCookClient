@@ -41,7 +41,8 @@ fun NavGraphBuilder.addProfileRoutes(
     logOutRoute: Any,
     navBarRoutes: NavBarRoutes,
     mediaViewerAccessState: State<MediaViewerAccess>,
-    navigateToRecipe: (String) -> Unit
+    navigateToRecipe: (String) -> Unit,
+    navigateToEditRecipe: (String) -> Unit,
 ) {
     composable<ProfileNavRoutes.EditedProfile> {
         val authManager = koinInject<AuthManager>()
@@ -63,9 +64,11 @@ fun NavGraphBuilder.addProfileRoutes(
                     EditedProfileUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
                     EditedProfileUiAction.NavigateToNewRecipe ->navBarRoutes.navigateToNewRecipe()
                     EditedProfileUiAction.NavigateToSettings -> navController.navigate(ProfileNavRoutes.Settings)
+                    is EditedProfileUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
+                    is EditedProfileUiAction.NavigateToEditRecipe -> navigateToEditRecipe(action.recipeId)
+                    EditedProfileUiAction.NavigateToChangePassword -> navController.navigate(ProfileNavRoutes.PasswordChange)
+
                     is EditedProfileUiAction.ViewMediaFile -> mediaViewerAccessState.value.viewBitmap(action.bitmap)
-                    is EditedProfileUiAction.ViewRecipe -> navigateToRecipe(action.recipeId)
-                    EditedProfileUiAction.ChangePassword -> navController.navigate(ProfileNavRoutes.PasswordChange)
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
@@ -86,6 +89,7 @@ fun NavGraphBuilder.addProfileRoutes(
                     ProfileUiAction.NavigateBack -> navController.navigateUp()
                     ProfileUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
                     ProfileUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
+                    is ProfileUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
 
                     is ProfileUiAction.ViewMediaFile -> mediaViewerAccessState.value.viewBitmap(action.bitmap)
                     else -> Unit

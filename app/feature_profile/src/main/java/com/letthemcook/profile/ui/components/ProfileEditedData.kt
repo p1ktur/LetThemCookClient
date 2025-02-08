@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateEmail
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validateName
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePhoneNumber
@@ -33,6 +35,7 @@ import com.letthemcook.core.domain.validation.result.PhoneNumberValidationResult
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiState
 import com.letthemcook.theme.base.LocalAppTheme
+import com.letthemcook.theme.components.dialogs.DatePickerDialog
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.ValidatedTextField
 
@@ -44,7 +47,7 @@ fun ProfileEditedData(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    // TODO birthDate
+    var isBirthDateDialogShown by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier.animateContentSize(),
@@ -71,7 +74,7 @@ fun ProfileEditedData(
             tint = LocalAppTheme.current.text
         )
         if (!isExpanded) {
-            Column(
+            if (uiState.about.text.isNotEmpty()) Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -87,7 +90,7 @@ fun ProfileEditedData(
                     )
                 }
             }
-            Row(
+            if (uiState.name.text.isNotEmpty()) Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -100,7 +103,7 @@ fun ProfileEditedData(
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
             }
-            Row(
+            if (uiState.surname.text.isNotEmpty()) Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -113,7 +116,7 @@ fun ProfileEditedData(
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
             }
-            Row(
+            if (uiState.email.text.isNotEmpty()) Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -126,7 +129,20 @@ fun ProfileEditedData(
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
             }
-            Row(
+            if (uiState.birthDate != null) Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Birth date",
+                    style = LocalAppTheme.current.typography.bodyMedium
+                )
+                Text(
+                    text = uiState.birthDate.prettyString(),
+                    style = LocalAppTheme.current.typography.bodyMedium
+                )
+            }
+            if (uiState.phoneNumber.text.isNotEmpty()) Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -167,6 +183,17 @@ fun ProfileEditedData(
                     }
                 }
             )
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        isBirthDateDialogShown = true
+                    }
+                    .padding(8.dp),
+                text = "Birth date: " + (uiState.birthDate?.prettyString() ?: "Unspecified"),
+                style = LocalAppTheme.current.typography.bodyLarge
+            )
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.email,
@@ -201,7 +228,7 @@ fun ProfileEditedData(
                 Text(
                     modifier = Modifier
                         .clickable {
-                            onUiAction(EditedProfileUiAction.ChangePassword)
+                            onUiAction(EditedProfileUiAction.NavigateToChangePassword)
                         }
                         .padding(6.dp),
                     text = "Change password",
@@ -211,4 +238,16 @@ fun ProfileEditedData(
             }
         }
     }
+
+    DatePickerDialog(
+        isShown = isBirthDateDialogShown,
+        onDateSelected = { date ->
+            onUiAction(EditedProfileUiAction.SetBirthDate(date))
+
+            isBirthDateDialogShown = false
+        },
+        onDismiss = {
+            isBirthDateDialogShown = false
+        }
+    )
 }

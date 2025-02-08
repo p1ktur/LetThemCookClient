@@ -16,9 +16,6 @@ import com.letthemcook.editor.domain.viewModels.cooking.CookingUiState
 import com.letthemcook.editor.ui.components.canvas.CookingCanvas
 import com.letthemcook.editor.ui.components.cooking.CookingControlPanel
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.ToolBar
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
 @Composable
@@ -32,7 +29,7 @@ fun CookingScreen(
             clearToDefaults()
 
             setShowToolBar(true)
-            setToolBarStatusText("Recipe name") //TODO
+            setToolBarStatusText(uiState.recipeName)
             setOnToolBarBackClick { onUiAction(CookingUiAction.NavigateBack) }
 
             setShowNavigationBar(false)

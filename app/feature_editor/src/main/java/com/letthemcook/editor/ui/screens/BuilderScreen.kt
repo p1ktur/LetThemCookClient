@@ -2,7 +2,6 @@ package com.letthemcook.editor.ui.screens
 
 import android.content.ClipData
 import android.content.ClipDescription
-import android.util.Log
 import android.view.View
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,7 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +59,7 @@ import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
+import com.letthemcook.editor.domain.editor.components.prototype.countBlocks
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiState
 import com.letthemcook.editor.ui.components.BlockItem
@@ -68,13 +68,10 @@ import com.letthemcook.editor.ui.components.popups.BlockEditorPopup
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
 import com.letthemcook.editor.ui.modifier.rowScrollbar
 import com.letthemcook.theme.base.LocalAppTheme
-import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.buttons.IconButton
 import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
 import com.letthemcook.theme.components.labels.LabelIcon
 import com.letthemcook.theme.components.labels.LabelItem
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import org.koin.compose.koinInject
 
@@ -90,7 +87,7 @@ fun BuilderScreen(
             clearToDefaults()
 
             setShowToolBar(true)
-            setToolBarStatusText("Recipe name") //TODO
+            setToolBarStatusText(uiState.recipeName)
             setOnToolBarBackClick { onUiAction(BuilderUiAction.NavigateBack) }
 
             setShowNavigationBar(false)
@@ -128,10 +125,9 @@ fun BuilderScreen(
     val productsRowScrollState = rememberScrollState()
     val blocksRowScrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) {
-        if (uiState.savedBlockEditorState != null) {
-            onUiAction(BuilderUiAction.SetBlockEditorState(uiState.savedBlockEditorState))
-            onUiAction(BuilderUiAction.SaveBlockEditorState(null))
+    val canAddBlocks by remember {
+        derivedStateOf {
+            uiState.centralComponent.countBlocks() + uiState.unusedBlockComponents.size < 30
         }
     }
 
@@ -191,20 +187,20 @@ fun BuilderScreen(
                     ) {
                         Spacer(modifier = Modifier.width(8.dp))
                         uiState.unusedProducts.forEach { product ->
-                            key(product.id) {
+                            key(product.data.id) {
                                 LabelItem(
                                     modifier = Modifier.dragAndDropSource {
                                         detectTapGestures(onLongPress = {
                                             onUiAction(BuilderUiAction.SetDraggingState(DraggingState.PRODUCT))
                                             startTransfer(
                                                 DragAndDropTransferData(
-                                                    clipData = ClipData.newPlainText("Product", product.id.toString()),
+                                                    clipData = ClipData.newPlainText("Product", product.data.id.toString()),
                                                     flags = View.DRAG_FLAG_GLOBAL
                                                 )
                                             )
                                         })
                                     },
-                                    text = product.name,
+                                    text = product.toString(),
                                     icon = LabelIcon.NONE
                                 )
                             }
@@ -227,16 +223,18 @@ fun BuilderScreen(
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(
-                        modifier = Modifier.size(40.dp),
-                        icon = Icons.Outlined.Add,
-                        containerColor = LocalAppTheme.current.screenOne,
-                        onClick = {
-                            onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Creating))
-                        },
-                        isOutlined = true
-                    )
+                    if (canAddBlocks) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            modifier = Modifier.size(40.dp),
+                            icon = Icons.Outlined.Add,
+                            containerColor = LocalAppTheme.current.screenOne,
+                            onClick = {
+                                onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Creating))
+                            },
+                            isOutlined = true
+                        )
+                    }
                     if (uiState.unusedBlockComponents.isEmpty()) {
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
@@ -357,6 +355,7 @@ fun BuilderScreen(
         anchorSize = containerSize,
         onEdit = { name, description, hours, minutes, seconds, colorOption, file ->
             val newBlockComponent = UnusedBlockComponent(
+                recipeId = uiState.recipeId,
                 name = name,
                 description = description,
                 time = getLongTime(hours, minutes, seconds),
@@ -380,10 +379,17 @@ fun BuilderScreen(
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
         },
         onViewMediaFile = { file ->
-            onUiAction(BuilderUiAction.ViewMediaFile(file))
+            val blockId = when (val state = uiState.blockEditorState) {
+                BlockEditorState.Creating -> ""
+                is BlockEditorState.EditingBlock -> state.component.id
+                is BlockEditorState.EditingUnusedBlock -> state.component.id
+                BlockEditorState.Hidden -> ""
+            }
+
+            onUiAction(BuilderUiAction.ViewMediaFile(blockId, file))
         },
-        onSaveState = { state ->
-            onUiAction(BuilderUiAction.SaveBlockEditorState(state))
+        onRestoreState = {
+            onUiAction(BuilderUiAction.SetBlockEditorState(it))
         },
         onDismiss = {
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))

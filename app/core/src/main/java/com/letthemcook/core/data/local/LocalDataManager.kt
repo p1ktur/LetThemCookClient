@@ -1,8 +1,8 @@
 package com.letthemcook.core.data.local
 
-import com.letthemcook.core.domain.model.recipe.reactions.RecipeReaction
-import com.letthemcook.core.domain.model.recipe.reactions.ReviewLike
-import com.letthemcook.core.domain.model.recipe.Recipe
+import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
+import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
+import com.letthemcook.core.domain.model.remote.Recipe
 import kotlinx.coroutines.flow.Flow
 
 class LocalDataManager(
@@ -11,6 +11,10 @@ class LocalDataManager(
     private val reviewLikeDao: ReviewLikeDao
 ) {
     // Recipes
+    suspend fun getRecipeIds(): List<String> {
+        return recipeDao.getRecipeIds()
+    }
+
     suspend fun getRecipes(): List<Recipe> {
         return recipeDao.getRecipes()
     }
@@ -23,10 +27,6 @@ class LocalDataManager(
         return recipeDao.getFavoredRecipes()
     }
 
-    suspend fun getFavoredRecipe(recipeId: String): Recipe? {
-        return recipeDao.getFavoredRecipeById(recipeId)
-    }
-
     fun getFavoredRecipesAmount(): Flow<Int> {
         return recipeDao.getFavoredRecipesAmount()
     }
@@ -35,8 +35,8 @@ class LocalDataManager(
         recipeDao.upsertRecipe(recipe)
     }
 
-    suspend fun deleteRecipe(recipe: Recipe) {
-        recipeDao.deleteRecipe(recipe)
+    suspend fun deleteRecipeById(recipeId: String) {
+        recipeDao.deleteRecipeById(recipeId)
     }
 
     // Recipe Reactions
