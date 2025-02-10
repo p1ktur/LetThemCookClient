@@ -4,10 +4,10 @@ import com.letthemcook.core.domain.http.RequestPair
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.post
 import com.letthemcook.core.domain.http.put
-import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.UserItemData
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode

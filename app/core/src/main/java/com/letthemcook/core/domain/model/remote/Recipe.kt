@@ -8,10 +8,11 @@ import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.domain.dataConvertion.serialization.LocalDateTimeSerializer
-import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.core.domain.model.status.LikeStatus
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
@@ -38,7 +39,7 @@ data class Recipe(
     @Serializable(with = LocalDateTimeSerializer::class) var publicationDate: LocalDateTime? = null,
     var isFavored: Boolean = false
 ) {
-    fun asItemData(bitmap: Bitmap?): RecipeItemData {
+    fun asItemData(bitmap: Bitmap?, likeStatus: LikeStatus): RecipeItemData {
         return RecipeItemData(
             id = id,
             name = name ?: "",
@@ -47,7 +48,9 @@ data class Recipe(
             dislikesAmount = dislikesAmount,
             reviewsAmount = reviewsAmount,
             preparationsAmount = preparationsAmount,
+            viewsAmount = viewsAmount,
             description = description ?: "",
+            likeStatus = likeStatus,
             bitmap = bitmap,
             publicationDate = publicationDate
         )

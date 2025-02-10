@@ -1,6 +1,5 @@
 package com.letthemcook.recipe.ui.navigation
 
-import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -12,15 +11,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.recipe.domain.model.SaveStatus
-import com.letthemcook.theme.ui.navigation.CookingRoutes
-import com.letthemcook.theme.ui.navigation.NavBarRoutes
-import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
-import com.letthemcook.recipe.domain.viewModels.recipe.RecipeViewModel
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeViewModel
-import com.letthemcook.recipe.ui.screens.RecipeScreen
+import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
+import com.letthemcook.recipe.domain.viewModels.recipe.RecipeViewModel
 import com.letthemcook.recipe.ui.screens.EditedRecipeScreen
+import com.letthemcook.recipe.ui.screens.RecipeScreen
+import com.letthemcook.theme.ui.navigation.CookingRoutes
 import com.letthemcook.theme.ui.navigation.MediaViewerAccess
+import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -130,6 +129,8 @@ fun NavGraphBuilder.addRecipeRoutes(
                     EditedRecipeUiAction.NavigateToProfile -> navBarRoutes.navigateToProfile()
                     is EditedRecipeUiAction.NavigateToOtherProfile -> navigateToProfile(action.userId)
 
+                    EditedRecipeUiAction.DeleteRecipe -> navController.popBackStack(rawProfileRoute, false)
+
                     is EditedRecipeUiAction.EditCooking -> {
                         cookingRoutes.navigateToEditor(
                             uiState.ownerId,
@@ -143,8 +144,8 @@ fun NavGraphBuilder.addRecipeRoutes(
                         cookingRoutes.navigateToCooking(
                             uiState.ownerId,
                             uiState.recipeId,
-                            uiState.name.text.toString(),
-                            action.recipeJson
+                            action.recipeJson,
+                            uiState.name.text.toString()
                         )
                     }
 

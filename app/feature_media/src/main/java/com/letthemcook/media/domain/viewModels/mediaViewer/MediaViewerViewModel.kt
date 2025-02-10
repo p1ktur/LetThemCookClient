@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.RemoteFileManager
-import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.Dispatchers

@@ -27,7 +27,7 @@ sealed interface RecipeUiAction {
     data object UnDislikeRecipe : RecipeUiAction
 
     data object LoadReviews : RecipeUiAction
-    data object SendReview : RecipeUiAction
+    data class SendReview(val text: String) : RecipeUiAction
     data class LikeReview(val index: Int) : RecipeUiAction
     data class UnlikeReview(val index: Int) : RecipeUiAction
 }

@@ -7,6 +7,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -69,7 +70,7 @@ class MainActivity : ComponentActivity() {
             navController.navigate(EditorNavRoutes.Builder(ownerId, recipeId, recipeJson, recipeName, products))
         },
         navigateToCooking = { ownerId, recipeId, recipeJson, recipeName ->
-            navController.navigate(EditorNavRoutes.Cooking(ownerId, recipeId, recipeName, recipeJson))
+            navController.navigate(EditorNavRoutes.Cooking(ownerId, recipeId, recipeJson, recipeName))
         }
     )
 
@@ -241,6 +242,8 @@ class MainActivity : ComponentActivity() {
             }
 
             val rtResult = authManager.checkRefreshToken()
+
+            Log.d("TAG", "$rtResult")
 
             if (rtResult == TokenCheckResult.OK) {
                 isLoggedIn.value = true

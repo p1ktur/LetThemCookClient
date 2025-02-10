@@ -19,14 +19,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +40,7 @@ import com.letthemcook.feed.ui.components.RecipeItem
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     uiState: FeedUiState,
@@ -147,49 +151,63 @@ fun FeedScreen(
                 }
             }
         } else {
-            LazyColumn(
+            var isRefreshing by remember { mutableStateOf(false) }
+
+            LaunchedEffect(uiState.loading) {
+                if (!uiState.loading) isRefreshing = false
+            }
+
+            PullToRefreshBox(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                state = columnLazyListState
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    onUiAction(FeedUiAction.RefreshFeed)
+                }
             ) {
-                if (uiState.favoredRecipesAmount > 0) {
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onUiAction(FeedUiAction.NavigateToSavedRecipes)
-                                }
-                                .padding(6.dp)
-                                .animateItem(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
-                                style = LocalAppTheme.current.typography.bodyLarge
-                            )
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                imageVector = Icons.Outlined.Bookmark,
-                                contentDescription = "Saved Recipes Icon",
-                                tint = LocalAppTheme.current.text
-                            )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = columnLazyListState
+                ) {
+                    if (uiState.favoredRecipesAmount > 0) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onUiAction(FeedUiAction.NavigateToSavedRecipes)
+                                    }
+                                    .padding(6.dp)
+                                    .animateItem(),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Text(
+                                    text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
+                                    style = LocalAppTheme.current.typography.bodyLarge
+                                )
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    imageVector = Icons.Outlined.Bookmark,
+                                    contentDescription = "Saved Recipes Icon",
+                                    tint = LocalAppTheme.current.text
+                                )
+                            }
                         }
                     }
-                }
-                itemsIndexed(uiState.recipes, key = { _, it -> it.id }) { index, recipeItemData ->
-                    RecipeItem(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateItem(),
-                        recipeItemData = recipeItemData,
-                        onClick = {
-                            onUiAction(FeedUiAction.NavigateToRecipe(recipeItemData.id))
-                        }
-                    )
-                    if (index != uiState.recipes.lastIndex) {
-                        HorizontalDivider(color = LocalAppTheme.current.text)
+                    itemsIndexed(uiState.recipes, key = { _, it -> it.id }) { index, recipeItemData ->
+                        RecipeItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(),
+                            recipeItemData = recipeItemData,
+                            index = index,
+                            lastIndex = uiState.recipes.lastIndex,
+                            onClick = {
+                                onUiAction(FeedUiAction.NavigateToRecipe(recipeItemData.id))
+                            }
+                        )
                     }
                 }
             }

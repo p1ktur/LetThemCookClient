@@ -55,7 +55,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.getLongTime
-import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -69,11 +68,9 @@ import com.letthemcook.editor.ui.components.popups.BlockEditorState
 import com.letthemcook.editor.ui.modifier.rowScrollbar
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.IconButton
-import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
 import com.letthemcook.theme.components.labels.LabelIcon
 import com.letthemcook.theme.components.labels.LabelItem
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -94,8 +91,7 @@ fun BuilderScreen(
         }
     }
 
-    val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
-    mediaFilePickerManager.RegisterLaunchers()
+    val mediaFilePicker = LocalScreenContainer.current.mediaFilePicker
 
     var isBlocksMenuVisible by remember { mutableStateOf(true) }
 
@@ -350,7 +346,7 @@ fun BuilderScreen(
 
     BlockEditorPopup(
         state = uiState.blockEditorState,
-        mediaFilePickerManager = mediaFilePickerManager,
+        mediaFilePicker = mediaFilePicker,
         anchorPosition = containerPosition,
         anchorSize = containerSize,
         onEdit = { name, description, hours, minutes, seconds, colorOption, file ->
@@ -395,6 +391,4 @@ fun BuilderScreen(
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
         }
     )
-
-    MediaPickMethodDialog(mediaFilePickerManager)
 }

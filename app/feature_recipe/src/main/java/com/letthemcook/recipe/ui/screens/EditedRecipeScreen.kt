@@ -1,6 +1,5 @@
 package com.letthemcook.recipe.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -20,11 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.RemoveRedEye
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
@@ -48,10 +50,10 @@ import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.format.toShortTimeString
-import com.letthemcook.core.domain.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.recipe.domain.model.EditingError
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
 import com.letthemcook.recipe.domain.model.SaveStatus
@@ -62,7 +64,6 @@ import com.letthemcook.theme.components.buttons.IconButton
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.dialogs.AreYouSureDialog
 import com.letthemcook.theme.components.dialogs.AreYouSureDialogConfig
-import com.letthemcook.theme.components.dialogs.MediaPickMethodDialog
 import com.letthemcook.theme.components.images.RecipeImage
 import com.letthemcook.theme.components.labels.EditedLabelContainer
 import com.letthemcook.theme.components.textFields.MultiLineTextField
@@ -70,8 +71,6 @@ import com.letthemcook.theme.components.textFields.SingleLineTextField
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.koin.compose.koinInject
 import java.util.UUID
 
 @Composable
@@ -82,13 +81,13 @@ fun EditedRecipeScreen(
     val wasPublished = remember { uiState.publicationDate != null }
 
     // Save Dialog
-    var saveDialogConfig: AreYouSureDialogConfig? by remember { mutableStateOf(null) }
+    var areYouSureDialogConfig: AreYouSureDialogConfig? by remember { mutableStateOf(null) }
     val saveDialogConfigDefault = remember {
         AreYouSureDialogConfig(
             titleText = "Exit recipe editing?",
             bodyText = "There are may be unsaved changes. Are you sure you want to exit?",
             onOk = {},
-            onDismiss = { saveDialogConfig = null }
+            onDismiss = { areYouSureDialogConfig = null }
         )
     }
 
@@ -100,14 +99,14 @@ fun EditedRecipeScreen(
             setShowToolBar(true)
             setOnToolBarBackClick {
                 if (uiState.saveStatus == SaveStatus.NOT_SAVED) {
-                    saveDialogConfig = saveDialogConfigDefault.copy(
+                    areYouSureDialogConfig = saveDialogConfigDefault.copy(
                         onOk = {
                             if (wasPublished) {
                                 onUiAction(EditedRecipeUiAction.PopToProfile)
                             } else {
                                 onUiAction(EditedRecipeUiAction.NavigateBack)
                             }
-                            saveDialogConfig = null
+                            areYouSureDialogConfig = null
                         }
                     )
                 } else {
@@ -118,12 +117,12 @@ fun EditedRecipeScreen(
             setShowNavigationBar(true)
             setOnNavigateToNewRecipe {
                 if (uiState.saveStatus != SaveStatus.NOT_SAVED) {
-                    saveDialogConfig = saveDialogConfigDefault.copy(
+                    areYouSureDialogConfig = saveDialogConfigDefault.copy(
                         onOk = {
                             if (!uiState.recipeIsNew) {
                                 onUiAction(EditedRecipeUiAction.NavigateToNewRecipe)
                             }
-                            saveDialogConfig = null
+                            areYouSureDialogConfig = null
                         }
                     )
                 } else {
@@ -134,10 +133,10 @@ fun EditedRecipeScreen(
             }
             setOnNavigateToProfile {
                 if (uiState.saveStatus != SaveStatus.NOT_SAVED) {
-                    saveDialogConfig = saveDialogConfigDefault.copy(
+                    areYouSureDialogConfig = saveDialogConfigDefault.copy(
                         onOk = {
                             onUiAction(EditedRecipeUiAction.NavigateToProfile)
-                            saveDialogConfig = null
+                            areYouSureDialogConfig = null
                         }
                     )
                 } else {
@@ -161,24 +160,7 @@ fun EditedRecipeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     // Media
-    val mediaFilePickerManager = koinInject<MediaFilePickerManager>()
-    mediaFilePickerManager.RegisterLaunchers()
-
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            uiState.recipeBitmapId?.let { fileId ->
-                mediaFilePickerManager.getStoredFile(fileId) { file ->
-                    (file as? MediaFile.Image)?.let { mediaFile ->
-                        onUiAction(EditedRecipeUiAction.UpdateRecipeBitmap(fileId, mediaFile.bitmap))
-                    }
-                }
-            }
-
-            mediaFilePickerManager.getStoredFilesIndexed(uiState.recipeId, 0) {
-                onUiAction(EditedRecipeUiAction.AddFile(it.file))
-            }
-        }
-    }
+    val mediaFilePicker = LocalScreenContainer.current.mediaFilePicker
 
     // Other
     val categoriesFilterNames = remember(uiState.categoriesFilter) { uiState.categoriesFilter.map { it.name } }
@@ -225,7 +207,7 @@ fun EditedRecipeScreen(
                     icon = Icons.Outlined.AddAPhoto,
                     onClick = {
                         val fileId = uiState.recipeBitmapId ?: UUID.randomUUID().toString()
-                        mediaFilePickerManager.showDialog(FileType.IMAGE, fileId) {
+                        mediaFilePicker.showDialog(FileType.IMAGE, fileId) {
                             (it as? MediaFile.Image)?.let { mediaFile ->
                                 onUiAction(EditedRecipeUiAction.UpdateRecipeBitmap(fileId, mediaFile.bitmap))
                             }
@@ -326,6 +308,28 @@ fun EditedRecipeScreen(
                     }
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
+            if (uiState.publicationDate == null) {
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            areYouSureDialogConfig = AreYouSureDialogConfig(
+                                titleText = "Delete this recipe?",
+                                bodyText = "If you delete this recipe all your work will be gone forever. Are you sure you want to proceed?",
+                                onOk = {
+                                    areYouSureDialogConfig = null
+                                    onUiAction(EditedRecipeUiAction.DeleteRecipe)
+                                },
+                                onDismiss = { areYouSureDialogConfig = null }
+                            )
+                        },
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete Icon",
+                    tint = LocalAppTheme.current.text
+                )
+            }
         }
         HorizontalDivider(color = LocalAppTheme.current.text)
         Row(
@@ -341,13 +345,21 @@ fun EditedRecipeScreen(
             )
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.ThumbDown,
+                imageVector = if (uiState.likeStatus == LikeStatus.DISLIKED) {
+                    Icons.Filled.ThumbDown
+                } else {
+                    Icons.Outlined.ThumbDown
+                },
                 contentDescription = "Dislikes Icon",
                 tint = LocalAppTheme.current.text
             )
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.ThumbUp,
+                imageVector = if (uiState.likeStatus == LikeStatus.LIKED) {
+                    Icons.Filled.ThumbUp
+                } else {
+                    Icons.Outlined.ThumbUp
+                },
                 contentDescription = "Likes Icon",
                 tint = LocalAppTheme.current.text
             )
@@ -356,8 +368,14 @@ fun EditedRecipeScreen(
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                contentDescription = "Views Icon",
+                tint = LocalAppTheme.current.text
+            )
             Text(
-                text = uiState.preparationsAmount.cute(),
+                text = uiState.viewsAmount.cute(),
                 style = LocalAppTheme.current.typography.bodyMedium
             )
             Icon(
@@ -365,6 +383,10 @@ fun EditedRecipeScreen(
                 imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
                 contentDescription = "Preparations Icon",
                 tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = uiState.preparationsAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
             )
             Icon(
                 modifier = Modifier.size(32.dp),
@@ -396,14 +418,14 @@ fun EditedRecipeScreen(
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .clickable {
-                        mediaFilePickerManager.showDialog(
+                        mediaFilePicker.showDialog(
                             FileType.ANY,
                             UUID.randomUUID().toString()
                         ) {
@@ -475,7 +497,7 @@ fun EditedRecipeScreen(
                             val index = uiState.attachments.indexOf(attachment)
 
                             coroutineScope.launch(Dispatchers.IO) {
-                                mediaFilePickerManager.deleteStoredFile(attachment) { wasDeleted ->
+                                mediaFilePicker.deleteStoredFile(attachment) { wasDeleted ->
                                     if (wasDeleted) onUiAction(EditedRecipeUiAction.DeleteFile(index))
                                 }
                             }
@@ -533,7 +555,5 @@ fun EditedRecipeScreen(
         Spacer(modifier = Modifier.height(144.dp))
     }
 
-    MediaPickMethodDialog(mediaFilePickerManager)
-
-    AreYouSureDialog(saveDialogConfig)
+    AreYouSureDialog(areYouSureDialogConfig)
 }

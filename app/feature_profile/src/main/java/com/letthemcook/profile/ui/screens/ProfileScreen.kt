@@ -22,10 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.model.items.RecipeItemData
-import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiState
-import com.letthemcook.profile.ui.components.PageOption
 import com.letthemcook.profile.ui.components.recipesGrid
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
@@ -173,13 +171,15 @@ fun ProfileScreen(
                         text = "@${uiState.user.login}",
                         style = LocalAppTheme.current.typography.bodyMedium
                     )
-                    TextButton(
-                        modifier = Modifier,
-                        text = if (uiState.user.isFollowed) "Unfollow" else "Follow",
-                        onClick = {
-                            onUiAction(ProfileUiAction.FollowOrUnfollow)
-                        }
-                    )
+                    if (!uiState.isSelf) {
+                        TextButton(
+                            modifier = Modifier,
+                            text = if (uiState.user.isFollowed) "Unfollow" else "Follow",
+                            onClick = {
+                                onUiAction(ProfileUiAction.FollowOrUnfollow)
+                            }
+                        )
+                    }
                     if (uiState.user.name != null || uiState.user.surname != null) {
                         Text(
                             text = "${uiState.user.name} ${uiState.user.surname}",

@@ -14,6 +14,7 @@ sealed interface EditedRecipeUiAction {
 
     data object SaveChanges : EditedRecipeUiAction
     data class UpdateRecipeJson(val recipeJson: String?, val cookingTime: Long?) : EditedRecipeUiAction
+    data object DeleteRecipe : EditedRecipeUiAction
 
     data class SelectMediaFile(val index: Int) : EditedRecipeUiAction
     data class ViewMediaFile(val file: File) : EditedRecipeUiAction

@@ -5,8 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.RecipeManager
-import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.core.domain.model.remote.reactions.toLikeStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,7 +53,9 @@ class FavoredRecipesViewModel(
                             }
                         }
 
-                        recipes.add(currentRecipe.asItemData(bitmap))
+                        val likeStatus = localDataManager.getRecipeReaction(recipe.id).toLikeStatus()
+
+                        recipes.add(currentRecipe.asItemData(bitmap, likeStatus))
                     }
                 }
 

@@ -5,6 +5,7 @@ import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.items.RecipeItemData
 
 data class ProfileUiState(
+    val isSelf: Boolean = false,
     val user: User? = null,
     val userBitmap: Bitmap? = null,
     val loadingRecipes: Boolean = false,

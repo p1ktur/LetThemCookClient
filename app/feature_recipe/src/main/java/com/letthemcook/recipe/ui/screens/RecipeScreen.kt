@@ -1,11 +1,11 @@
 package com.letthemcook.recipe.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
@@ -25,12 +24,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.RemoveRedEye
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
@@ -42,24 +41,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
+import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.file.FileType
-import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.LoadingStatus
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiState
 import com.letthemcook.recipe.ui.components.ReviewItem
-import com.letthemcook.recipe.ui.components.dialogs.ReviewTextFieldDialog
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.images.RecipeImage
@@ -87,7 +83,7 @@ fun RecipeScreen(
         }
     }
 
-    var isReviewTextFieldDialogShown by remember { mutableStateOf(false) }
+    val reviewWriter = LocalScreenContainer.current.reviewWriter
 
     val categoryLabelNames = remember(uiState.categories) { uiState.categories.map { it.name } }
     val productLabelNames = remember(uiState.products) { uiState.products.map { it.toString() } }
@@ -107,6 +103,7 @@ fun RecipeScreen(
     }
 
     LaunchedEffect(Unit) {
+        Log.d("TAG", "here")
         onUiAction(RecipeUiAction.LoadData)
     }
 
@@ -178,6 +175,12 @@ fun RecipeScreen(
                             .padding(horizontal = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        uiState.publicationDate?.let { date ->
+                            Text(
+                                text = date.prettyString(),
+                                style = LocalAppTheme.current.typography.bodySmall
+                            )
+                        }
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -291,8 +294,14 @@ fun RecipeScreen(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                        contentDescription = "Views Icon",
+                        tint = LocalAppTheme.current.text
+                    )
                     Text(
-                        text = uiState.preparationsAmount.cute(),
+                        text = uiState.viewsAmount.cute(),
                         style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Icon(
@@ -300,6 +309,10 @@ fun RecipeScreen(
                         imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
                         contentDescription = "Preparations Icon",
                         tint = LocalAppTheme.current.text
+                    )
+                    Text(
+                        text = uiState.preparationsAmount.cute(),
+                        style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Icon(
                         modifier = Modifier.size(32.dp),
@@ -333,7 +346,7 @@ fun RecipeScreen(
                             .horizontalScroll(rememberScrollState())
                             .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         uiState.attachments.forEachIndexed { index, file ->
                             Icon(
@@ -403,7 +416,11 @@ fun RecipeScreen(
                             .size(32.dp)
                             .clip(CircleShape)
                             .clickable {
-                                isReviewTextFieldDialogShown = true
+                                reviewWriter.showDialog(
+                                    onSendReviewCallback = { text ->
+                                        onUiAction(RecipeUiAction.SendReview(text))
+                                    }
+                                )
                             }
                             .padding(4.dp),
                         imageVector = Icons.AutoMirrored.Outlined.Comment,
@@ -413,8 +430,11 @@ fun RecipeScreen(
                 }
             }
         }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         if (uiState.reviews.isNotEmpty()) {
-            itemsIndexed(uiState.reviews, key = { _, it -> "${it.id}_${it.likesAmount}" }) { index, reviewData ->
+            itemsIndexed(uiState.reviews, key = { _, it -> it.id }) { index, reviewData ->
                 ReviewItem(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -423,12 +443,11 @@ fun RecipeScreen(
                     onProfileClick = {
                         onUiAction(RecipeUiAction.NavigateToOtherProfile(reviewData.authorId))
                     },
-                    onLikeClick = {
-                        if (reviewData.isLiked) {
-                            onUiAction(RecipeUiAction.UnlikeReview(index))
-                        } else {
-                            onUiAction(RecipeUiAction.LikeReview(index))
-                        }
+                    onLike = {
+                        onUiAction(RecipeUiAction.LikeReview(index))
+                    },
+                    onDisLike = {
+                        onUiAction(RecipeUiAction.UnlikeReview(index))
                     }
                 )
             }
@@ -444,16 +463,4 @@ fun RecipeScreen(
             }
         }
     }
-
-    ReviewTextFieldDialog(
-        isShown = isReviewTextFieldDialogShown,
-        reviewState = uiState.reviewText,
-        onSendReview = {
-            onUiAction(RecipeUiAction.SendReview)
-            isReviewTextFieldDialogShown = false
-        },
-        onDismiss = {
-            isReviewTextFieldDialogShown = false
-        }
-    )
 }

@@ -1,7 +1,7 @@
 package com.letthemcook.media.domain.viewModels.mediaViewerImage
 
 import androidx.lifecycle.ViewModel
-import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 

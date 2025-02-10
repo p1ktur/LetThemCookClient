@@ -8,17 +8,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.EmptyMediaFilePicker
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePickerManager
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.NavBar
 import com.letthemcook.theme.components.bars.ToolBar
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.MediaPickMethodDialog
+import com.letthemcook.theme.components.dialogs.bottom.writeReview.ReviewWriter
+import com.letthemcook.theme.components.dialogs.bottom.writeReview.WriteReviewDialog
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.spacers.TopInsetSpacer
+import org.koin.compose.koinInject
 
 typealias Function = (() -> Unit)?
 
@@ -36,6 +44,18 @@ class ScreenContainer {
         setOnNavigateToNewRecipe(null)
         setOnNavigateToProfile(null)
     }
+
+    private val _mediaFilePicker: MutableState<MediaFilePicker> = mutableStateOf(
+        EmptyMediaFilePicker
+    )
+    val mediaFilePicker by _mediaFilePicker
+
+    internal fun setMediaFilePicker(value: MediaFilePicker) {
+        _mediaFilePicker.value = value
+    }
+
+    private val _reviewWriter = mutableStateOf(ReviewWriter())
+    val reviewWriter by _reviewWriter
 
     private val _viewingMedia = mutableStateOf(false)
     val viewingMedia by _viewingMedia
@@ -87,7 +107,6 @@ class ScreenContainer {
         _onToolBarSearchClick.value = value
     }
 
-    
     // Navigation Bar
     private val _showNavigationBar = mutableStateOf(false)
     val showNavigationBar by _showNavigationBar
@@ -123,7 +142,6 @@ class ScreenContainer {
     fun setOnNavigateToProfile(value: Function) {
         _onNavigateToProfile.value = value
     }
-
 }
 
 val LocalScreenContainer = compositionLocalOf { ScreenContainer() }
@@ -136,10 +154,15 @@ fun ScreensContainer(
     val toolBarColor = LocalAppTheme.current.screenThree
     val navigationBarColor = LocalAppTheme.current.background
 
+    val mediaFilePicker = koinInject<MediaFilePickerManager>()
+    mediaFilePicker.RegisterLaunchers()
+
     LaunchedEffect(Unit) {
         screenContainer.apply {
             setToolBarColor(toolBarColor)
             setNavigationBarColor(navigationBarColor)
+
+            setMediaFilePicker(mediaFilePicker)
         }
     }
 
@@ -180,4 +203,8 @@ fun ScreensContainer(
         }
         BottomInsetSpacer(LocalScreenContainer.current.navigationBarColor)
     }
+
+    MediaPickMethodDialog(mediaFilePicker)
+
+    WriteReviewDialog(screenContainer.reviewWriter)
 }

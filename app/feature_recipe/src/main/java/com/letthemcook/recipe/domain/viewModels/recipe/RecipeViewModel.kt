@@ -8,12 +8,11 @@ import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.ReviewManager
-import com.letthemcook.core.domain.media.toBitmap
-import com.letthemcook.core.domain.model.items.ReviewItemData
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.remote.Review
 import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
-import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.LoadingStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +62,7 @@ class RecipeViewModel(
             RecipeUiAction.UnDislikeRecipe -> unDislikeRecipe()
 
             RecipeUiAction.LoadReviews -> loadReviews()
-            RecipeUiAction.SendReview -> sendReview()
+            is RecipeUiAction.SendReview -> sendReview(action.text)
             is RecipeUiAction.LikeReview -> likeReview(action.index)
             is RecipeUiAction.UnlikeReview -> unlikeReview(action.index)
         }
@@ -85,6 +84,8 @@ class RecipeViewModel(
             }
 
             if (recipe == null) {
+                if (uiState.value.loadingStatus == LoadingStatus.SUCCESS) return@launch
+
                 _uiState.update {
                     it.copy(
                         loadingStatus = LoadingStatus.FAILED
@@ -146,7 +147,11 @@ class RecipeViewModel(
         }
     }
 
+    // Can be changed so that it prepares recipes only if any steps were done during cooking
+    // or cooking was finished so it cannot be abused by simple entering cooking and leaving it
     private fun prepareRecipe() {
+        if (uiState.value.isOwner) return
+
         viewModelScope.launch(Dispatchers.IO) {
             recipeManager.prepareRecipe(recipeId)
         }
@@ -295,22 +300,22 @@ class RecipeViewModel(
 
             _uiState.update {
                 it.copy(
-                    reviews = it.reviews + reviews,
+                    reviews = (it.reviews + reviews).distinctBy { review -> review.id },
                     loadingReviews = false
                 )
             }
         }
     }
 
-    private fun sendReview() {
+    private fun sendReview(text: String) {
         val user = authManager.getUser() ?: return
-        if (uiState.value.reviewText.text.isEmpty()) return
+        if (text.isEmpty()) return
 
         val review = Review(
             id = UUID.randomUUID().toString(),
             authorId = user.id,
             recipeId = uiState.value.recipeId,
-            reviewText = uiState.value.reviewText.text.toString(),
+            reviewText = text,
             likesAmount = 0
         )
 
@@ -321,15 +326,7 @@ class RecipeViewModel(
                         localFileManager.getFileBytes(file)?.toBitmap()
                     }
                 }
-                val reviewItemData = ReviewItemData(
-                    id = UUID.randomUUID().toString(),
-                    authorId = user.id,
-                    authorLogin = user.login,
-                    authorBitmap = userProfileBitmap,
-                    text = uiState.value.reviewText.text.toString(),
-                    likesAmount = 0,
-                    isLiked = false
-                )
+                val reviewItemData = review.asItemData(user.login, userProfileBitmap, false)
 
                 _uiState.update {
                     it.copy(

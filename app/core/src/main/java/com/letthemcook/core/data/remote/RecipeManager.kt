@@ -1,22 +1,24 @@
 package com.letthemcook.core.data.remote
 
-import android.util.Log
+import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.domain.http.delete
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.post
-import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
-import com.letthemcook.core.domain.model.remote.Category
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.core.domain.model.remote.Category
 import com.letthemcook.core.domain.model.remote.Product
 import com.letthemcook.core.domain.model.remote.Recipe
+import com.letthemcook.core.domain.model.remote.reactions.toLikeStatus
 import io.ktor.client.call.body
 import io.ktor.util.StringValues
 import java.net.URLEncoder
 
 class RecipeManager(
     private val authManager: AuthManager,
-    private val remoteFileManager: RemoteFileManager
+    private val remoteFileManager: RemoteFileManager,
+    private val localDataManager: LocalDataManager
 ) {
 
     // Recipes
@@ -44,7 +46,9 @@ class RecipeManager(
                     )
                     val recipeImage = remoteFileManager.getFile(params)
 
-                    recipe.asItemData(recipeImage?.toBitmap())
+                    val likeStatus = localDataManager.getRecipeReaction(recipe.id).toLikeStatus()
+
+                    recipe.asItemData(recipeImage?.toBitmap(), likeStatus)
                 }
             },
             onError = { emptyList() }
@@ -88,7 +92,9 @@ class RecipeManager(
                     )
                     val recipeImage = remoteFileManager.getFile(params)
 
-                    recipe.asItemData(recipeImage?.toBitmap())
+                    val likeStatus = localDataManager.getRecipeReaction(recipe.id).toLikeStatus()
+
+                    recipe.asItemData(recipeImage?.toBitmap(), likeStatus)
                 }
             },
             onError = { emptyList() }
@@ -120,7 +126,9 @@ class RecipeManager(
                     )
                     val recipeImage = remoteFileManager.getFile(params)
 
-                    recipe.asItemData(recipeImage?.toBitmap())
+                    val likeStatus = localDataManager.getRecipeReaction(recipe.id).toLikeStatus()
+
+                    recipe.asItemData(recipeImage?.toBitmap(), likeStatus)
                 }
             },
             onError = { emptyList() }
@@ -139,9 +147,7 @@ class RecipeManager(
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
             onResponse = { it.body<Recipe>() },
-            onError = {
-                Log.d("TAG", "$it")
-                null }
+            onError = { null }
         )
     }
 

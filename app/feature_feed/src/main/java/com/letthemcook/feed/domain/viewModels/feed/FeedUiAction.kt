@@ -7,5 +7,6 @@ sealed interface FeedUiAction {
     data object NavigateToSavedRecipes : FeedUiAction
     data class NavigateToRecipe(val recipeId: String) : FeedUiAction
 
+    data object RefreshFeed : FeedUiAction
     data object LoadNextRecipes : FeedUiAction
 }

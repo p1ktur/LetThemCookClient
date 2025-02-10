@@ -1,4 +1,4 @@
-package com.letthemcook.recipe.domain.model
+package com.letthemcook.core.domain.model.status
 
 enum class LikeStatus {
     NONE,

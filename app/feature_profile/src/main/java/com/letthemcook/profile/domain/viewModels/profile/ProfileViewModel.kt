@@ -2,10 +2,11 @@ package com.letthemcook.profile.domain.viewModels.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
-import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val userId: String,
+    authManager: AuthManager,
     private val userManager: UserManager,
     remoteFileManager: RemoteFileManager,
     private val recipeManager: RecipeManager
@@ -31,6 +33,7 @@ class ProfileViewModel(
             userManager.getUser(userId)?.let { user ->
                 _uiState.update {
                     it.copy(
+                        isSelf = user.id == authManager.getUser()?.id,
                         user = user
                     )
                 }

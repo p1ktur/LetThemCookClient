@@ -52,7 +52,32 @@ class FeedViewModel(
             FeedUiAction.NavigateToSavedRecipes -> Unit
             is FeedUiAction.NavigateToRecipe -> Unit
 
+            FeedUiAction.RefreshFeed -> refreshFeed()
             FeedUiAction.LoadNextRecipes -> loadNextRecipes()
+        }
+    }
+
+    private fun refreshFeed() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update {
+                it.copy(
+                    loading = true
+                )
+            }
+
+            allPagesReached = false
+            lastPage = 0
+
+            val recipes = recipeManager.getFeedRecipes(++lastPage)
+
+            if (recipes.isNotEmpty()) {
+                _uiState.update {
+                    it.copy(
+                        recipes = recipes,
+                        loading = false
+                    )
+                }
+            }
         }
     }
 
@@ -72,7 +97,7 @@ class FeedViewModel(
                 } else {
                     _uiState.update {
                         it.copy(
-                            recipes = it.recipes + recipes,
+                            recipes = (it.recipes + recipes).distinctBy { recipe -> recipe.id },
                             loading = false
                         )
                     }

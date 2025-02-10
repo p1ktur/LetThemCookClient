@@ -3,8 +3,8 @@ package com.letthemcook.core.data.remote
 import com.letthemcook.core.data.local.LocalDataManager
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.post
-import com.letthemcook.core.domain.media.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.ReviewItemData
 import com.letthemcook.core.domain.model.remote.Review
 import io.ktor.client.call.body

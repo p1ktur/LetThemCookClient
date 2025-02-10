@@ -306,7 +306,6 @@ class SearchViewModel(
     }
 
     // Not actions
-    //TODO test recipe searching
     private suspend fun searchRecipes(searchText: String? = null) {
         val text = searchText ?: uiState.value.searchText.text.toString()
         if (lastRecipePage == 0 && text.isEmpty()) return
@@ -366,14 +365,13 @@ class SearchViewModel(
         }
     }
 
-    //TODO test user searching
     private suspend fun searchUsers(searchText: String? = null) {
         val text = searchText ?: uiState.value.searchText.text.toString()
         if (lastUserPage == 0 && text.isEmpty()) return
 
         _uiState.update {
             it.copy(
-                loadingRecipes = true
+                loadingUsers = true
             )
         }
 

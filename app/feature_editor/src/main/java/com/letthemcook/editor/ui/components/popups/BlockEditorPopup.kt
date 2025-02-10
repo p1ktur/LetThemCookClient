@@ -43,7 +43,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.letthemcook.core.domain.format.toHoursString
 import com.letthemcook.core.domain.format.toMinutesString
 import com.letthemcook.core.domain.format.toSecondsString
-import com.letthemcook.core.domain.media.MediaFilePickerManager
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.color.ColorOption
@@ -58,6 +58,7 @@ import com.letthemcook.theme.components.textFields.SingleLineTextField
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.math.roundToInt
 
 sealed interface BlockEditorState {
@@ -80,7 +81,7 @@ private data class BlockEditorFields(
 @Composable
 fun BlockEditorPopup(
     state: BlockEditorState,
-    mediaFilePickerManager: MediaFilePickerManager,
+    mediaFilePicker: MediaFilePicker,
     anchorPosition: Offset,
     anchorSize: IntSize,
     onEdit: (String, String, Int, Int, Int, ColorOption, File?) -> Unit,
@@ -94,7 +95,7 @@ fun BlockEditorPopup(
     var lastBlockEditorState by remember { mutableStateOf(state) }
 
     val coroutineScope = rememberCoroutineScope()
-    val isMediaPickerDialogShown by remember { mediaFilePickerManager.isDialogShown }
+    val isMediaPickerDialogShown by remember { mediaFilePicker.isDialogShown }
 
     var showEmptyNameError by remember { mutableStateOf(false) }
 
@@ -362,7 +363,7 @@ fun BlockEditorPopup(
                                 blockFile = null
 
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    mediaFilePickerManager.deleteStoredFile(blockId)
+                                    mediaFilePicker.deleteStoredFile(blockId)
                                 }
                             }
                             .padding(4.dp),
@@ -378,10 +379,10 @@ fun BlockEditorPopup(
                         .clickable {
                             val blockId = (state as? BlockEditorState.EditingBlock)?.component?.id
                                 ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
-                                ?: return@clickable
+                                ?: UUID.randomUUID().toString()
 
                             if (blockFile == null) {
-                                mediaFilePickerManager.showDialog(FileType.ANY, blockId) {
+                                mediaFilePicker.showDialog(FileType.ANY, blockId) {
                                     blockFile = it.file
                                 }
                             } else blockFile?.let {
@@ -436,7 +437,7 @@ fun BlockEditorPopup(
                                         ?: (state as? BlockEditorState.EditingUnusedBlock)?.component?.id
                                         ?: return@clickable
 
-                                mediaFilePickerManager.showDialog(FileType.ANY, blockId) {
+                                mediaFilePicker.showDialog(FileType.ANY, blockId) {
                                     blockFile = it.file
                                 }
                             }

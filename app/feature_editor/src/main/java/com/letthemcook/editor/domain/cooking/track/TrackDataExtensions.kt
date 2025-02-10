@@ -1,6 +1,5 @@
 package com.letthemcook.editor.domain.cooking.track
 
-import android.util.Log
 import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.composed.HorizontalComposedComponent

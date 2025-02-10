@@ -1,21 +1,22 @@
 package com.letthemcook.recipe.domain.viewModels.editedRecipe
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.local.LocalDataManager
+import com.letthemcook.core.data.local.UnusedBlocksDaoDeleter
 import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.domain.list.filterOn
-import com.letthemcook.core.domain.media.compressBitmap
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.toBytes
 import com.letthemcook.core.domain.model.remote.WeightedProduct
-import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.SaveStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -27,6 +28,13 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -37,7 +45,8 @@ class EditedRecipeViewModel(
     private val recipeManager: RecipeManager,
     private val remoteFileManager: RemoteFileManager,
     private val localFileManager: LocalFileManager,
-    private val localDataManager: LocalDataManager
+    private val localDataManager: LocalDataManager,
+    private val unusedBlocksDaoDeleter: UnusedBlocksDaoDeleter
 ) : ViewModel() {
 
     private val _uiState = run {
@@ -152,6 +161,7 @@ class EditedRecipeViewModel(
 
             EditedRecipeUiAction.SaveChanges -> saveChanges()
             is EditedRecipeUiAction.UpdateRecipeJson -> updateRecipeJson(action.recipeJson, action.cookingTime)
+            EditedRecipeUiAction.DeleteRecipe -> deleteRecipe()
 
             is EditedRecipeUiAction.SelectMediaFile -> selectFile(action.index)
             is EditedRecipeUiAction.ViewMediaFile -> Unit
@@ -190,6 +200,8 @@ class EditedRecipeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val recipe = uiState.value.toRecipe()
             val attachments = uiState.value.attachments
+            val bitmap = uiState.value.recipeBitmap
+            val bitmapId = uiState.value.recipeBitmapId
 
             localDataManager.saveRecipe(recipe)
 
@@ -207,6 +219,17 @@ class EditedRecipeViewModel(
 
                             remoteFileManager.uploadFile(params, bytes)
                         }
+                    }
+
+                    if (bitmap != null && bitmapId != null) {
+                        val params = RemoteFileManager.RequestParams(
+                            userId = recipe.ownerId,
+                            fileId = bitmapId,
+                            recipeId = recipe.id,
+                            type = FileType.IMAGE
+                        )
+
+                        remoteFileManager.uploadFile(params, bitmap.toBytes())
                     }
                 }
             }
@@ -228,7 +251,57 @@ class EditedRecipeViewModel(
             )
         }
 
+        if (recipeJson != null) {
+            val jsonElement = Json.parseToJsonElement(recipeJson)
+            val files = findNonNullFiles(jsonElement).map { (id, fileObject) ->
+                id to Json.decodeFromString<File>(fileObject.toString())
+            }
+
+            if (uiState.value.publicationDate != null && files.isNotEmpty()) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    files.forEach { (blockId, file) ->
+                        localFileManager.getFileByUid(file.uid)?.let { localFile ->
+                            val bytes = localFileManager.getFileBytes(localFile)
+
+                            if (bytes != null) {
+                                val params = RemoteFileManager.RequestParams(
+                                    userId = uiState.value.ownerId,
+                                    fileId = file.uid,
+                                    recipeId = uiState.value.recipeId,
+                                    blockId = blockId,
+                                    type = file.type
+                                )
+
+                                remoteFileManager.uploadFile(params, bytes)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         saveChanges()
+    }
+
+    private fun deleteRecipe() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val attachments = uiState.value.attachments
+            val bitmapId = uiState.value.recipeBitmapId
+
+            localDataManager.deleteRecipeById(uiState.value.recipeId)
+
+            attachments.forEach { file ->
+                localFileManager.deleteFile(file)
+            }
+
+            if (bitmapId != null) {
+                localFileManager.getFileByUid(bitmapId)?.let { file ->
+                    localFileManager.deleteFile(file)
+                }
+            }
+
+            unusedBlocksDaoDeleter.deleteByRecipeId(uiState.value.recipeId)
+        }
     }
 
     private fun selectFile(index: Int) {
@@ -516,6 +589,23 @@ class EditedRecipeViewModel(
                     )
                 }
             }
+        }
+    }
+
+    private fun findNonNullFiles(jsonElement: JsonElement, parentBlockId: String? = null): List<Pair<String, JsonObject>> {
+        return when (jsonElement) {
+            is JsonObject -> {
+                val currentBlockId = jsonElement["id"]?.jsonPrimitive?.contentOrNull ?: parentBlockId
+                val fileObject = jsonElement["file"]?.takeIf { it is JsonObject }?.jsonObject
+                val nestedFiles = jsonElement.values.flatMap { findNonNullFiles(it, currentBlockId) }
+                if (fileObject != null && currentBlockId != null) {
+                    listOf(currentBlockId to fileObject) + nestedFiles
+                } else {
+                    nestedFiles
+                }
+            }
+            is JsonArray -> jsonElement.flatMap { findNonNullFiles(it, parentBlockId) }
+            else -> emptyList()
         }
     }
 }

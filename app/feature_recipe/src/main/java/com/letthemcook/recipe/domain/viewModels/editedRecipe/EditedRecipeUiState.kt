@@ -8,7 +8,7 @@ import com.letthemcook.core.domain.model.remote.Category
 import com.letthemcook.core.domain.model.remote.Product
 import com.letthemcook.core.domain.model.remote.Recipe
 import com.letthemcook.core.domain.model.remote.WeightedProduct
-import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.SaveStatus
 import java.time.LocalDateTime
 

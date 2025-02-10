@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.media
+package com.letthemcook.core.domain.model.file.extensions
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

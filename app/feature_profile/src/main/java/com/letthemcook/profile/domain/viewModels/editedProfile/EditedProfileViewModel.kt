@@ -8,10 +8,11 @@ import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
-import com.letthemcook.core.domain.media.compressBitmap
-import com.letthemcook.core.domain.media.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.remote.reactions.toLikeStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,7 +64,9 @@ class EditedProfileViewModel(
                     }
                 }
 
-                recipe.asItemData(recipeBitmap)
+                val likeStatus = localDataManager.getRecipeReaction(recipe.id).toLikeStatus()
+
+                recipe.asItemData(recipeBitmap, likeStatus)
             }
 
             _uiState.update { state ->

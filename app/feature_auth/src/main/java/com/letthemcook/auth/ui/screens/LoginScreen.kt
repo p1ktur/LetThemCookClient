@@ -55,8 +55,6 @@ import com.letthemcook.core.domain.validation.result.PasswordValidationResult
 import com.letthemcook.core.domain.validation.result.PhoneNumberValidationResult
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
-import com.letthemcook.theme.components.spacers.BottomInsetSpacer
-import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.components.textFields.ValidatedTextField
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 

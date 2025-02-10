@@ -154,7 +154,7 @@ class CookingViewModel(
         recalculateTrackData()
 
         cookingJob = viewModelScope.launch {
-            while (isActive) {
+            while (isActive && uiState.value.cookingProgress < 1f && uiState.value.cookingTimeLeft > 0L) {
                 components.decreaseCookingTimer()
 
                 if (uiState.value.cookingTimeLeft > 0L) {

@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.media
+package com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media
 
 import android.Manifest
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
@@ -25,20 +25,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
 import com.letthemcook.core.data.local.files.LocalFileManager
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
+import com.letthemcook.core.domain.model.file.extensions.compressVideoWithSizeLimit
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
 import java.io.File as JFile
 
 class MediaFilePickerManager(
     private val context: Context,
     private val localFileManager: LocalFileManager
-) {
+) : MediaFilePicker {
     // UI
-    val isDialogShown = mutableStateOf(false)
+    override val isDialogShown = mutableStateOf(false)
 
     // Common
     private lateinit var cameraPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
@@ -50,7 +52,7 @@ class MediaFilePickerManager(
     private var currentFileName: String = ""
 
     private var _currentFileType = FileType.IMAGE
-    var currentFileType = mutableStateOf(FileType.IMAGE)
+    override val currentFileType = mutableStateOf(FileType.IMAGE)
 
     private var onReceiveMediaFile: ((MediaFile) -> Unit)? = null
 
@@ -59,7 +61,7 @@ class MediaFilePickerManager(
 
     // UI
     @Composable
-    fun RegisterLaunchers() {
+    override fun RegisterLaunchers() {
         val coroutineScope = rememberCoroutineScope()
 
         // Camera
@@ -157,9 +159,9 @@ class MediaFilePickerManager(
         }
     }
 
-    fun showDialog(
+    override fun showDialog(
         fileType: FileType,
-        fileId: String = UUID.randomUUID().toString(),
+        fileId: String,
         onReceiveMediaFile: (MediaFile) -> Unit
     ) {
         isDialogShown.value = true
@@ -170,11 +172,11 @@ class MediaFilePickerManager(
         this.onReceiveMediaFile = onReceiveMediaFile
     }
 
-    fun hideDialog() {
+    override fun hideDialog() {
         isDialogShown.value = false
     }
 
-    fun launchGallery(fileType: FileType) {
+    override fun launchGallery(fileType: FileType) {
         _currentFileType = fileType
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -189,14 +191,14 @@ class MediaFilePickerManager(
         }
     }
 
-    fun launchCamera(fileType: FileType) {
+    override fun launchCamera(fileType: FileType) {
         _currentFileType = fileType
 
         cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     // Files
-    suspend fun getStoredFile(
+    override suspend fun getStoredFile(
         fileId: String,
         onReceiveMediaFile: (MediaFile) -> Unit
     ): Boolean {
@@ -218,21 +220,7 @@ class MediaFilePickerManager(
         return true
     }
 
-    suspend fun getStoredFilesIndexed(
-        fileId: String,
-        startIndex: Int,
-        onReceiveMediaFile: (MediaFile) -> Unit
-    ) {
-        var searching = true
-        var currentIndex = startIndex
-
-        while (searching) {
-            searching = getStoredFile(fileId + currentIndex, onReceiveMediaFile)
-            currentIndex++
-        }
-    }
-
-    suspend fun deleteStoredFile(fileId: String, onFileDeleted: ((Boolean) -> Unit)? = null) {
+    override suspend fun deleteStoredFile(fileId: String, onFileDeleted: ((Boolean) -> Unit)?) {
         this.onFileDeleted = onFileDeleted
 
         localFileManager.getFileByUid(fileId)?.let { file ->
@@ -242,7 +230,7 @@ class MediaFilePickerManager(
         }
     }
 
-    suspend fun deleteStoredFile(file: File, onFileDeleted: ((Boolean) -> Unit)? = null) {
+    override suspend fun deleteStoredFile(file: File, onFileDeleted: ((Boolean) -> Unit)?) {
         this.onFileDeleted = onFileDeleted
 
         if (localFileManager.deleteFile(file, deleteFileLauncher)) {

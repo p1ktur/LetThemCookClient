@@ -1,13 +1,12 @@
 package com.letthemcook.recipe.domain.viewModels.recipe
 
 import android.graphics.Bitmap
-import androidx.compose.foundation.text.input.TextFieldState
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.items.ReviewItemData
 import com.letthemcook.core.domain.model.remote.Category
 import com.letthemcook.core.domain.model.remote.Recipe
 import com.letthemcook.core.domain.model.remote.WeightedProduct
-import com.letthemcook.recipe.domain.model.LikeStatus
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.LoadingStatus
 import java.time.LocalDateTime
 
@@ -36,7 +35,6 @@ data class RecipeUiState(
     // Reviews
     val loadingReviews: Boolean = false,
     val reviews: List<ReviewItemData> = emptyList(),
-    val reviewText: TextFieldState = TextFieldState(),
     // Other
     val recipeBitmapId: String? = null,
     val recipeBitmap: Bitmap? = null,

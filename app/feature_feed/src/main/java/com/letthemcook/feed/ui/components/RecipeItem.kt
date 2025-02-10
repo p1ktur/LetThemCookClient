@@ -3,148 +3,170 @@ package com.letthemcook.feed.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.RemoveRedEye
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
+import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
 fun RecipeItem(
     modifier: Modifier = Modifier,
     recipeItemData: RecipeItemData,
+    index: Int,
+    lastIndex: Int,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .clickable(onClick = onClick)
+    val recipeBitmap = remember(recipeItemData) { recipeItemData.bitmap }
+
+    Column(
+        modifier = modifier.clickable(onClick = onClick),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Image(
+        if (recipeBitmap != null) {
+            Image(
+                modifier = Modifier.fillMaxWidth(),
+                bitmap = recipeBitmap.asImageBitmap(),
+                contentDescription = "Recipe Image",
+                contentScale = ContentScale.FillWidth
+            )
+        } else {
+            Spacer(modifier = Modifier.height(0.dp))
+        }
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(5f / 4f),
-            bitmap = recipeItemData.bitmap?.asImageBitmap()
-                ?: ImageBitmap.imageResource(id = com.letthemcook.theme.R.drawable.image_placeholder),
-            contentDescription = "Recipe Image",
-            contentScale = ContentScale.FillBounds
-        )
-        Text(
-            modifier = Modifier
-                .padding(8.dp)
-                .align(Alignment.TopStart),
-            text = recipeItemData.name,
-            style = LocalAppTheme.current.typography.bodyLarge
-        )
-        Text(
-            modifier = Modifier
-                .padding(8.dp)
-                .align(Alignment.TopEnd),
-            text = recipeItemData.authorLogin,
-            style = LocalAppTheme.current.typography.bodyMedium
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = recipeItemData.dislikesAmount.cute(),
-                        style = LocalAppTheme.current.typography.bodySmall
-                    )
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Outlined.ThumbDown,
-                        contentDescription = "Dislikes Icon",
-                        tint = LocalAppTheme.current.text
-                    )
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Outlined.ThumbUp,
-                        contentDescription = "Likes Icon",
-                        tint = LocalAppTheme.current.text
-                    )
-                    Text(
-                        text = recipeItemData.likesAmount.cute(),
-                        style = LocalAppTheme.current.typography.bodySmall
-                    )
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = recipeItemData.preparationsAmount.cute(),
-                            style = LocalAppTheme.current.typography.bodySmall
-                        )
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
-                            contentDescription = "Dislikes Icon",
-                            tint = LocalAppTheme.current.text
-                        )
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = recipeItemData.reviewsAmount.cute(),
-                            style = LocalAppTheme.current.typography.bodySmall
-                        )
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            imageVector = Icons.AutoMirrored.Outlined.Comment,
-                            contentDescription = "Dislikes Icon",
-                            tint = LocalAppTheme.current.text
-                        )
-                    }
-                }
+            Text(
+                text = recipeItemData.dislikesAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = if (recipeItemData.likeStatus == LikeStatus.DISLIKED) {
+                    Icons.Filled.ThumbDown
+                } else {
+                    Icons.Outlined.ThumbDown
+                },
+                contentDescription = "Dislikes Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = if (recipeItemData.likeStatus == LikeStatus.LIKED) {
+                    Icons.Filled.ThumbUp
+                } else {
+                    Icons.Outlined.ThumbUp
+                },
+                contentDescription = "Likes Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = recipeItemData.likesAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                contentDescription = "Views Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = recipeItemData.viewsAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                contentDescription = "Preparations Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = recipeItemData.preparationsAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.AutoMirrored.Outlined.Comment,
+                contentDescription = "Reviews Icon",
+                tint = LocalAppTheme.current.text
+            )
+            Text(
+                text = recipeItemData.reviewsAmount.cute(),
+                style = LocalAppTheme.current.typography.bodyMedium
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "@${recipeItemData.authorLogin}",
+                style = LocalAppTheme.current.typography.bodySmall
+            )
+            recipeItemData.publicationDate?.let { date ->
+                Text(
+                    text = date.prettyString(),
+                    style = LocalAppTheme.current.typography.bodySmall
+                )
             }
+        }
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            text = recipeItemData.name,
+            style = LocalAppTheme.current.typography.bodyLarge,
+        )
+        if (recipeItemData.description.isNotEmpty()) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 12.dp),
                 text = recipeItemData.description,
-                style = LocalAppTheme.current.typography.bodySmall,
-                maxLines = 2,
+                style = LocalAppTheme.current.typography.bodyMedium,
+                maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+
+        if (index != lastIndex) {
+            HorizontalDivider(color = LocalAppTheme.current.text)
+        } else {
+            Spacer(modifier = Modifier.height(0.dp))
         }
     }
 }

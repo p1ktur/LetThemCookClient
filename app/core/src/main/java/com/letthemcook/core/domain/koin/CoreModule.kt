@@ -9,7 +9,6 @@ import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.ReviewManager
 import com.letthemcook.core.data.remote.UserManager
-import com.letthemcook.core.domain.media.MediaFilePickerManager
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -25,11 +24,9 @@ val koinCoreModule = module {
     single { get<LocalDataDatabase>().getReviewLikeDao() }
     single { LocalDataManager(get(), get(), get()) }
 
-    single { MediaFilePickerManager(androidContext(), get()) }
-
     // Remote
     single { AuthManager(androidContext()) }
-    single { RecipeManager(get(), get()) }
+    single { RecipeManager(get(), get(), get()) }
     single { RemoteFileManager(get()) }
     single { ReviewManager(get(), get(), get(), get()) }
     single { UserManager(get(), get()) }

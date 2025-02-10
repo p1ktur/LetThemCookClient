@@ -18,7 +18,7 @@ import com.letthemcook.media.domain.viewModels.mediaViewerImage.MediaViewerImage
 import com.letthemcook.media.ui.screens.MediaViewerImageScreen
 import com.letthemcook.media.ui.screens.MediaViewerScreen
 import com.letthemcook.core.data.remote.RemoteFileManager
-import com.letthemcook.core.domain.media.toBytes
+import com.letthemcook.core.domain.model.file.extensions.toBytes
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 import com.letthemcook.theme.ui.navigation.MediaViewerAccess

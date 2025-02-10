@@ -251,13 +251,12 @@ fun SearchScreen(
                                 RecipeItem(
                                     modifier = Modifier.fillMaxWidth(),
                                     recipeItemData = recipeItemData,
+                                    index = index,
+                                    lastIndex = uiState.searchedRecipes.lastIndex,
                                     onClick = {
                                         onUiAction(SearchUiAction.NavigateToRecipe(recipeItemData.id))
                                     }
                                 )
-                                if (index != uiState.searchedRecipes.lastIndex) {
-                                    HorizontalDivider(color = LocalAppTheme.current.text)
-                                }
                             }
                         }
                     }

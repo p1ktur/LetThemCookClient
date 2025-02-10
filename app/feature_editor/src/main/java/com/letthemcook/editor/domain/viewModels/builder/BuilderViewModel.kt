@@ -99,7 +99,7 @@ class BuilderViewModel(
                             }
                         }
 
-                        component.products.removeAll(toRemove)
+                        component.products.removeAll(toRemove.toSet())
                     }
                 }
 

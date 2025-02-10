@@ -1,4 +1,4 @@
-package com.letthemcook.core.domain.media
+package com.letthemcook.core.domain.model.file.extensions
 
 import android.content.Context
 import android.media.MediaMetadataRetriever

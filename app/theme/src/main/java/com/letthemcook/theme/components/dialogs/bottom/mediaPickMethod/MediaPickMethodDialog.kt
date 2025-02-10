@@ -1,4 +1,4 @@
-package com.letthemcook.theme.components.dialogs
+package com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.letthemcook.core.domain.media.MediaFilePickerManager
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
