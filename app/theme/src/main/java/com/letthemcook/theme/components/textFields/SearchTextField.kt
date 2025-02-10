@@ -25,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.letthemcook.theme.R
 import com.letthemcook.theme.base.LocalAppTheme
 
 @Composable
@@ -65,7 +67,7 @@ fun SearchTextField(
             if (state.text.isEmpty()) {
                 Text(
                     modifier = Modifier.padding(start = 10.dp),
-                    text = "Type to search",
+                    text = stringResource(R.string.type_to_search),
                     style = placeholderTextStyle
                 )
                 Spacer(modifier = Modifier.weight(1f))

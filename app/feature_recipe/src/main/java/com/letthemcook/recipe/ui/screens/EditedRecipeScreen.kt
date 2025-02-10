@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.format.prettyString
@@ -54,6 +55,7 @@ import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.recipe.domain.model.EditingError
 import com.letthemcook.core.domain.model.status.LikeStatus
+import com.letthemcook.recipe.R
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.editedRecipe.EditedRecipeUiState
 import com.letthemcook.recipe.domain.model.SaveStatus
@@ -81,11 +83,13 @@ fun EditedRecipeScreen(
     val wasPublished = remember { uiState.publicationDate != null }
 
     // Save Dialog
+    val exitRecipeEditing = stringResource(R.string.exit_recipe_editing)
+    val thereMayBeUnsavedChanges = stringResource(R.string.there_are_may_be_unsaved_changes_are_you_sure_you_want_to_exit)
     var areYouSureDialogConfig: AreYouSureDialogConfig? by remember { mutableStateOf(null) }
     val saveDialogConfigDefault = remember {
         AreYouSureDialogConfig(
-            titleText = "Exit recipe editing?",
-            bodyText = "There are may be unsaved changes. Are you sure you want to exit?",
+            titleText = exitRecipeEditing,
+            bodyText = thereMayBeUnsavedChanges,
             onOk = {},
             onDismiss = { areYouSureDialogConfig = null }
         )
@@ -146,13 +150,17 @@ fun EditedRecipeScreen(
         }
     }
 
+    val notSaved = stringResource(R.string.not_saved)
+    val saving = stringResource(R.string.saving)
+    val saved = stringResource(R.string.saved)
+
     LaunchedEffect(uiState.saveStatus) {
         screenContainer.setToolBarStatusText(
             value = when (uiState.saveStatus) {
                 SaveStatus.NO_CHANGES -> null
-                SaveStatus.NOT_SAVED -> "Not saved"
-                SaveStatus.SAVING -> "Saving..."
-                SaveStatus.SAVED -> "Saved"
+                SaveStatus.NOT_SAVED -> notSaved
+                SaveStatus.SAVING -> saving
+                SaveStatus.SAVED -> saved
             }
         )
     }
@@ -224,14 +232,14 @@ fun EditedRecipeScreen(
                 SingleLineTextField(
                     modifier = Modifier.fillMaxWidth(),
                     state = uiState.name,
-                    labelText = "Name",
-                    placeholderText = "Type name"
+                    labelText = stringResource(R.string.name),
+                    placeholderText = stringResource(R.string.type_name)
                 )
                 Text(
                     text = if (uiState.publicationDate == null) {
-                        "Archived"
+                        stringResource(R.string.archived)
                     } else {
-                        "Published: ${uiState.publicationDate.prettyString()}"
+                        stringResource(R.string.published) + uiState.publicationDate.prettyString()
                     },
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
@@ -241,11 +249,11 @@ fun EditedRecipeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     TextButton(
-                        modifier = Modifier.size(120.dp, 40.dp),
+                        modifier = Modifier.size(130.dp, 40.dp),
                         text = if (uiState.publicationDate != null) {
-                            "Unpublish"
+                            stringResource(R.string.unpublish)
                         } else {
-                            "Publish"
+                            stringResource(R.string.publish)
                         },
                         onClick = {
                             if (uiState.publicationDate != null) {
@@ -279,9 +287,9 @@ fun EditedRecipeScreen(
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),
             text = if (uiState.cookingTime != null) {
-                "Cooking time: " + uiState.cookingTime.toShortTimeString()
+                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString()
             } else {
-                "No cooking yet"
+                stringResource(R.string.no_cooking_yet)
             },
             style = LocalAppTheme.current.typography.bodyLarge
         )
@@ -293,16 +301,16 @@ fun EditedRecipeScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             TextButton(
-                modifier = Modifier.size(120.dp, 40.dp),
-                text = "Edit",
+                modifier = Modifier.size(130.dp, 40.dp),
+                text = stringResource(R.string.edit),
                 onClick = {
                     onUiAction(EditedRecipeUiAction.EditCooking(uiState.recipeJson))
                 }
             )
             if (uiState.recipeJson != null) {
                 TextButton(
-                    modifier = Modifier.size(120.dp, 40.dp),
-                    text = "Cook",
+                    modifier = Modifier.size(130.dp, 40.dp),
+                    text = stringResource(R.string.cook),
                     onClick = {
                         onUiAction(EditedRecipeUiAction.Cook(uiState.recipeJson))
                     }
@@ -310,14 +318,17 @@ fun EditedRecipeScreen(
             }
             Spacer(modifier = Modifier.weight(1f))
             if (uiState.publicationDate == null) {
+                val deleteThisRecipe = stringResource(R.string.delete_this_recipe)
+                val ifYouDeleteThisRecipe = stringResource(R.string.if_you_delete_this_recipe_all_your_work_will_be_gone_forever_are_you_sure_you_want_to_proceed)
+
                 Icon(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(6.dp))
                         .clickable {
                             areYouSureDialogConfig = AreYouSureDialogConfig(
-                                titleText = "Delete this recipe?",
-                                bodyText = "If you delete this recipe all your work will be gone forever. Are you sure you want to proceed?",
+                                titleText = deleteThisRecipe,
+                                bodyText = ifYouDeleteThisRecipe,
                                 onOk = {
                                     areYouSureDialogConfig = null
                                     onUiAction(EditedRecipeUiAction.DeleteRecipe)
@@ -370,7 +381,7 @@ fun EditedRecipeScreen(
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                imageVector = Icons.Outlined.RemoveRedEye,
                 contentDescription = "Views Icon",
                 tint = LocalAppTheme.current.text
             )
@@ -380,7 +391,7 @@ fun EditedRecipeScreen(
             )
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                imageVector = Icons.Outlined.SoupKitchen,
                 contentDescription = "Preparations Icon",
                 tint = LocalAppTheme.current.text
             )
@@ -404,12 +415,12 @@ fun EditedRecipeScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             state = uiState.description,
-            labelText = "Description",
-            placeholderText = "Type description"
+            labelText = stringResource(R.string.description),
+            placeholderText = stringResource(R.string.type_description)
         )
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),
-            text = "Attachments",
+            text = stringResource(R.string.attachments),
             style = LocalAppTheme.current.typography.bodyMedium
         )
         Row(
@@ -466,9 +477,9 @@ fun EditedRecipeScreen(
             ) {
                 Text(
                     text = when (attachment.type) {
-                        FileType.IMAGE -> "Image"
-                        FileType.VIDEO -> "Video"
-                        FileType.ANY -> "File"
+                        FileType.IMAGE -> stringResource(R.string.image)
+                        FileType.VIDEO -> stringResource(R.string.video)
+                        FileType.ANY -> stringResource(R.string.file)
                     },
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
@@ -514,9 +525,9 @@ fun EditedRecipeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
-            name = "Categories",
+            name = stringResource(R.string.categories),
             labels = categoriesFilterNames,
-            searchTitle = "Categories",
+            searchTitle = stringResource(R.string.categories),
             searchText = uiState.categoriesSearchText,
             isLoading = uiState.loadingCategories,
             searchedLabels = searchedCategoriesNames,
@@ -535,9 +546,9 @@ fun EditedRecipeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp),
-            name = "Products",
+            name = stringResource(R.string.products),
             weightedProducts = uiState.productsFilter,
-            searchTitle = "Products",
+            searchTitle = stringResource(R.string.products),
             searchText = uiState.productsSearchText,
             isLoading = uiState.loadingProducts,
             searchedProducts = uiState.searchedProducts,

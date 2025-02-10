@@ -27,7 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.theme.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 import com.letthemcook.theme.components.textFields.MultiLineTextField
@@ -36,8 +38,6 @@ import com.letthemcook.theme.components.textFields.MultiLineTextField
 fun WriteReviewDialog(reviewWriter: ReviewWriter) {
     val isShown by remember { reviewWriter.isDialogShown }
     val showEmptyTextError by remember { reviewWriter.showEmptyTextError }
-
-    //TODO error cannot be empty
 
     Box(
         modifier = Modifier
@@ -82,7 +82,7 @@ fun WriteReviewDialog(reviewWriter: ReviewWriter) {
                             tint = LocalAppTheme.current.errorText
                         )
                         Text(
-                            text = "Review text cannot be empty.",
+                            text = stringResource(R.string.review_text_cannot_be_empty),
                             style = LocalAppTheme.current.typography.bodySmall,
                             color = LocalAppTheme.current.errorText
                         )
@@ -91,8 +91,8 @@ fun WriteReviewDialog(reviewWriter: ReviewWriter) {
                 MultiLineTextField(
                     modifier = Modifier.fillMaxWidth(),
                     state = reviewWriter.reviewTextState,
-                    labelText = "Review",
-                    placeholderText = "Type review",
+                    labelText = stringResource(R.string.review),
+                    placeholderText = stringResource(R.string.type_review),
                     onSendButtonClick = {
                         reviewWriter.hideDialogAndSendReview()
                     },

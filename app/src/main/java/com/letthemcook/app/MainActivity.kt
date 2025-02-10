@@ -1,13 +1,15 @@
 package com.letthemcook.app
 
+import android.app.LocaleManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.os.LocaleList
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -76,9 +78,6 @@ class MainActivity : ComponentActivity() {
 
     private val authManager by inject<AuthManager>()
 
-    // TODO move media picker dialog onto screenContainer
-    // TODO localize everything
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -92,17 +91,18 @@ class MainActivity : ComponentActivity() {
             val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
             val theme by themeStateProvider.getTheme().collectAsState(Theme.LIGHT)
-            val language by languageStateProvider.getLanguage().collectAsState(Language.fromLocale())
 
             val mediaViewerAccess = remember { mutableStateOf(MediaViewerAccess.Dummy) }
 
-            LaunchedEffect(language) {
-                setLocale(
-                    when (language) {
-                        Language.ENGLISH -> "us"
-                        Language.UKRAINIAN -> "ua"
-                    }
-                )
+            LaunchedEffect(Unit) {
+                languageStateProvider.onSetLanguageCallback = { language ->
+                    setLocale(
+                        when (language) {
+                            Language.ENGLISH -> "us"
+                            Language.UKRAINIAN -> "uk"
+                        }
+                    )
+                }
             }
 
             LaunchedEffect(currentBackStackEntry) {
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
 
                         LaunchedEffect(isLoggedIn.value) {
                             if (isLoggedIn.value == false) {
-                                navController.navigate(navController.navigate(AuthNavRoutes.Login))
+                                navController.navigate(AuthNavRoutes.Login)
                             }
                         }
 
@@ -200,13 +200,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setLocale(language: String) {
-        val locale = Locale(language)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        createConfigurationContext(config)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = getSystemService(Context.LOCALE_SERVICE) as LocaleManager
+            localeManager.applicationLocales = LocaleList(Locale(language))
+        } else {
+            val config = Configuration(resources.configuration)
+            config.setLocales(LocaleList(Locale(language)))
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
     }
 
     @Composable
@@ -242,8 +244,6 @@ class MainActivity : ComponentActivity() {
             }
 
             val rtResult = authManager.checkRefreshToken()
-
-            Log.d("TAG", "$rtResult")
 
             if (rtResult == TokenCheckResult.OK) {
                 isLoggedIn.value = true

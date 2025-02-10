@@ -46,18 +46,18 @@ fun ProgressBar(
                         awaitEachGesture {
                             var event = awaitFirstDown()
                             var position = event.position
-                            var progress = position.x / size.width
+                            var viewedProgress = position.x / size.width
 
                             do {
-                                soughtProgress = progress
-                                onSoughtProgress.invoke(progress)
+                                soughtProgress = viewedProgress
+                                onSoughtProgress.invoke(viewedProgress)
 
                                 event.consume()
 
                                 event = awaitPointerEvent().changes.firstOrNull() ?: continue
 
                                 position = event.position
-                                progress = position.x / size.width
+                                viewedProgress = position.x / size.width
                             } while (event.pressed)
 
                             onReleased?.invoke()

@@ -13,8 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.model.items.UserItemData
+import com.letthemcook.feed.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.images.ProfileImage
 
@@ -51,7 +54,7 @@ fun UserItem(
             )
             Text(
                 modifier = Modifier.alpha(0.66f),
-                text = "${userItemData.totalFollowers} followers",
+                text = userItemData.totalFollowers.cute() + stringResource(R.string.followers),
                 style = LocalAppTheme.current.typography.bodySmall
             )
         }

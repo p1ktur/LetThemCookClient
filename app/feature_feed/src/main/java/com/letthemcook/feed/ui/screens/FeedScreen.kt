@@ -33,7 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
+import com.letthemcook.feed.R
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiAction
 import com.letthemcook.feed.domain.viewModels.feed.FeedUiState
 import com.letthemcook.feed.ui.components.RecipeItem
@@ -91,7 +94,7 @@ fun FeedScreen(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Text(
-                        text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
+                        text = stringResource(R.string.saved_recipes) + uiState.favoredRecipesAmount.cute(),
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
                     Icon(
@@ -110,7 +113,7 @@ fun FeedScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Your feed is empty",
+                    text = stringResource(R.string.your_feed_is_empty),
                     style = LocalAppTheme.current.typography.titleSmall
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -119,8 +122,8 @@ fun FeedScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "try to search new recipes",
-                        style = LocalAppTheme.current.typography.bodyLarge
+                        text = stringResource(R.string.try_to_search_new_recipes),
+                        style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Icon(
                         modifier = Modifier
@@ -137,8 +140,8 @@ fun FeedScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "or follow other users",
-                        style = LocalAppTheme.current.typography.bodyLarge
+                        text = stringResource(R.string.or_follow_other_users),
+                        style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Icon(
                         modifier = Modifier
@@ -184,7 +187,7 @@ fun FeedScreen(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Text(
-                                    text = "Saved Recipes: ${uiState.favoredRecipesAmount}",
+                                    text = stringResource(R.string.saved_recipes) + uiState.favoredRecipesAmount.cute(),
                                     style = LocalAppTheme.current.typography.bodyLarge
                                 )
                                 Icon(

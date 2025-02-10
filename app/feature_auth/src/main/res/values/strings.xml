@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="phone">Phone</string>
+    <string name="phone_number">Phone number</string>
+    <string name="field_cannot_be_empty">This field cannot be empty.</string>
+    <string name="log_in">Log in</string>
+    <string name="new_to">"New to "</string>
+    <string name="register">Register</string>
+    <string name="only_letters_and_numbers_allowed">Only letters or digits are allowed.</string>
+    <string name="please_follow_email_format">Please follow the email format, such as example@email.com.</string>
+    <string name="phone_number_too_short">Phone number is too short.</string>
+    <string name="phone_number_too_long">Phone number is too long.</string>
+    <string name="only_numbers_allowed">Only numbers are allowed.</string>
+    <string name="password_too_short">Password is too short.</string>
+    <string name="password_too_long">Password is too long.</string>
+    <string name="password_condition">Password must contain at least one capital letter, one small letter and one digit.</string>
+    <string name="sorry_but_login_failed">Sorry, but log in failed.</string>
+    <string name="login_option">login</string>
+    <string name="email_option">email</string>
+    <string name="phone_option">phone</string>
+    <string name="user_with_such">"User with such "</string>
+    <string name="does_not_exist">" does not exist."</string>
+    <string name="wrong_password">Wrong password.</string>
+    <string name="registration">Registration</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="passwords_does_not_match">Passwords does not match.</string>
+    <string name="already_have_an_account">"Already have an account? "</string>
+    <string name="sorry_but_registration_failed">Sorry, but registration failed.</string>
+    <string name="user_with_such_email_or_login_already_exists">User with such email or login already exists.</string>
+</resources>

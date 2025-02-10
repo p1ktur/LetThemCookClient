@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -28,6 +29,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.letthemcook.core.domain.model.remote.Product
 import com.letthemcook.core.domain.model.remote.WeightedProduct
+import com.letthemcook.recipe.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import com.letthemcook.theme.components.textFields.DigitsTextField
@@ -95,19 +97,19 @@ fun WeightedLabelEditPopup(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Add $weightedProduct",
+                text = stringResource(R.string.add) + " $weightedProduct",
                 style = LocalAppTheme.current.typography.bodyLarge
             )
             DigitsTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = weightText,
-                labelText = "Weight (g)",
+                labelText = stringResource(R.string.weight_g),
                 backgroundColor = LocalAppTheme.current.screenTwo
             )
             DigitsTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = amountText,
-                labelText = "Amount (pcs)",
+                labelText = stringResource(R.string.amount_pcs),
                 backgroundColor = LocalAppTheme.current.screenTwo
             )
             Row(
@@ -115,7 +117,7 @@ fun WeightedLabelEditPopup(
                 horizontalArrangement = Arrangement.Center
             ) {
                 TextButton(
-                    text = "Add",
+                    text = stringResource(R.string.add),
                     onClick = {
                         onAdd(weightedProduct)
 

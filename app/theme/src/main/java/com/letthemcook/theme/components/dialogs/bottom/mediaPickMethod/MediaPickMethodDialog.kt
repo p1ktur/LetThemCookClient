@@ -30,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePickerManager
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.theme.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
 
@@ -76,13 +78,13 @@ fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
                 when (fileType) {
                     FileType.IMAGE -> {
                         Text(
-                            text = "Select Image",
+                            text = stringResource(R.string.select_image),
                             style = LocalAppTheme.current.typography.titleSmall
                         )
                     }
                     FileType.VIDEO -> {
                         Text(
-                            text = "Select Video",
+                            text = stringResource(R.string.select_video),
                             style = LocalAppTheme.current.typography.titleSmall
                         )
                     }
@@ -99,7 +101,7 @@ fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
                                         selectedFileType = FileType.IMAGE
                                     }
                                     .padding(6.dp),
-                                text = "Select Image",
+                                text = stringResource(R.string.select_image),
                                 style = LocalAppTheme.current.typography.titleSmall,
                                 textDecoration = if (selectedFileType == FileType.IMAGE) TextDecoration.Underline else null
                             )
@@ -110,7 +112,7 @@ fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
                                         selectedFileType = FileType.VIDEO
                                     }
                                     .padding(6.dp),
-                                text = "Select Video",
+                                text = stringResource(R.string.select_video),
                                 style = LocalAppTheme.current.typography.titleSmall,
                                 textDecoration = if (selectedFileType == FileType.VIDEO) TextDecoration.Underline else null
                             )
@@ -141,7 +143,7 @@ fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
                             tint = LocalAppTheme.current.text
                         )
                         Text(
-                            text = "Gallery",
+                            text = stringResource(R.string.gallery),
                             style = LocalAppTheme.current.typography.bodyMedium
                         )
                     }
@@ -165,7 +167,7 @@ fun MediaPickMethodDialog(mediaFilePickerManager: MediaFilePickerManager) {
                             tint = LocalAppTheme.current.text
                         )
                         Text(
-                            text = "Camera",
+                            text = stringResource(R.string.camera),
                             style = LocalAppTheme.current.typography.bodyMedium
                         )
                     }

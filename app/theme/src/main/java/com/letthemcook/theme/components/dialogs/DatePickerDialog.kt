@@ -10,7 +10,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.theme.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 import java.time.Instant
@@ -54,7 +56,7 @@ fun DatePickerDialog(
         confirmButton = {
             TextButton(
                 modifier = Modifier.size(120.dp, 40.dp),
-                text = "OK",
+                text = stringResource(R.string.ok),
                 onClick = {
                     datePickerState.selectedDateMillis?.let { timeMillis ->
                         val date = Instant.ofEpochMilli(timeMillis)
@@ -69,7 +71,7 @@ fun DatePickerDialog(
         dismissButton = {
             TextButton(
                 modifier = Modifier.size(120.dp, 40.dp),
-                text = "Cancel",
+                text = stringResource(R.string.cancel),
                 onClick = onDismiss
             )
         }

@@ -235,6 +235,7 @@ class RecipeManager(
     suspend fun searchCategories(
         page: Int? = null,
         perPage: Int = 10,
+        language: String,
         searchText: String,
     ): List<Category> {
         if (!authManager.checkAccessTokenAndTryRefresh()) return emptyList()
@@ -244,6 +245,7 @@ class RecipeManager(
             params = StringValues.build {
                 append("page", page.toString())
                 append("perPage", perPage.toString())
+                append("language", language)
                 append("searchText", URLEncoder.encode(searchText, "utf-8"))
             },
             headers = StringValues.build {
@@ -257,6 +259,7 @@ class RecipeManager(
     suspend fun searchProducts(
         page: Int? = null,
         perPage: Int = 10,
+        language: String,
         searchText: String,
     ): List<Product> {
         if (!authManager.checkAccessTokenAndTryRefresh()) return emptyList()
@@ -266,6 +269,7 @@ class RecipeManager(
             params = StringValues.build {
                 append("page", page.toString())
                 append("perPage", perPage.toString())
+                append("language", language)
                 append("searchText", URLEncoder.encode(searchText, "utf-8"))
             },
             headers = StringValues.build {

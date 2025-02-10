@@ -22,7 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.feed.R
 import com.letthemcook.feed.domain.viewModels.search.SearchUiState
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.RadioButton
@@ -48,7 +50,7 @@ fun CategoriesRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = searchType == SearchUiState.SearchType.NAME,
-                    label = "Search by name",
+                    label = stringResource(R.string.search_by_name),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SearchType.NAME)
                     }
@@ -56,7 +58,7 @@ fun CategoriesRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = searchType == SearchUiState.SearchType.CATEGORY,
-                    label = "Search by category",
+                    label = stringResource(R.string.search_by_category),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SearchType.CATEGORY)
                     }
@@ -64,7 +66,7 @@ fun CategoriesRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = searchType == SearchUiState.SearchType.PRODUCTS,
-                    label = "Search by products",
+                    label = stringResource(R.string.search_by_products),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SearchType.PRODUCTS)
                     }
@@ -76,9 +78,9 @@ fun CategoriesRadioButtons(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterStart),
                 text = when (searchType) {
-                    SearchUiState.SearchType.NAME -> "Searching by name"
-                    SearchUiState.SearchType.CATEGORY -> "Searching by category"
-                    SearchUiState.SearchType.PRODUCTS -> "Searching by products"
+                    SearchUiState.SearchType.NAME -> stringResource(R.string.searching_by_name)
+                    SearchUiState.SearchType.CATEGORY -> stringResource(R.string.searching_by_category)
+                    SearchUiState.SearchType.PRODUCTS -> stringResource(R.string.searching_by_products)
                 },
                 style = LocalAppTheme.current.typography.bodyLarge
             )
@@ -124,7 +126,7 @@ fun ProductsRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = sortType == SearchUiState.SortType.DATE,
-                    label = "Sort by date",
+                    label = stringResource(R.string.sort_by_date),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SortType.DATE)
                     }
@@ -132,7 +134,7 @@ fun ProductsRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = sortType == SearchUiState.SortType.REVIEWS,
-                    label = "Sort by reviews",
+                    label = stringResource(R.string.sort_by_reviews),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SortType.REVIEWS)
                     }
@@ -140,7 +142,7 @@ fun ProductsRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = sortType == SearchUiState.SortType.PREPARATIONS,
-                    label = "Sort by preparations",
+                    label = stringResource(R.string.sort_by_preparations),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SortType.PREPARATIONS)
                     }
@@ -148,7 +150,7 @@ fun ProductsRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = sortType == SearchUiState.SortType.LIKES,
-                    label = "Sort by likes",
+                    label = stringResource(R.string.sort_by_likes),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SortType.LIKES)
                     }
@@ -156,7 +158,7 @@ fun ProductsRadioButtons(
                 RadioButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = sortType == SearchUiState.SortType.POPULARITY,
-                    label = "Sort by popularity",
+                    label = stringResource(R.string.sort_by_popularity),
                     onClick = {
                         onRadioButtonSelected(SearchUiState.SortType.POPULARITY)
                     }
@@ -168,11 +170,11 @@ fun ProductsRadioButtons(
                     .padding(start = 8.dp)
                     .align(Alignment.CenterStart),
                 text = when (sortType) {
-                    SearchUiState.SortType.DATE -> "Sorting by date"
-                    SearchUiState.SortType.REVIEWS -> "Sorting by reviews"
-                    SearchUiState.SortType.PREPARATIONS -> "Sorting by preparations"
-                    SearchUiState.SortType.LIKES -> "Sorting by likes"
-                    SearchUiState.SortType.POPULARITY -> "Sorting by popularity"
+                    SearchUiState.SortType.DATE -> stringResource(R.string.sorting_by_date)
+                    SearchUiState.SortType.REVIEWS -> stringResource(R.string.sorting_by_reviews)
+                    SearchUiState.SortType.PREPARATIONS -> stringResource(R.string.sorting_by_preparations)
+                    SearchUiState.SortType.LIKES -> stringResource(R.string.sorting_by_likes)
+                    SearchUiState.SortType.POPULARITY -> stringResource(R.string.sorting_by_popularity)
                 },
                 style = LocalAppTheme.current.typography.bodyLarge
             )

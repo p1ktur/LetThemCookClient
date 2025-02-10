@@ -1,7 +1,6 @@
 package com.letthemcook.core.data.remote
 
 import android.content.Context
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.letthemcook.core.domain.http.ClientJson
@@ -81,11 +80,11 @@ class AuthManager(context: Context) {
             urlString = "/register",
             body = registrationData,
             onResponse = { response ->
-                val response = response.body<TokenResponse>()
+                val tokenResponse = response.body<TokenResponse>()
 
-                setUser(response.user)
-                setAccessToken(response.accessToken)
-                setRefreshToken(response.refreshToken)
+                setUser(tokenResponse.user)
+                setAccessToken(tokenResponse.accessToken)
+                setRefreshToken(tokenResponse.refreshToken)
 
                 RegistrationAuthResult.Successful
             },
@@ -160,9 +159,6 @@ class AuthManager(context: Context) {
     }
 
     suspend fun refreshTokens(): HttpResult {
-        Log.d("TAG", "${getAccessToken()}")
-        Log.d("TAG", "${getRefreshToken()}")
-
         return get(
             urlString = "/refresh_tokens",
             params = StringValues.build {
@@ -175,18 +171,13 @@ class AuthManager(context: Context) {
             onResponse = { response ->
                 val tokenResponse = response.body<TokenResponse>()
 
-                Log.d("TAG", "$tokenResponse")
-
                 setUser(tokenResponse.user)
                 setAccessToken(tokenResponse.accessToken)
                 setRefreshToken(tokenResponse.refreshToken)
 
                 HttpResult.Success
             },
-            onError = {
-                Log.d("TAG", "$it")
-                HttpResult.Failure
-            }
+            onError = { HttpResult.Failure }
         )
     }
 }

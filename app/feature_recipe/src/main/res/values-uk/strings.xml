@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add">Додати</string>
+    <string name="weight_g">Вага (г)</string>
+    <string name="amount_pcs">Кількість (шт)</string>
+    <string name="provide_name_for_recipe_before_publishing">Надайте рецепту ім\'я перед публікацією.</string>
+    <string name="maximum_amount_of_categories_is_20">Максимальна кількість категорій - 20.</string>
+    <string name="maximum_amount_of_products_is_20">Максимальна кількість продуктів - 20.</string>
+    <string name="exit_recipe_editing">Покинути редагування рецепту?</string>
+    <string name="there_are_may_be_unsaved_changes_are_you_sure_you_want_to_exit">Тут можуть бути незбережені зміни. Ви впевнені, що хочете вийти?</string>
+    <string name="not_saved">Не збережено</string>
+    <string name="saving">Зберігається...</string>
+    <string name="saved">Збережено</string>
+    <string name="name">Ім\'я</string>
+    <string name="type_name">Друкуйте ім\'я</string>
+    <string name="archived">В архіві</string>
+    <string name="published">"Опубліковано: "</string>
+    <string name="unpublish">Архівувати</string>
+    <string name="publish">Опублікувати</string>
+    <string name="cooking_time">"Час приготування: "</string>
+    <string name="no_cooking_yet">Ще немає приготування</string>
+    <string name="edit">Редагувати</string>
+    <string name="cook">Готувати</string>
+    <string name="delete_this_recipe">Видалити цей рецепт?</string>
+    <string name="if_you_delete_this_recipe_all_your_work_will_be_gone_forever_are_you_sure_you_want_to_proceed">Якщо ви видалите цей рецепт - вся ваша праця буде видалена назавжди. Ви впевнені, що хочете продовжити?</string>
+    <string name="description">Опис</string>
+    <string name="type_description">Друкуйте опис</string>
+    <string name="attachments">Додатки</string>
+    <string name="image">Фото</string>
+    <string name="video">Відео</string>
+    <string name="file">Файл</string>
+    <string name="categories">Категорії</string>
+    <string name="products">Продукти</string>
+    <string name="failed_to_load_recipe">Не вдалося завантажити рецепт.</string>
+    <string name="reviews">Огляди</string>
+    <string name="no_reviews_yet">Ще немає оглядів</string>
+</resources>

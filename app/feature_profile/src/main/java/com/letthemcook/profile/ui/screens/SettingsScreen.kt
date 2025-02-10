@@ -27,8 +27,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.profile.R
 import com.letthemcook.profile.domain.viewModels.settings.SettingsUiAction
 import com.letthemcook.profile.domain.viewModels.settings.SettingsUiState
 import com.letthemcook.theme.base.LocalAppTheme
@@ -73,7 +75,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings),
                 style = LocalAppTheme.current.typography.titleMedium
             )
             Row(
@@ -81,7 +83,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "App Theme",
+                    text = stringResource(R.string.app_theme),
                     style = LocalAppTheme.current.typography.titleSmall
                 )
                 Icon(
@@ -138,7 +140,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "Language",
+                    text = stringResource(R.string.language),
                     style = LocalAppTheme.current.typography.titleSmall
                 )
                 Icon(
@@ -165,7 +167,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "English",
+                    text = stringResource(R.string.english),
                     style = LocalAppTheme.current.typography.titleSmall
                 )
                 Text(
@@ -190,7 +192,7 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Ukrainian",
+                    text = stringResource(R.string.ukrainian),
                     style = LocalAppTheme.current.typography.titleSmall
                 )
                 Text(
@@ -210,7 +212,7 @@ fun SettingsScreen(
             ) {
                 Text(
                     modifier = Modifier.padding(6.dp),
-                    text = "Log Out",
+                    text = stringResource(R.string.log_out),
                     style = LocalAppTheme.current.typography.bodyLarge,
                     textDecoration = TextDecoration.Underline
                 )

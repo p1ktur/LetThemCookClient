@@ -11,10 +11,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.profile.R
 import com.letthemcook.theme.base.LocalAppTheme
 
 enum class PageOption {
@@ -38,7 +40,7 @@ fun LazyListScope.recipesPager(
         HorizontalDivider(color = LocalAppTheme.current.text)
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Your recipes",
+            text = stringResource(R.string.your_recipes),
             style = LocalAppTheme.current.typography.bodyLarge
         )
         Row(
@@ -53,7 +55,7 @@ fun LazyListScope.recipesPager(
                             onSetSelectedOption(PageOption.PUBLISHED)
                         }
                         .padding(vertical = 8.dp),
-                    text = "Published",
+                    text = stringResource(R.string.published),
                     style = LocalAppTheme.current.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     textDecoration = if (selectedOption == PageOption.PUBLISHED) TextDecoration.Underline else null
@@ -67,7 +69,7 @@ fun LazyListScope.recipesPager(
                             onSetSelectedOption(PageOption.ARCHIVED)
                         }
                         .padding(vertical = 8.dp),
-                    text = "Archived",
+                    text = stringResource(R.string.archived),
                     style = LocalAppTheme.current.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     textDecoration = if (selectedOption == PageOption.ARCHIVED) TextDecoration.Underline else null

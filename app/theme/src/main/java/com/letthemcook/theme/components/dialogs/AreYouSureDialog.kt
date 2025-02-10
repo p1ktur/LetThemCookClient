@@ -22,7 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.theme.R
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
 
@@ -99,12 +101,12 @@ fun AreYouSureDialog(
                 ) {
                     TextButton(
                         modifier = Modifier.size(140.dp, 40.dp),
-                        text = "OK",
+                        text = stringResource(R.string.ok),
                         onClick = onOK
                     )
                     TextButton(
                         modifier = Modifier.size(140.dp, 40.dp),
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         onClick = onDismiss
                     )
                 }

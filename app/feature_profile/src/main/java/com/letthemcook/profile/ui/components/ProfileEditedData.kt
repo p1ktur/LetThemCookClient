@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.prettyString
@@ -32,6 +33,7 @@ import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validat
 import com.letthemcook.core.domain.validation.result.EmailValidationResult
 import com.letthemcook.core.domain.validation.result.NameValidationResult
 import com.letthemcook.core.domain.validation.result.PhoneNumberValidationResult
+import com.letthemcook.profile.R
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiState
 import com.letthemcook.theme.base.LocalAppTheme
@@ -79,7 +81,7 @@ fun ProfileEditedData(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "About",
+                    text = stringResource(R.string.about),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 if (uiState.about.text.isNotEmpty()) {
@@ -95,7 +97,7 @@ fun ProfileEditedData(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Name",
+                    text = stringResource(R.string.name),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 Text(
@@ -108,7 +110,7 @@ fun ProfileEditedData(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Surname",
+                    text = stringResource(R.string.surname),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 Text(
@@ -121,7 +123,7 @@ fun ProfileEditedData(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Email",
+                    text = stringResource(R.string.email),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 Text(
@@ -134,7 +136,7 @@ fun ProfileEditedData(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Birth date",
+                    text = stringResource(R.string.birth_date),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 Text(
@@ -147,7 +149,7 @@ fun ProfileEditedData(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Phone number",
+                    text = stringResource(R.string.phone_number),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
                 Text(
@@ -156,15 +158,20 @@ fun ProfileEditedData(
                 )
             }
         } else {
+            val pleaseFollowEmailFormat = stringResource(R.string.please_follow_email_format)
+            val phoneNumberTooShort = stringResource(R.string.phone_number_too_short)
+            val phoneNumberTooLong = stringResource(R.string.phone_number_too_long)
+            val onlyNumbersAllowed = stringResource(R.string.only_numbers_allowed)
+
             MultiLineTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = uiState.about,
-                labelText = "About"
+                labelText = stringResource(R.string.about)
             )
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.name,
-                label = "Name",
+                label = stringResource(R.string.name),
                 validationFunction = { toValidateText ->
                     when (validateName(toValidateText)) {
                         NameValidationResult.OK -> ""
@@ -175,7 +182,7 @@ fun ProfileEditedData(
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.surname,
-                label = "Surname",
+                label = stringResource(R.string.surname),
                 validationFunction = { toValidateText ->
                     when (validateName(toValidateText)) {
                         NameValidationResult.OK -> ""
@@ -191,33 +198,34 @@ fun ProfileEditedData(
                         isBirthDateDialogShown = true
                     }
                     .padding(8.dp),
-                text = "Birth date: " + (uiState.birthDate?.prettyString() ?: "Unspecified"),
+                text = stringResource(R.string.birth_date) + ": " +
+                        (uiState.birthDate?.prettyString() ?: stringResource(R.string.unspecified)),
                 style = LocalAppTheme.current.typography.bodyLarge
             )
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.email,
-                label = "Email",
+                label = stringResource(R.string.email),
                 validationFunction = { toValidateText ->
                     when (validateEmail(toValidateText)) {
                         EmailValidationResult.OK -> ""
                         EmailValidationResult.Empty -> ""
-                        EmailValidationResult.WrongFormat -> "Please follow the email format, such as example@email.com."
+                        EmailValidationResult.WrongFormat -> pleaseFollowEmailFormat
                     }
                 }
             )
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.phoneNumber,
-                label = "Phone number",
+                label = stringResource(R.string.phone_number),
                 isPhoneNumber = true,
                 validationFunction = { toValidateText ->
                     when (validatePhoneNumber(toValidateText)) {
                         PhoneNumberValidationResult.OK -> ""
                         PhoneNumberValidationResult.Empty -> ""
-                        PhoneNumberValidationResult.TooShort -> "Phone number is too short."
-                        PhoneNumberValidationResult.TooLong -> "Phone number is too long."
-                        PhoneNumberValidationResult.OnlyNumbersAllowed -> "Only numbers are allowed."
+                        PhoneNumberValidationResult.TooShort -> phoneNumberTooShort
+                        PhoneNumberValidationResult.TooLong -> phoneNumberTooLong
+                        PhoneNumberValidationResult.OnlyNumbersAllowed -> onlyNumbersAllowed
                     }
                 }
             )
@@ -231,7 +239,7 @@ fun ProfileEditedData(
                             onUiAction(EditedProfileUiAction.NavigateToChangePassword)
                         }
                         .padding(6.dp),
-                    text = "Change password",
+                    text = stringResource(R.string.change_password),
                     style = LocalAppTheme.current.typography.bodyMedium,
                     textDecoration = TextDecoration.Underline
                 )

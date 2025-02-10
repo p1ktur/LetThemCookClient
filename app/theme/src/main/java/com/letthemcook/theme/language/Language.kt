@@ -15,4 +15,11 @@ enum class Language {
             }
         }
     }
+
+    fun toLanguageString(): String {
+        return when (this) {
+            ENGLISH -> "us"
+            UKRAINIAN -> "uk"
+        }
+    }
 }

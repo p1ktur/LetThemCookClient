@@ -30,9 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.ui.drawing.getBlockBodyBrush
@@ -45,6 +48,8 @@ fun BlockInfo(
     selectedBlock: BlockComponent,
     onUiAction: (CookingUiAction) -> Unit
 ) {
+    val context = LocalContext.current
+
     var isExpanded by remember { mutableStateOf(true) }
 
     Box(
@@ -59,7 +64,12 @@ fun BlockInfo(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(getBlockBodyBrush(LocalAppTheme.current.background, selectedBlock.colorOption.color))
+                    .background(
+                        getBlockBodyBrush(
+                            LocalAppTheme.current.background,
+                            selectedBlock.colorOption.color
+                        )
+                    )
                     .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -106,7 +116,7 @@ fun BlockInfo(
                 ) {
                     key(canvasCounter) {
                         Text(
-                            text = selectedBlock.cookingState.toString(),
+                            text = selectedBlock.cookingState.toLocalString(context),
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
@@ -133,7 +143,12 @@ fun BlockInfo(
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .clickable {
-                                    onUiAction(CookingUiAction.ViewMediaFile(selectedBlock.id, file))
+                                    onUiAction(
+                                        CookingUiAction.ViewMediaFile(
+                                            selectedBlock.id,
+                                            file
+                                        )
+                                    )
                                 }
                                 .padding(4.dp),
                             imageVector = when (file.type) {
@@ -151,13 +166,18 @@ fun BlockInfo(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(getBlockBodyBrush(LocalAppTheme.current.background, selectedBlock.colorOption.color))
+                    .background(
+                        getBlockBodyBrush(
+                            LocalAppTheme.current.background,
+                            selectedBlock.colorOption.color
+                        )
+                    )
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Block info",
+                    text = stringResource(R.string.block_info),
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.weight(1f))

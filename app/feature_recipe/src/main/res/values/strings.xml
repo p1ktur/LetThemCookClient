@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add">Add</string>
+    <string name="weight_g">Weight (g)</string>
+    <string name="amount_pcs">Amount (pcs)</string>
+    <string name="provide_name_for_recipe_before_publishing">Provide name for recipe before publishing.</string>
+    <string name="maximum_amount_of_categories_is_20">Maximum amount of categories is 20.</string>
+    <string name="maximum_amount_of_products_is_20">Maximum amount of products is 20.</string>
+    <string name="exit_recipe_editing">Exit recipe editing?</string>
+    <string name="there_are_may_be_unsaved_changes_are_you_sure_you_want_to_exit">There are may be unsaved changes. Are you sure you want to exit?</string>
+    <string name="not_saved">Not saved</string>
+    <string name="saving">Saving...</string>
+    <string name="saved">Saved</string>
+    <string name="name">Name</string>
+    <string name="type_name">Type name</string>
+    <string name="archived">Archived</string>
+    <string name="published">"Published: "</string>
+    <string name="unpublish">Unpublish</string>
+    <string name="publish">Publish</string>
+    <string name="cooking_time">"Cooking time: "</string>
+    <string name="no_cooking_yet">No cooking yet</string>
+    <string name="edit">Edit</string>
+    <string name="cook">Cook</string>
+    <string name="delete_this_recipe">Delete this recipe?</string>
+    <string name="if_you_delete_this_recipe_all_your_work_will_be_gone_forever_are_you_sure_you_want_to_proceed">If you delete this recipe all your work will be gone forever. Are you sure you want to proceed?</string>
+    <string name="description">Description</string>
+    <string name="type_description">Type description</string>
+    <string name="attachments">Attachments</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
+    <string name="file">File</string>
+    <string name="categories">Categories</string>
+    <string name="products">Products</string>
+    <string name="failed_to_load_recipe">Failed to load recipe.</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_reviews_yet">No reviews yet</string>
+</resources>

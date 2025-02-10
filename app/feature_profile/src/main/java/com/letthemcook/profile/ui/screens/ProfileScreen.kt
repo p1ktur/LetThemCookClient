@@ -19,9 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.profile.R
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiAction
 import com.letthemcook.profile.domain.viewModels.profile.ProfileUiState
 import com.letthemcook.profile.ui.components.recipesGrid
@@ -117,7 +119,7 @@ fun ProfileScreen(
                                 style = LocalAppTheme.current.typography.bodyLarge
                             )
                             Text(
-                                text = "Recipes",
+                                text = stringResource(R.string.recipes),
                                 style = LocalAppTheme.current.typography.bodySmall
                             )
                             Spacer(modifier = Modifier.height(24.dp))
@@ -126,7 +128,7 @@ fun ProfileScreen(
                                 style = LocalAppTheme.current.typography.bodyLarge
                             )
                             Text(
-                                text = "Average Rating",
+                                text = stringResource(R.string.average_rating),
                                 style = LocalAppTheme.current.typography.bodySmall
                             )
                         }
@@ -153,7 +155,7 @@ fun ProfileScreen(
                                 style = LocalAppTheme.current.typography.bodyLarge
                             )
                             Text(
-                                text = "Preparations",
+                                text = stringResource(R.string.preparations),
                                 style = LocalAppTheme.current.typography.bodySmall
                             )
                             Spacer(modifier = Modifier.height(24.dp))
@@ -162,7 +164,7 @@ fun ProfileScreen(
                                 style = LocalAppTheme.current.typography.bodyLarge
                             )
                             Text(
-                                text = "Followers",
+                                text = stringResource(R.string.followers),
                                 style = LocalAppTheme.current.typography.bodySmall
                             )
                         }
@@ -174,7 +176,11 @@ fun ProfileScreen(
                     if (!uiState.isSelf) {
                         TextButton(
                             modifier = Modifier,
-                            text = if (uiState.user.isFollowed) "Unfollow" else "Follow",
+                            text = if (uiState.user.isFollowed) {
+                                stringResource(R.string.unfollow)
+                            } else {
+                                stringResource(R.string.follow)
+                            },
                             onClick = {
                                 onUiAction(ProfileUiAction.FollowOrUnfollow)
                             }
@@ -207,7 +213,7 @@ fun ProfileScreen(
                     HorizontalDivider(color = LocalAppTheme.current.text)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "@${uiState.user.login}'s recipes",
+                        text = "@${uiState.user.login}" + stringResource(R.string.s_recipes),
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
                 }

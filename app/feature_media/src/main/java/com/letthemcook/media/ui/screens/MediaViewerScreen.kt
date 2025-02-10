@@ -24,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cooking.media.R
 import com.letthemcook.media.domain.viewModels.mediaViewer.MediaViewerUiAction
 import com.letthemcook.media.domain.viewModels.mediaViewer.MediaViewerUiState
 import com.letthemcook.media.ui.components.ImageViewer
@@ -82,9 +84,9 @@ fun MediaViewerScreen(
             )
             Text(
                 text = when (uiState.viewedMediaFile) {
-                    is MediaFile.Image -> "Viewing Image" //TODO localize
-                    is MediaFile.Video -> "Viewing Video" //TODO localize
-                    null -> "No Media Found" //TODO localize
+                    is MediaFile.Image -> stringResource(R.string.viewing_image)
+                    is MediaFile.Video -> stringResource(R.string.viewing_video)
+                    null -> stringResource(R.string.no_media_found)
                 },
                 style = LocalAppTheme.current.typography.titleSmall,
                 color = Color.White

@@ -25,11 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
 import com.letthemcook.core.domain.model.items.RecipeItemData
+import com.letthemcook.profile.R
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiState
 import com.letthemcook.profile.ui.components.PageOption
@@ -151,7 +153,7 @@ fun EditedProfileScreen(
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
-                            text = "Recipes",
+                            text = stringResource(R.string.recipes),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                         Spacer(modifier = Modifier.height(24.dp))
@@ -160,7 +162,7 @@ fun EditedProfileScreen(
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
-                            text = "Average Rating",
+                            text = stringResource(R.string.average_rating),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                     }
@@ -203,7 +205,7 @@ fun EditedProfileScreen(
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
-                            text = "Preparations",
+                            text = stringResource(R.string.preparations),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                         Spacer(modifier = Modifier.height(24.dp))
@@ -212,7 +214,7 @@ fun EditedProfileScreen(
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
-                            text = "Followers",
+                            text = stringResource(R.string.followers),
                             style = LocalAppTheme.current.typography.bodySmall
                         )
                     }

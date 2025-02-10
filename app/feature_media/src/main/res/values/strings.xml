@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="viewing_image">Viewing Image</string>
+    <string name="viewing_video">Viewing Video</string>
+    <string name="no_media_found">No Media Found</string>
+</resources>

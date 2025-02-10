@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about">About</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="email">Email</string>
+    <string name="birth_date">Birth date</string>
+    <string name="phone_number">Phone number</string>
+    <string name="unspecified">Unspecified</string>
+    <string name="please_follow_email_format">Please follow the email format, such as example@email.com.</string>
+    <string name="phone_number_too_short">Phone number is too short.</string>
+    <string name="phone_number_too_long">Phone number is too long.</string>
+    <string name="only_numbers_allowed">Only numbers are allowed.</string>
+    <string name="change_password">Change password</string>
+    <string name="your_recipes">Your recipes</string>
+    <string name="published">Published</string>
+    <string name="archived">Archived</string>
+    <string name="recipes">Recipes</string>
+    <string name="average_rating">Average Rating</string>
+    <string name="preparations">Preparations</string>
+    <string name="followers">Followers</string>
+    <string name="old_password_is_incorrect">Old password is incorrect.</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="repeat_new_password">Repeat New Password</string>
+    <string name="field_cannot_be_empty">This field cannot be empty.</string>
+    <string name="password_too_short">Password is too short.</string>
+    <string name="password_too_long">Password is too long.</string>
+    <string name="password_condition">Password must contain at least one capital letter, one small letter and one digit.</string>
+    <string name="passwords_does_not_match">Passwords does not match.</string>
+    <string name="change">Change</string>
+    <string name="unfollow">Unfollow</string>
+    <string name="follow">Follow</string>
+    <string name="s_recipes">\'s recipes</string>
+    <string name="settings">Settings</string>
+    <string name="app_theme">App Theme</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="ukrainian">Ukrainian</string>
+    <string name="log_out">Log Out</string>
+</resources>

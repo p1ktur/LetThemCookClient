@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="block_info">Block info</string>
+    <string name="create_new_block">Create new block</string>
+    <string name="edit_block">Edit block</string>
+    <string name="create">Create</string>
+    <string name="edit">Edit</string>
+    <string name="block_name_cannot_be_empty">Block name cannot be empty.</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
+    <string name="file">File</string>
+    <string name="attach_file">Attach file</string>
+    <string name="all_products_are_used">All products are used</string>
+    <string name="use_all_products">Use all products</string>
+    <string name="all_blocks_are_used">All blocks are used</string>
+    <string name="blocks_menu">Blocks menu</string>
+    <string name="cooking_tutorial">Cooking Tutorial</string>
+    <string name="not_reached_yet">Not reached yet</string>
+    <string name="waiting">Waiting...</string>
+    <string name="cooking">Cooking...</string>
+    <string name="done">Done</string>
+</resources>

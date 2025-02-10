@@ -97,7 +97,7 @@ fun RecipeItem(
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                imageVector = Icons.Outlined.RemoveRedEye,
                 contentDescription = "Views Icon",
                 tint = LocalAppTheme.current.text
             )
@@ -107,7 +107,7 @@ fun RecipeItem(
             )
             Icon(
                 modifier = Modifier.size(32.dp),
-                imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                imageVector = Icons.Outlined.SoupKitchen,
                 contentDescription = "Preparations Icon",
                 tint = LocalAppTheme.current.text
             )

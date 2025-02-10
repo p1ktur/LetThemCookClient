@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_by_name">Шукати за ім\'ям</string>
+    <string name="search_by_category">Шукати за категорією</string>
+    <string name="search_by_products">Шукати за продуктом</string>
+    <string name="searching_by_name">Пошук за ім\'ям</string>
+    <string name="searching_by_category">Пошук за категорією</string>
+    <string name="searching_by_products">Пошук за продуктом</string>
+    <string name="sort_by_date">Сортувати за датою</string>
+    <string name="sort_by_reviews">Сортувати за відгуками</string>
+    <string name="sort_by_preparations">Сортувати за приготуваннями</string>
+    <string name="sort_by_likes">Сортувати за вподобайками</string>
+    <string name="sort_by_popularity">Сортувати за популярністю</string>
+    <string name="sorting_by_date">Сортування за датою</string>
+    <string name="sorting_by_reviews">Сортування за відгуками</string>
+    <string name="sorting_by_preparations">Сортування за приготуваннями</string>
+    <string name="sorting_by_likes">Сортування за вподобайками</string>
+    <string name="sorting_by_popularity">Сортування за популярністю</string>
+    <string name="followers">" підписників"</string>
+    <string name="saved_recipes">"Збережені Рецепти: "</string>
+    <string name="your_feed_is_empty">Ваша стрічка порожня</string>
+    <string name="try_to_search_new_recipes">спробуйте пошукати нові рецепти</string>
+    <string name="or_follow_other_users">або підписатися на інших користувачів</string>
+    <string name="results">"Результати: "</string>
+    <string name="products">Продукти</string>
+    <string name="filter_by_products">Фільтрувати за продуктами</string>
+    <string name="filter_by_categories">Фільтрувати за категоріями</string>
+    <string name="categories">Категорії</string>
+    <string name="users">Користувачі</string>
+    <string name="recipes">Рецепти</string>
+</resources>

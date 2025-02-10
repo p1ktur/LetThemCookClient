@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.list.forEachReversed
 import com.letthemcook.editor.domain.cooking.BlockCookingState
@@ -50,6 +51,8 @@ fun BlockTrack(
     onBlockClick: (BlockComponent) -> Unit,
     onNextClick: (BlockComponent) -> Unit
 ) {
+    val context = LocalContext.current
+
     Row(
         modifier = modifier.height(IntrinsicSize.Min)
     ) {
@@ -128,7 +131,7 @@ fun BlockTrack(
                             .padding(4.dp),
                         text = when (trackData.ref.cookingState) {
                             BlockCookingState.COOKING -> trackData.ref.name
-                            else -> trackData.ref.cookingState.toString()
+                            else -> trackData.ref.cookingState.toLocalString(context)
                         },
                         style = LocalAppTheme.current.typography.bodyLarge
                     )

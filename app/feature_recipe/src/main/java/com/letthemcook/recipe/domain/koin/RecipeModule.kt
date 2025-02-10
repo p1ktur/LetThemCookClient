@@ -8,6 +8,6 @@ import org.koin.dsl.module
 val koinRecipeModule = module {
     viewModel { RecipeViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (recipeId: String?) ->
-        EditedRecipeViewModel(recipeId, get(), get(), get(), get(), get(), get())
+        EditedRecipeViewModel(recipeId, get(), get(), get(), get(), get(), get(), get())
     }
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about">Про мене</string>
+    <string name="name">Ім\'я</string>
+    <string name="surname">Прізвище</string>
+    <string name="email">Пошта</string>
+    <string name="birth_date">Дата народження</string>
+    <string name="phone_number">Номер телефону</string>
+    <string name="unspecified">Не зазначено</string>
+    <string name="only_numbers_allowed">Дозволені тільки числа.</string>
+    <string name="change_password">Поміняти пароль</string>
+    <string name="your_recipes">Ваші рецепти</string>
+    <string name="published">Опубліковані</string>
+    <string name="archived">В архіві</string>
+    <string name="recipes">Рецепти</string>
+    <string name="average_rating">Середній рейтинг</string>
+    <string name="preparations">Приготування</string>
+    <string name="followers">Підписники</string>
+    <string name="old_password_is_incorrect">Старий пароль неправильний.</string>
+    <string name="old_password">Старий Пароль</string>
+    <string name="new_password">Новий Пароль</string>
+    <string name="repeat_new_password">Повторіть Новий Пароль</string>
+    <string name="passwords_does_not_match">Passwords does not match.</string>
+    <string name="change">Змінити</string>
+    <string name="unfollow">Відписатися</string>
+    <string name="follow">Підписатися</string>
+    <string name="s_recipes">-го рецепти</string>
+    <string name="settings">Налаштування</string>
+    <string name="app_theme">Тема застосунку</string>
+    <string name="language">Мова</string>
+    <string name="english">Англійська</string>
+    <string name="ukrainian">Українська</string>
+    <string name="log_out">Вийти з акаунту</string>
+    <string name="please_follow_email_format">Будь-ласка, притримуйтеся формату пошти, як example@email.com</string>
+    <string name="phone_number_too_short">Номер телефону закороткий.</string>
+    <string name="phone_number_too_long">Номер телефону задовгий.</string>
+    <string name="field_cannot_be_empty">Це поле не може бути порожнім.</string>
+    <string name="password_too_short">Пароль закороткий.</string>
+    <string name="password_too_long">Пароль задовгий.</string>
+    <string name="password_condition">Пароль повинен містити хоча б одну велику букву, одну малу букву та одне число.</string>
+</resources>

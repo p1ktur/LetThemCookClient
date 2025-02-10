@@ -29,9 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.letthemcook.core.domain.format.cute
+import com.letthemcook.feed.R
 import com.letthemcook.feed.domain.viewModels.search.SearchUiAction
 import com.letthemcook.feed.domain.viewModels.search.SearchUiState
 import com.letthemcook.feed.ui.components.CategoriesRadioButtons
@@ -131,7 +134,7 @@ fun SearchScreen(
                         }
                     }
                     .padding(8.dp),
-                text = "Recipes",
+                text = stringResource(R.string.recipes),
                 style = LocalAppTheme.current.typography.titleSmall,
                 textDecoration = if (uiState.searchClass == SearchUiState.SearchClass.RECIPE) {
                     TextDecoration.Underline
@@ -149,7 +152,7 @@ fun SearchScreen(
                         }
                     }
                     .padding(8.dp),
-                text = "Users",
+                text = stringResource(R.string.users),
                 style = LocalAppTheme.current.typography.titleSmall,
                 textDecoration = if (uiState.searchClass == SearchUiState.SearchClass.USER) {
                     TextDecoration.Underline
@@ -187,9 +190,9 @@ fun SearchScreen(
                     HorizontalDivider(color = LocalAppTheme.current.text)
                     EditedLabelContainer(
                         modifier = Modifier.fillMaxWidth(),
-                        name = "Filter by categories",
+                        name = stringResource(R.string.filter_by_categories),
                         labels = categoriesFilterNames,
-                        searchTitle = "Categories",
+                        searchTitle = stringResource(R.string.categories),
                         searchText = uiState.categoriesSearchText,
                         isLoading = uiState.loadingCategories,
                         searchedLabels = searchedCategoriesNames,
@@ -208,9 +211,9 @@ fun SearchScreen(
                     )
                     EditedLabelContainer(
                         modifier = Modifier.fillMaxWidth(),
-                        name = "Filter by products",
+                        name = stringResource(R.string.filter_by_products),
                         labels = productsFilterNames,
-                        searchTitle = "Products",
+                        searchTitle = stringResource(R.string.products),
                         searchText = uiState.productsSearchText,
                         isLoading = uiState.loadingProducts,
                         searchedLabels = searchedProductsNames,
@@ -233,7 +236,7 @@ fun SearchScreen(
                         HorizontalDivider(color = LocalAppTheme.current.text)
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Results: ${uiState.resultsAmount}",
+                            text = stringResource(R.string.results) + uiState.resultsAmount.cute(),
                             style = LocalAppTheme.current.typography.titleMedium,
                             color = LocalAppTheme.current.text,
                             textAlign = TextAlign.Center

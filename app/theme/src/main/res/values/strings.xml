@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">LetThemCook</string>
+    <string name="app_name" translatable="false">LetThemCook</string>
+    <string name="select_image">Select Image</string>
+    <string name="select_video">Select Video</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="review_text_cannot_be_empty">Review text cannot be empty.</string>
+    <string name="review">Review</string>
+    <string name="type_review">Type review</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="type_to_search">Type to search</string>
 </resources>

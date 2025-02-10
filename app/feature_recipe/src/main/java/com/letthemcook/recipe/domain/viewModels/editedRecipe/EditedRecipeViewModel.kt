@@ -11,13 +11,14 @@ import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.domain.list.filterOn
-import com.letthemcook.core.domain.model.file.extensions.compressBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
 import com.letthemcook.core.domain.model.file.extensions.toBytes
 import com.letthemcook.core.domain.model.remote.WeightedProduct
 import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.SaveStatus
+import com.letthemcook.theme.providers.LanguageStateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,8 @@ class EditedRecipeViewModel(
     private val remoteFileManager: RemoteFileManager,
     private val localFileManager: LocalFileManager,
     private val localDataManager: LocalDataManager,
-    private val unusedBlocksDaoDeleter: UnusedBlocksDaoDeleter
+    private val unusedBlocksDaoDeleter: UnusedBlocksDaoDeleter,
+    private val languageStateProvider: LanguageStateProvider
 ) : ViewModel() {
 
     private val _uiState = run {
@@ -397,6 +399,7 @@ class EditedRecipeViewModel(
         val categories = recipeManager.searchCategories(
             page = lastCategoryPage++,
             perPage = perPage,
+            language = languageStateProvider.getLastLanguage().toLanguageString(),
             searchText = text
         ).filterNot { uiState.value.categoriesFilter.contains(it) }
 
@@ -482,6 +485,7 @@ class EditedRecipeViewModel(
         val products = recipeManager.searchProducts(
             page = lastProductPage++,
             perPage = perPage,
+            language = languageStateProvider.getLastLanguage().toLanguageString(),
             searchText = text
         ).filterNot { productsFilterData.contains(it) }
 

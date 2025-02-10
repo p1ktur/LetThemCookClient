@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_by_name">Search by name</string>
+    <string name="search_by_category">Search by category</string>
+    <string name="search_by_products">Search by product</string>
+    <string name="searching_by_name">Searching by name</string>
+    <string name="searching_by_category">Searching by category</string>
+    <string name="searching_by_products">Searching by product</string>
+    <string name="sort_by_date">Sort by date</string>
+    <string name="sort_by_reviews">Sort by reviews</string>
+    <string name="sort_by_preparations">Sort by preparations</string>
+    <string name="sort_by_likes">Sort by likes</string>
+    <string name="sort_by_popularity">Sort by popularity</string>
+    <string name="sorting_by_date">Sorting by date</string>
+    <string name="sorting_by_reviews">Sorting by reviews</string>
+    <string name="sorting_by_preparations">Sorting by preparations</string>
+    <string name="sorting_by_likes">Sorting by likes</string>
+    <string name="sorting_by_popularity">Sorting by popularity</string>
+    <string name="followers">" followers"</string>
+    <string name="saved_recipes">"Saved Recipes: "</string>
+    <string name="your_feed_is_empty">Your feed is empty</string>
+    <string name="try_to_search_new_recipes">try to search new recipes</string>
+    <string name="or_follow_other_users">or follow other users</string>
+    <string name="results">"Results: "</string>
+    <string name="products">Products</string>
+    <string name="filter_by_products">Filter by products</string>
+    <string name="filter_by_categories">Filter by categories</string>
+    <string name="categories">Categories</string>
+    <string name="users">Users</string>
+    <string name="recipes">Recipes</string>
+</resources>

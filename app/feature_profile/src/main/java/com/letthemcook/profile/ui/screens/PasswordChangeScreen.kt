@@ -18,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
 import com.letthemcook.core.domain.validation.AuthorizationDataValidator.validatePassword
 import com.letthemcook.core.domain.validation.result.PasswordValidationResult
+import com.letthemcook.profile.R
 import com.letthemcook.profile.domain.viewModels.passwordChange.PasswordChangeUiAction
 import com.letthemcook.profile.domain.viewModels.passwordChange.PasswordChangeUiState
 import com.letthemcook.theme.base.LocalAppTheme
@@ -46,6 +48,13 @@ fun PasswordChangeScreen(
         }
     }
 
+    // Strings
+    val fieldCannotBeEmpty = stringResource(R.string.field_cannot_be_empty)
+    val passwordNumberTooShort = stringResource(R.string.password_too_short)
+    val passwordNumberTooLong = stringResource(R.string.password_too_long)
+    val passwordCondition = stringResource(R.string.password_condition)
+    val passwordsDoNotMatch = stringResource(R.string.passwords_does_not_match)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,7 +64,7 @@ fun PasswordChangeScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Change Password",
+            text = stringResource(R.string.change_password),
             style = LocalAppTheme.current.typography.titleMedium
         )
         Column(
@@ -78,7 +87,7 @@ fun PasswordChangeScreen(
                         tint = LocalAppTheme.current.errorText
                     )
                     Text(
-                        text = "Old password is incorrect.",
+                        text = stringResource(R.string.old_password_is_incorrect),
                         style = LocalAppTheme.current.typography.bodySmall,
                         color = LocalAppTheme.current.errorText
                     )
@@ -88,15 +97,15 @@ fun PasswordChangeScreen(
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.oldPassword,
-                label = "Old Password",
+                label = stringResource(R.string.old_password),
                 isPassword = true,
                 validationFunction = { toValidateText ->
                     when (validatePassword(toValidateText)) {
                         PasswordValidationResult.OK -> ""
-                        PasswordValidationResult.Empty -> "This field cannot be empty."
-                        PasswordValidationResult.TooShort -> "Password it too short."
-                        PasswordValidationResult.TooLong -> "Password it too long."
-                        PasswordValidationResult.WrongFormat -> "Password must contain at least one capital letter, one small letter and one digit."
+                        PasswordValidationResult.Empty -> fieldCannotBeEmpty
+                        PasswordValidationResult.TooShort -> passwordNumberTooShort
+                        PasswordValidationResult.TooLong -> passwordNumberTooLong
+                        PasswordValidationResult.WrongFormat -> passwordCondition
                     }
                 }
             )
@@ -104,15 +113,15 @@ fun PasswordChangeScreen(
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.password,
-                label = "New Password",
+                label = stringResource(R.string.new_password),
                 isPassword = true,
                 validationFunction = { toValidateText ->
                     when (validatePassword(toValidateText)) {
                         PasswordValidationResult.OK -> ""
-                        PasswordValidationResult.Empty -> "This field cannot be empty."
-                        PasswordValidationResult.TooShort -> "Password it too short."
-                        PasswordValidationResult.TooLong -> "Password it too long."
-                        PasswordValidationResult.WrongFormat -> "Password must contain at least one capital letter, one small letter and one digit."
+                        PasswordValidationResult.Empty -> fieldCannotBeEmpty
+                        PasswordValidationResult.TooShort -> passwordNumberTooShort
+                        PasswordValidationResult.TooLong -> passwordNumberTooLong
+                        PasswordValidationResult.WrongFormat -> passwordCondition
                     }
                 }
             )
@@ -120,11 +129,11 @@ fun PasswordChangeScreen(
             ValidatedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 textFieldState = uiState.repeatedPassword,
-                label = "Repeat New Password",
+                label = stringResource(R.string.repeat_new_password),
                 isPassword = true,
                 validationFunction = { toValidateText ->
                     if (toValidateText != uiState.password.text) {
-                        "Passwords does not match."
+                        passwordsDoNotMatch
                     } else {
                         ""
                     }
@@ -132,7 +141,7 @@ fun PasswordChangeScreen(
             )
         }
         TextButton(
-            text = "Change",
+            text = stringResource(R.string.change),
             onClick = {
                 onUiAction(PasswordChangeUiAction.ChangePassword)
             }

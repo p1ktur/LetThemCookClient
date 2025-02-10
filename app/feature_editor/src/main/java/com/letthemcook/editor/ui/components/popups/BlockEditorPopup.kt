@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -46,6 +47,7 @@ import com.letthemcook.core.domain.format.toSecondsString
 import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.editor.color.ColorOption
 import com.letthemcook.editor.domain.editor.components.block.BlockComponent
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -112,16 +114,16 @@ fun BlockEditorPopup(
 
     val title = when (state) {
         BlockEditorState.Hidden -> ""
-        BlockEditorState.Creating -> "Create new block"
-        is BlockEditorState.EditingBlock -> "Edit block"
-        is BlockEditorState.EditingUnusedBlock -> "Edit block"
+        BlockEditorState.Creating -> stringResource(R.string.create_new_block)
+        is BlockEditorState.EditingBlock -> stringResource(R.string.edit_block)
+        is BlockEditorState.EditingUnusedBlock -> stringResource(R.string.edit_block)
     }
 
     val buttonText = when (state) {
         BlockEditorState.Hidden -> ""
-        BlockEditorState.Creating -> "Create"
-        is BlockEditorState.EditingBlock -> "Edit"
-        is BlockEditorState.EditingUnusedBlock -> "Edit"
+        BlockEditorState.Creating -> stringResource(R.string.create)
+        is BlockEditorState.EditingBlock -> stringResource(R.string.edit)
+        is BlockEditorState.EditingUnusedBlock -> stringResource(R.string.edit)
     }
 
     val nameText: TextFieldState = remember(state) {
@@ -297,7 +299,7 @@ fun BlockEditorPopup(
                         tint = LocalAppTheme.current.errorText
                     )
                     Text(
-                        text = "Block name cannot be empty.",
+                        text = stringResource(R.string.block_name_cannot_be_empty),
                         style = LocalAppTheme.current.typography.bodySmall,
                         color = LocalAppTheme.current.errorText
                     )
@@ -306,13 +308,13 @@ fun BlockEditorPopup(
             SingleLineTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = nameText,
-                labelText = "Name",
+                labelText = stringResource(R.string.name),
                 backgroundColor = LocalAppTheme.current.screenTwo
             )
             MultiLineTextField(
                 modifier = Modifier.fillMaxWidth(),
                 state = descriptionText,
-                labelText = "Description",
+                labelText = stringResource(R.string.description),
                 backgroundColor = LocalAppTheme.current.screenTwo
             )
             Row(
@@ -325,7 +327,7 @@ fun BlockEditorPopup(
                         .weight(1f)
                         .padding(end = 20.dp),
                     state = timeHoursText,
-                    labelText = "Hours",
+                    labelText = stringResource(R.string.hours),
                     backgroundColor = LocalAppTheme.current.screenTwo
                 )
                 DigitsTextField(
@@ -333,7 +335,7 @@ fun BlockEditorPopup(
                         .weight(1f)
                         .padding(horizontal = 10.dp),
                     state = timeMinutesText,
-                    labelText = "Minutes",
+                    labelText = stringResource(R.string.minutes),
                     backgroundColor = LocalAppTheme.current.screenTwo
                 )
                 DigitsTextField(
@@ -341,7 +343,7 @@ fun BlockEditorPopup(
                         .weight(1f)
                         .padding(start = 20.dp),
                     state = timeSecondsText,
-                    labelText = "Seconds",
+                    labelText = stringResource(R.string.seconds),
                     backgroundColor = LocalAppTheme.current.screenTwo
                 )
             }
@@ -407,10 +409,10 @@ fun BlockEditorPopup(
                 ) {
                     Text(
                         text = when (blockFile?.type) {
-                            FileType.IMAGE -> "Image"
-                            FileType.VIDEO -> "Video"
-                            FileType.ANY -> "File"
-                            null -> "Attach file"
+                            FileType.IMAGE -> stringResource(R.string.image)
+                            FileType.VIDEO -> stringResource(R.string.video)
+                            FileType.ANY -> stringResource(R.string.file)
+                            null -> stringResource(R.string.attach_file)
                         },
                         style = LocalAppTheme.current.typography.bodyLarge
                     )

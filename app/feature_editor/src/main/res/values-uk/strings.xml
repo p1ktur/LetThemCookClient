@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="block_info">Інформація про блок</string>
+    <string name="create_new_block">Створіть новий блок</string>
+    <string name="edit_block">Редагуйте блок</string>
+    <string name="create">Створити</string>
+    <string name="edit">Відредагувати</string>
+    <string name="block_name_cannot_be_empty">Ім\'я блоку не може бути порожнім.</string>
+    <string name="name">Ім\'я</string>
+    <string name="description">Опис</string>
+    <string name="hours">Години</string>
+    <string name="minutes">Хвилини</string>
+    <string name="seconds">Секунди</string>
+    <string name="image">Фото</string>
+    <string name="video">Відео</string>
+    <string name="file">Файл</string>
+    <string name="attach_file">Додати файл</string>
+    <string name="all_products_are_used">Всі продукти використано</string>
+    <string name="use_all_products">Використайте всі продукти</string>
+    <string name="all_blocks_are_used">Всі блоки використано</string>
+    <string name="blocks_menu">Меню блоків</string>
+    <string name="cooking_tutorial">Навчання у готуванні</string>
+    <string name="not_reached_yet">Ще не досягнутий</string>
+    <string name="waiting">Очікує...</string>
+    <string name="cooking">Готується...</string>
+    <string name="done">Готово</string>
+</resources>

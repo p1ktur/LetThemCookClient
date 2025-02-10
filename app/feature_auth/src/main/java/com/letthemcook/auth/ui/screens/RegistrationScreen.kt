@@ -64,6 +64,15 @@ fun RegistrationScreen(
         }
     }
 
+    // Strings
+    val fieldCannotBeEmpty = stringResource(R.string.field_cannot_be_empty)
+    val onlyLettersAndNumbersAllowed = stringResource(R.string.only_letters_and_numbers_allowed)
+    val pleaseFollowEmailFormat = stringResource(R.string.please_follow_email_format)
+    val passwordNumberTooShort = stringResource(R.string.password_too_short)
+    val passwordNumberTooLong = stringResource(R.string.password_too_long)
+    val passwordCondition = stringResource(R.string.password_condition)
+    val passwordsDoNotMatch = stringResource(R.string.passwords_does_not_match)
+
     Column {
         Box(
             modifier = Modifier
@@ -103,7 +112,7 @@ fun RegistrationScreen(
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Registration",
+                    text = stringResource(R.string.registration),
                     style = LocalAppTheme.current.typography.titleMedium
                 )
                 RegistrationError(uiState.registrationResult)
@@ -111,50 +120,50 @@ fun RegistrationScreen(
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     textFieldState = uiState.email,
-                    label = "Email",
+                    label = stringResource(R.string.email),
                     validationFunction = { toValidateText ->
                         when (validateEmail(toValidateText)) {
                             EmailValidationResult.OK -> ""
-                            EmailValidationResult.Empty -> "This field cannot be empty."
-                            EmailValidationResult.WrongFormat -> "Please follow the email format, such as example@email.com."
+                            EmailValidationResult.Empty -> fieldCannotBeEmpty
+                            EmailValidationResult.WrongFormat -> pleaseFollowEmailFormat
                         }
                     }
                 )
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     textFieldState = uiState.login,
-                    label = "Login",
+                    label = stringResource(R.string.login),
                     validationFunction = { toValidateText ->
                         when (validateLogin(toValidateText)) {
                             LoginValidationResult.OK -> ""
-                            LoginValidationResult.Empty -> "This field cannot be empty."
-                            LoginValidationResult.OnlyLettersOrDigitsAllowed -> "Only letters or digits are allowed."
+                            LoginValidationResult.Empty -> fieldCannotBeEmpty
+                            LoginValidationResult.OnlyLettersOrDigitsAllowed -> onlyLettersAndNumbersAllowed
                         }
                     }
                 )
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     textFieldState = uiState.password,
-                    label = "Password",
+                    label = stringResource(R.string.password),
                     isPassword = true,
                     validationFunction = { toValidateText ->
                         when (validatePassword(toValidateText)) {
                             PasswordValidationResult.OK -> ""
-                            PasswordValidationResult.Empty -> "This field cannot be empty."
-                            PasswordValidationResult.TooShort -> "Password it too short."
-                            PasswordValidationResult.TooLong -> "Password it too long."
-                            PasswordValidationResult.WrongFormat -> "Password must contain at least one capital letter, one small letter and one digit."
+                            PasswordValidationResult.Empty -> fieldCannotBeEmpty
+                            PasswordValidationResult.TooShort -> passwordNumberTooShort
+                            PasswordValidationResult.TooLong -> passwordNumberTooLong
+                            PasswordValidationResult.WrongFormat -> passwordCondition
                         }
                     }
                 )
                 ValidatedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     textFieldState = uiState.repeatedPassword,
-                    label = "Repeat password",
+                    label = stringResource(R.string.repeat_password),
                     isPassword = true,
                     validationFunction = { toValidateText ->
                         if (toValidateText != uiState.password.text) {
-                            "Passwords does not match."
+                            passwordsDoNotMatch
                         } else {
                             ""
                         }
@@ -162,7 +171,7 @@ fun RegistrationScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextButton(
-                    text = "Register",
+                    text = stringResource(R.string.register),
                     onClick = {
                         onUiAction(RegistrationUiAction.Register)
                     }
@@ -181,14 +190,14 @@ fun RegistrationScreen(
                             }
                             .padding(6.dp),
                         text = buildAnnotatedString {
-                            append("Already have an account? ")
+                            append(stringResource(R.string.already_have_an_account))
                             withStyle(
                                 SpanStyle(
                                     color = LocalAppTheme.current.highlightColor,
                                     textDecoration = TextDecoration.Underline
                                 )
                             ) {
-                                append("Login")
+                                append(stringResource(R.string.login))
                             }
                         },
                         style = LocalAppTheme.current.typography.bodyMedium,
@@ -218,7 +227,7 @@ private fun RegistrationError(result: RegistrationAuthResult?) {
                     tint = LocalAppTheme.current.errorText
                 )
                 Text(
-                    text = "Sorry, but registration failed.",
+                    text = stringResource(R.string.sorry_but_registration_failed),
                     style = LocalAppTheme.current.typography.bodySmall,
                     color = LocalAppTheme.current.errorText
                 )
@@ -237,7 +246,7 @@ private fun RegistrationError(result: RegistrationAuthResult?) {
                     tint = LocalAppTheme.current.errorText
                 )
                 Text(
-                    text = "User with such email or login already exists.",
+                    text = stringResource(R.string.user_with_such_email_or_login_already_exists),
                     style = LocalAppTheme.current.typography.bodySmall,
                     color = LocalAppTheme.current.errorText
                 )

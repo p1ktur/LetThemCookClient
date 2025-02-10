@@ -1,6 +1,5 @@
 package com.letthemcook.recipe.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -45,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
@@ -52,6 +52,7 @@ import com.letthemcook.core.domain.format.prettyString
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.status.LikeStatus
+import com.letthemcook.recipe.R
 import com.letthemcook.recipe.domain.model.LoadingStatus
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiAction
 import com.letthemcook.recipe.domain.viewModels.recipe.RecipeUiState
@@ -103,7 +104,6 @@ fun RecipeScreen(
     }
 
     LaunchedEffect(Unit) {
-        Log.d("TAG", "here")
         onUiAction(RecipeUiAction.LoadData)
     }
 
@@ -121,7 +121,7 @@ fun RecipeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Failed to load recipe.",
+                    text = stringResource(R.string.failed_to_load_recipe),
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
                 if (uiState.isOwner) {
@@ -130,7 +130,7 @@ fun RecipeScreen(
                         modifier = Modifier
                             .padding(horizontal = 12.dp)
                             .size(120.dp, 40.dp),
-                        text = "Edit",
+                        text = stringResource(R.string.edit),
                         onClick = {
                             onUiAction(RecipeUiAction.EditRecipe)
                         }
@@ -191,16 +191,16 @@ fun RecipeScreen(
                         )
                         Text(
                             text = if (uiState.cookingTime != null) {
-                                "Cooking time: " + uiState.cookingTime.toShortTimeString()
+                                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString()
                             } else {
-                                "No cooking yet"
+                                stringResource(R.string.no_cooking_yet)
                             },
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         if (uiState.recipeJson != null && uiState.recipeJson != "null") {
                             TextButton(
-                                modifier = Modifier.size(120.dp, 40.dp),
-                                text = "Cook",
+                                modifier = Modifier.size(130.dp, 40.dp),
+                                text = stringResource(R.string.cook),
                                 onClick = {
                                     onUiAction(RecipeUiAction.Cook(uiState.recipeJson))
                                 }
@@ -208,8 +208,8 @@ fun RecipeScreen(
                         }
                         if (uiState.isOwner) {
                             TextButton(
-                                modifier = Modifier.size(120.dp, 40.dp),
-                                text = "Edit",
+                                modifier = Modifier.size(130.dp, 40.dp),
+                                text = stringResource(R.string.edit),
                                 onClick = {
                                     onUiAction(RecipeUiAction.EditRecipe)
                                 }
@@ -296,7 +296,7 @@ fun RecipeScreen(
                     }
                     Icon(
                         modifier = Modifier.size(32.dp),
-                        imageVector = Icons.Outlined.RemoveRedEye, //TODO maybe change
+                        imageVector = Icons.Outlined.RemoveRedEye,
                         contentDescription = "Views Icon",
                         tint = LocalAppTheme.current.text
                     )
@@ -306,7 +306,7 @@ fun RecipeScreen(
                     )
                     Icon(
                         modifier = Modifier.size(32.dp),
-                        imageVector = Icons.Outlined.SoupKitchen, //TODO maybe change
+                        imageVector = Icons.Outlined.SoupKitchen,
                         contentDescription = "Preparations Icon",
                         tint = LocalAppTheme.current.text
                     )
@@ -337,7 +337,7 @@ fun RecipeScreen(
                 if (uiState.attachments.isNotEmpty()) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp),
-                        text = "Attachments",
+                        text = stringResource(R.string.attachments),
                         style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Row(
@@ -348,7 +348,7 @@ fun RecipeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        uiState.attachments.forEachIndexed { index, file ->
+                        uiState.attachments.forEach { file ->
                             Icon(
                                 modifier = Modifier
                                     .size(40.dp)
@@ -374,7 +374,7 @@ fun RecipeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp),
-                        name = "Categories",
+                        name = stringResource(R.string.categories),
                         labels = categoryLabelNames,
                         maxRows = 2,
                         onLabelClick = {}
@@ -383,7 +383,7 @@ fun RecipeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp),
-                        name = "Products",
+                        name = stringResource(R.string.products),
                         labels = productLabelNames,
                         maxRows = 2,
                         onLabelClick = {}
@@ -408,7 +408,7 @@ fun RecipeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Reviews",
+                        text = stringResource(R.string.reviews),
                         style = LocalAppTheme.current.typography.bodyMedium
                     )
                     Icon(
@@ -456,7 +456,7 @@ fun RecipeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "No reviews yet",
+                    text = stringResource(R.string.no_reviews_yet),
                     style = LocalAppTheme.current.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )

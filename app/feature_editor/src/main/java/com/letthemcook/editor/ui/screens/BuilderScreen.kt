@@ -51,10 +51,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.getLongTime
+import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
@@ -150,13 +152,13 @@ fun BuilderScreen(
                     if (uiState.unusedProducts.isEmpty()) {
                         Text(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            text = "All products are used",
+                            text = stringResource(R.string.all_products_are_used),
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                     } else {
                         Text(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            text = "Use all products",
+                            text = stringResource(R.string.use_all_products),
                             style = LocalAppTheme.current.typography.bodyMedium
                         )
                     }
@@ -235,7 +237,7 @@ fun BuilderScreen(
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
                             modifier = Modifier,
-                            text = "All blocks are used",
+                            text = stringResource(R.string.all_blocks_are_used),
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -284,7 +286,7 @@ fun BuilderScreen(
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        text = "Blocks menu",
+                        text = stringResource(R.string.blocks_menu),
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
                     Icon(

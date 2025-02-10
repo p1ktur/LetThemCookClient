@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cooking.media.R
 import com.letthemcook.media.domain.viewModels.mediaViewerImage.MediaViewerImageUiAction
 import com.letthemcook.media.domain.viewModels.mediaViewerImage.MediaViewerImageUiState
 import com.letthemcook.media.ui.components.ImageViewer
@@ -70,7 +72,7 @@ fun MediaViewerImageScreen(
                 tint = Color.White
             )
             Text(
-                text = "Viewing Image", // TODO localize
+                text = stringResource(R.string.viewing_image),
                 style = LocalAppTheme.current.typography.titleSmall,
                 color = Color.White
             )

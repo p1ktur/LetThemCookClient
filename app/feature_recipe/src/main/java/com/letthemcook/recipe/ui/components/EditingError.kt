@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.letthemcook.recipe.R
 import com.letthemcook.recipe.domain.model.EditingError
 import com.letthemcook.theme.base.LocalAppTheme
 
@@ -39,9 +41,9 @@ fun EditingError(error: EditingError?) {
             )
             Text(
                 text = when (error) {
-                    EditingError.EmptyName -> "Provide name for recipe, before publishing."
-                    EditingError.TooManyCategories -> "Maximum amount of categories is 20."
-                    EditingError.TooManyProducts -> "Maximum amount of products is 20."
+                    EditingError.EmptyName -> stringResource(R.string.provide_name_for_recipe_before_publishing)
+                    EditingError.TooManyCategories -> stringResource(R.string.maximum_amount_of_categories_is_20)
+                    EditingError.TooManyProducts -> stringResource(R.string.maximum_amount_of_products_is_20)
                 },
                 style = LocalAppTheme.current.typography.bodySmall,
                 color = LocalAppTheme.current.errorText

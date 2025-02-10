@@ -73,6 +73,17 @@ fun LoginScreen(
         }
     }
 
+    // Strings
+    val fieldCannotBeEmpty = stringResource(R.string.field_cannot_be_empty)
+    val onlyLettersAndNumbersAllowed = stringResource(R.string.only_letters_and_numbers_allowed)
+    val pleaseFollowEmailFormat = stringResource(R.string.please_follow_email_format)
+    val phoneNumberTooShort = stringResource(R.string.phone_number_too_short)
+    val phoneNumberTooLong = stringResource(R.string.phone_number_too_long)
+    val onlyNumbersAllowed = stringResource(R.string.only_numbers_allowed)
+    val passwordNumberTooShort = stringResource(R.string.password_too_short)
+    val passwordNumberTooLong = stringResource(R.string.password_too_long)
+    val passwordCondition = stringResource(R.string.password_condition)
+
     Column {
         Box(
             modifier = Modifier
@@ -116,15 +127,15 @@ fun LoginScreen(
                     LoginUiState.LoginOption.entries.forEachIndexed { index, option ->
                         Text(
                             modifier = Modifier
-                                .width(72.dp)
+                                .width(108.dp)
                                 .clickable {
                                     onUiAction(LoginUiAction.ToggleLoginOption(option))
                                 }
                                 .padding(8.dp),
                             text = when (option) {
-                                LoginUiState.LoginOption.LOGIN -> "Login"
-                                LoginUiState.LoginOption.EMAIL -> "Email"
-                                LoginUiState.LoginOption.PHONE -> "Phone"
+                                LoginUiState.LoginOption.LOGIN -> stringResource(R.string.login)
+                                LoginUiState.LoginOption.EMAIL -> stringResource(R.string.email)
+                                LoginUiState.LoginOption.PHONE -> stringResource(R.string.phone)
                             },
                             style = LocalAppTheme.current.typography.bodyMedium,
                             textDecoration = if (option == uiState.loginOption) {
@@ -159,7 +170,7 @@ fun LoginScreen(
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Login",
+                        text = stringResource(R.string.login),
                         style = LocalAppTheme.current.typography.titleMedium
                     )
                     LoginError(uiState.loginResult, uiState.loginOption)
@@ -169,12 +180,12 @@ fun LoginScreen(
                             ValidatedTextField(
                                 modifier = Modifier.fillMaxWidth(),
                                 textFieldState = uiState.login,
-                                label = "Login",
+                                label = stringResource(R.string.login),
                                 validationFunction = { toValidateText ->
                                     when (validateLogin(toValidateText)) {
                                         LoginValidationResult.OK -> ""
-                                        LoginValidationResult.Empty -> "This field cannot be empty."
-                                        LoginValidationResult.OnlyLettersOrDigitsAllowed -> "Only letters or digits are allowed."
+                                        LoginValidationResult.Empty -> fieldCannotBeEmpty
+                                        LoginValidationResult.OnlyLettersOrDigitsAllowed -> onlyLettersAndNumbersAllowed
                                     }
                                 }
                             )
@@ -183,12 +194,12 @@ fun LoginScreen(
                             ValidatedTextField(
                                 modifier = Modifier.fillMaxWidth(),
                                 textFieldState = uiState.email,
-                                label = "Email",
+                                label = stringResource(R.string.email),
                                 validationFunction = { toValidateText ->
                                     when (validateEmail(toValidateText)) {
                                         EmailValidationResult.OK -> ""
-                                        EmailValidationResult.Empty -> "This field cannot be empty."
-                                        EmailValidationResult.WrongFormat -> "Please follow the email format, such as example@email.com."
+                                        EmailValidationResult.Empty -> fieldCannotBeEmpty
+                                        EmailValidationResult.WrongFormat -> pleaseFollowEmailFormat
                                     }
                                 }
                             )
@@ -197,15 +208,15 @@ fun LoginScreen(
                             ValidatedTextField(
                                 modifier = Modifier.fillMaxWidth(),
                                 textFieldState = uiState.phoneNumber,
-                                label = "Phone number",
+                                label = stringResource(R.string.phone_number),
                                 isPhoneNumber = true,
                                 validationFunction = { toValidateText ->
                                     when (validatePhoneNumber(toValidateText)) {
                                         PhoneNumberValidationResult.OK -> ""
-                                        PhoneNumberValidationResult.Empty -> "This field cannot be empty."
-                                        PhoneNumberValidationResult.TooShort -> "Phone number is too short."
-                                        PhoneNumberValidationResult.TooLong -> "Phone number is too long."
-                                        PhoneNumberValidationResult.OnlyNumbersAllowed -> "Only numbers are allowed."
+                                        PhoneNumberValidationResult.Empty -> fieldCannotBeEmpty
+                                        PhoneNumberValidationResult.TooShort -> phoneNumberTooShort
+                                        PhoneNumberValidationResult.TooLong -> phoneNumberTooLong
+                                        PhoneNumberValidationResult.OnlyNumbersAllowed -> onlyNumbersAllowed
                                     }
                                 }
                             )
@@ -214,22 +225,22 @@ fun LoginScreen(
                     ValidatedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         textFieldState = uiState.password,
-                        label = "Password",
+                        label = stringResource(R.string.password),
                         isPassword = true,
                         validationFunction = { toValidateText ->
                             when (validatePassword(toValidateText)) {
                                 PasswordValidationResult.OK -> ""
-                                PasswordValidationResult.Empty -> "This field cannot be empty."
-                                PasswordValidationResult.TooShort -> "Password it too short."
-                                PasswordValidationResult.TooLong -> "Password it too long."
-                                PasswordValidationResult.WrongFormat -> "Password must contain at least one capital letter, one small letter and one digit."
+                                PasswordValidationResult.Empty -> fieldCannotBeEmpty
+                                PasswordValidationResult.TooShort -> passwordNumberTooShort
+                                PasswordValidationResult.TooLong -> passwordNumberTooLong
+                                PasswordValidationResult.WrongFormat -> passwordCondition
                             }
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     TextButton(
                         modifier = Modifier,
-                        text = "Login",
+                        text = stringResource(R.string.log_in),
                         onClick = {
                             onUiAction(LoginUiAction.Login)
                         }
@@ -248,7 +259,7 @@ fun LoginScreen(
                                 }
                                 .padding(6.dp),
                             text = buildAnnotatedString {
-                                append("New to ")
+                                append(stringResource(R.string.new_to))
                                 withStyle(
                                     SpanStyle(
                                         fontFamily = FontFamily(Font(com.letthemcook.theme.R.font.kaushan_script))
@@ -263,7 +274,7 @@ fun LoginScreen(
                                         textDecoration = TextDecoration.Underline
                                     )
                                 ) {
-                                    append("Register")
+                                    append(stringResource(R.string.register))
                                 }
                             },
                             style = LocalAppTheme.current.typography.bodyMedium,
@@ -295,13 +306,17 @@ private fun LoginError(result: LoginAuthResult?, loginOption: LoginUiState.Login
                     tint = LocalAppTheme.current.errorText
                 )
                 Text(
-                    text = "Sorry, but login failed.",
+                    text = stringResource(R.string.sorry_but_login_failed),
                     style = LocalAppTheme.current.typography.bodySmall,
                     color = LocalAppTheme.current.errorText
                 )
             }
         }
         LoginAuthResult.UserDoesNotExist -> {
+            val loginOptionString = stringResource(R.string.login_option)
+            val emailOptionString = stringResource(R.string.email_option)
+            val phoneOptionString = stringResource(R.string.phone_option)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -309,9 +324,9 @@ private fun LoginError(result: LoginAuthResult?, loginOption: LoginUiState.Login
             ) {
                 val loginOptionText = remember(loginOption) {
                     when (loginOption) {
-                        LoginUiState.LoginOption.LOGIN -> "login"
-                        LoginUiState.LoginOption.EMAIL -> "email"
-                        LoginUiState.LoginOption.PHONE -> "phone number"
+                        LoginUiState.LoginOption.LOGIN -> loginOptionString
+                        LoginUiState.LoginOption.EMAIL -> emailOptionString
+                        LoginUiState.LoginOption.PHONE -> phoneOptionString
                     }
                 }
                 Icon(
@@ -321,7 +336,9 @@ private fun LoginError(result: LoginAuthResult?, loginOption: LoginUiState.Login
                     tint = LocalAppTheme.current.errorText
                 )
                 Text(
-                    text = "User with such $loginOptionText does not exist.",
+                    text = stringResource(R.string.user_with_such) +
+                            loginOptionText +
+                            stringResource(R.string.does_not_exist),
                     style = LocalAppTheme.current.typography.bodySmall,
                     color = LocalAppTheme.current.errorText
                 )
@@ -340,7 +357,7 @@ private fun LoginError(result: LoginAuthResult?, loginOption: LoginUiState.Login
                     tint = LocalAppTheme.current.errorText
                 )
                 Text(
-                    text = "Wrong password.",
+                    text = stringResource(R.string.wrong_password),
                     style = LocalAppTheme.current.typography.bodySmall,
                     color = LocalAppTheme.current.errorText
                 )

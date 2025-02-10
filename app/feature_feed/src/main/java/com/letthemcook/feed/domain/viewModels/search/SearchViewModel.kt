@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.UserManager
 import com.letthemcook.core.domain.list.filterOn
+import com.letthemcook.theme.providers.LanguageStateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import kotlinx.coroutines.withContext
 @OptIn(FlowPreview::class)
 class SearchViewModel(
     private val recipeManager: RecipeManager,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val languageStateProvider: LanguageStateProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -151,6 +153,7 @@ class SearchViewModel(
         val categories = recipeManager.searchCategories(
             page = lastCategoryPage++,
             perPage = perPage,
+            language = languageStateProvider.getLastLanguage().toLanguageString(),
             searchText = text
         ).filterNot { uiState.value.categoriesFilter.contains(it) }
 
@@ -232,6 +235,7 @@ class SearchViewModel(
         val products = recipeManager.searchProducts(
             page = lastProductPage++,
             perPage = perPage,
+            language = languageStateProvider.getLastLanguage().toLanguageString(),
             searchText = text
         ).filterNot { uiState.value.productsFilter.contains(it) }
 
