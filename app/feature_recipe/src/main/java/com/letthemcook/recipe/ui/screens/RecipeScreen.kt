@@ -453,13 +453,14 @@ fun RecipeScreen(
             }
         } else {
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.no_reviews_yet),
                     style = LocalAppTheme.current.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
