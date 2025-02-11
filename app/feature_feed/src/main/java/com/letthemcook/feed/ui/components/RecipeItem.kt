@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.ThumbDown
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,7 +43,8 @@ fun RecipeItem(
     recipeItemData: RecipeItemData,
     index: Int,
     lastIndex: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onUserLoginClick: () -> Unit
 ) {
     val recipeBitmap = remember(recipeItemData) { recipeItemData.bitmap }
 
@@ -129,16 +132,21 @@ fun RecipeItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(onClick = onUserLoginClick)
+                    .padding(4.dp),
                 text = "@${recipeItemData.authorLogin}",
                 style = LocalAppTheme.current.typography.bodySmall
             )
             recipeItemData.publicationDate?.let { date ->
                 Text(
+                    modifier = Modifier.padding(end = 4.dp),
                     text = date.prettyString(),
                     style = LocalAppTheme.current.typography.bodySmall
                 )

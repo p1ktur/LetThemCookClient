@@ -41,7 +41,7 @@ class UserManager(
 
                 users.map { user ->
                     val params = RemoteFileManager.RequestParams(
-                        userId = authManager.getUser()?.id.toString(),
+                        userId = user.id,
                         fileId = user.profileBitmapId.toString(),
                         type = FileType.IMAGE
                     )
@@ -60,7 +60,7 @@ class UserManager(
         return get(
             urlString = "/user",
             params = StringValues.build {
-                append("id", userId)
+                append("userId", userId)
             },
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
@@ -123,7 +123,7 @@ class UserManager(
             urlString = "/update_password",
             body = RequestPair(oldPassword, password),
             params = StringValues.build {
-                append("id", userId)
+                append("userId", userId)
             },
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")

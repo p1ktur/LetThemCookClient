@@ -31,7 +31,8 @@ fun UserItem(
         modifier = modifier
             .height(IntrinsicSize.Min)
             .clickable(onClick = onClick)
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ProfileImage(
             modifier = Modifier.width(64.dp),
@@ -47,14 +48,20 @@ fun UserItem(
                 text = "@${userItemData.login}",
                 style = LocalAppTheme.current.typography.bodyMedium
             )
+            userItemData.name?.let { name ->
+                userItemData.surname?.let { surname ->
+                    if (name.isNotEmpty() || surname.isNotEmpty()) {
+                        Text(
+                            modifier = Modifier.alpha(0.66f),
+                            text = "${userItemData.name} ${userItemData.surname}",
+                            style = LocalAppTheme.current.typography.bodySmall
+                        )
+                    }
+                }
+            }
             Text(
                 modifier = Modifier.alpha(0.66f),
-                text = "${userItemData.name} ${userItemData.surname}",
-                style = LocalAppTheme.current.typography.bodySmall
-            )
-            Text(
-                modifier = Modifier.alpha(0.66f),
-                text = userItemData.totalFollowers.cute() + stringResource(R.string.followers),
+                text = userItemData.totalFollowers.cute() + " " + stringResource(R.string.followers),
                 style = LocalAppTheme.current.typography.bodySmall
             )
         }

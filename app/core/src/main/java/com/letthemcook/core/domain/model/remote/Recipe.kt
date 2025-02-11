@@ -43,6 +43,7 @@ data class Recipe(
         return RecipeItemData(
             id = id,
             name = name ?: "",
+            ownerId = ownerId,
             authorLogin = authorLogin,
             likesAmount = likesAmount,
             dislikesAmount = dislikesAmount,

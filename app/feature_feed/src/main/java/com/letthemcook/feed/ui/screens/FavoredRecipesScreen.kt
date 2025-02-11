@@ -54,6 +54,9 @@ fun FavoredRecipesScreen(
                     lastIndex = uiState.favoredRecipes.lastIndex,
                     onClick = {
                         onUiAction(FavoredRecipesUiAction.NavigateToRecipe(recipeItemData.id))
+                    },
+                    onUserLoginClick = {
+                        onUiAction(FavoredRecipesUiAction.NavigateToUser(recipeItemData.ownerId))
                     }
                 )
             }

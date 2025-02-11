@@ -47,6 +47,7 @@ class FeedViewModel(
     fun onUiAction(action: FeedUiAction) {
         when (action) {
             FeedUiAction.NavigateToProfile -> Unit
+            is FeedUiAction.NavigateToUser -> Unit
             FeedUiAction.NavigateToAddRecipe -> Unit
             FeedUiAction.NavigateToSearch -> Unit
             FeedUiAction.NavigateToSavedRecipes -> Unit

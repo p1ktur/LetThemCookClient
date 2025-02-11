@@ -10,26 +10,26 @@ import kotlinx.coroutines.flow.Flow
 interface RecipeDao {
 
     // Default
-    @Query("SELECT id FROM Recipe WHERE isFavored = 0 ORDER BY id DESC")
-    suspend fun getRecipeIds(): List<String>
+    @Query("SELECT id FROM Recipe WHERE isFavored = 0 AND ownerId = :userId ORDER BY id DESC")
+    suspend fun getRecipeIds(userId: String): List<String>
 
-    @Query("SELECT * FROM Recipe WHERE isFavored = 0 ORDER BY id DESC")
-    suspend fun getRecipes(): List<Recipe>
+    @Query("SELECT * FROM Recipe WHERE isFavored = 0 AND ownerId = :userId ORDER BY id DESC")
+    suspend fun getRecipes(userId: String): List<Recipe>
 
-    @Query("SELECT * FROM Recipe WHERE id = :id LIMIT 1")
-    suspend fun getRecipeById(id: String): Recipe?
+    @Query("SELECT * FROM Recipe WHERE id = :id AND (ownerId = :userId OR (isFavored = 1 AND ownerId != :userId)) LIMIT 1")
+    suspend fun getRecipeById(id: String, userId: String): Recipe?
 
     // Favored
-    @Query("SELECT * FROM Recipe WHERE isFavored = 1 ORDER BY id DESC")
-    suspend fun getFavoredRecipes(): List<Recipe>
+    @Query("SELECT * FROM Recipe WHERE isFavored = 1 AND ownerId != :userId ORDER BY id DESC")
+    suspend fun getFavoredRecipes(userId: String): List<Recipe>
 
-    @Query("SELECT COUNT(*) FROM Recipe WHERE isFavored = 1")
-    fun getFavoredRecipesAmount(): Flow<Int>
+    @Query("SELECT COUNT(*) FROM Recipe WHERE isFavored = 1 AND ownerId != :userId")
+    fun getFavoredRecipesAmount(userId: String): Flow<Int>
 
     // Common
     @Upsert
     suspend fun upsertRecipe(recipe: Recipe)
 
-    @Query("DELETE FROM Recipe WHERE id = :recipeId")
-    suspend fun deleteRecipeById(recipeId: String)
+    @Query("DELETE FROM Recipe WHERE id = :recipeId AND (ownerId = :userId OR (ownerId != :userId AND isFavored = 1))")
+    suspend fun deleteRecipeById(recipeId: String, userId: String)
 }

@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor
 
+import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -26,6 +27,7 @@ object RecipeGrapher {
         endComponent: EndComponent,
         canvasUiState: CanvasUiState,
         // Graphics
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         titleTextStyle: TextStyle,
@@ -40,8 +42,8 @@ object RecipeGrapher {
         fileIcons: Map<FileType, VectorPainter>
     ) {
         if (centralComponent is EmptyComponent) {
-            startComponent.size = startComponent.calculateSize(textMeasurer, titleTextStyle)
-            endComponent.size = endComponent.calculateSize(textMeasurer, titleTextStyle)
+            startComponent.size = startComponent.calculateSize(context, textMeasurer, titleTextStyle)
+            endComponent.size = endComponent.calculateSize(context, textMeasurer, titleTextStyle)
 
             startComponent.position = Offset(
                 x = drawScope.center.x - startComponent.size.width / 2f,
@@ -65,6 +67,7 @@ object RecipeGrapher {
             val circleRadius = circleTextLayout.size.width / 2 + DRAW_PADDING * 4
 
             startComponent.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 textColor = textColor,
@@ -103,6 +106,7 @@ object RecipeGrapher {
                 topLeft = circleCenter - Offset(circleTextLayout.size.width / 2f, circleTextLayout.size.height / 2f)
             )
             endComponent.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 textColor = textColor,
@@ -113,7 +117,7 @@ object RecipeGrapher {
             )
         } else {
             if (startComponent.position.x != drawScope.center.x - startComponent.size.width / 2) {
-                startComponent.size = startComponent.calculateSize(textMeasurer, titleTextStyle)
+                startComponent.size = startComponent.calculateSize(context, textMeasurer, titleTextStyle)
 
                 startComponent.position = Offset(
                     x = drawScope.center.x - startComponent.size.width / 2f,
@@ -122,6 +126,7 @@ object RecipeGrapher {
             }
 
             startComponent.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 textColor = textColor,
@@ -153,6 +158,7 @@ object RecipeGrapher {
             cursorPosition += Offset(0f, centralComponent.size.height)
             endComponent.position = cursorPosition
             endComponent.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 textColor = textColor,

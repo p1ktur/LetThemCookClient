@@ -24,4 +24,6 @@
     <string name="waiting">Очікує...</string>
     <string name="cooking">Готується...</string>
     <string name="done">Готово</string>
+    <string name="end">Кінець</string>
+    <string name="start">Початок</string>
 </resources>

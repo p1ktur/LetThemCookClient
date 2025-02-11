@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -20,8 +21,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.rememberTextMeasurer
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.domain.editor.RecipeGrapher
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
@@ -34,13 +35,15 @@ import com.letthemcook.theme.base.LocalAppTheme
 fun CookingCanvas(
     modifier: Modifier = Modifier,
     uiState: CookingUiState,
-    textMeasurer: TextMeasurer,
-    blockComponentTitleTextStyle: TextStyle,
-    blockComponentNameTextStyle: TextStyle,
-    blockComponentContentTextStyle: TextStyle,
     onUiAction: (CookingUiAction) -> Any?
 ) {
+    val context = LocalContext.current
+
     // Canvas
+    val textMeasurer = rememberTextMeasurer()
+    val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
+    val blockComponentNameTextStyle = MaterialTheme.typography.titleLarge
+    val blockComponentContentTextStyle = MaterialTheme.typography.bodyLarge
     val highlightColor = LocalAppTheme.current.highlightColor
     val warningHighlightColor = LocalAppTheme.current.warningHighlightColor
     val goodHighlightColor = LocalAppTheme.current.goodHighlightColor
@@ -130,6 +133,7 @@ fun CookingCanvas(
                         endComponent = uiState.endComponent,
                         canvasUiState = uiState.canvasUiState,
                         // Graphics
+                        context = context,
                         drawScope = this,
                         textMeasurer = textMeasurer,
                         titleTextStyle = blockComponentTitleTextStyle,

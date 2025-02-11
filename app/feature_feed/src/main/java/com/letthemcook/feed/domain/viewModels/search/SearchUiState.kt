@@ -50,7 +50,7 @@ data class SearchUiState(
     }
 
     fun searchHashCode(): Int {
-        var result = searchText.hashCode()
+        var result = searchText.text.hashCode()
         result = 31 * result + recipeSearchType.hashCode()
         result = 31 * result + recipeSortType.hashCode()
         result = 31 * result + categoriesFilter.hashCode()

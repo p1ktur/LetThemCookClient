@@ -9,8 +9,8 @@ import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
 @Dao
 interface ReviewLikeDao {
 
-    @Query("SELECT * FROM ReviewLike WHERE reviewId = :reviewId LIMIT 1")
-    suspend fun getReviewLikeByReviewId(reviewId: String): ReviewLike?
+    @Query("SELECT * FROM ReviewLike WHERE reviewId = :reviewId AND ownerId = :userId LIMIT 1")
+    suspend fun getReviewLikeByReviewId(reviewId: String, userId: String): ReviewLike?
 
     @Upsert
     suspend fun upsertReviewLike(reviewLike: ReviewLike)

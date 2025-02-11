@@ -2,6 +2,7 @@ package com.letthemcook.feed.domain.viewModels.feed
 
 sealed interface FeedUiAction {
     data object NavigateToProfile : FeedUiAction
+    data class NavigateToUser(val userId: String) : FeedUiAction
     data object NavigateToAddRecipe : FeedUiAction
     data object NavigateToSearch : FeedUiAction
     data object NavigateToSavedRecipes : FeedUiAction

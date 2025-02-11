@@ -8,6 +8,7 @@ import com.letthemcook.core.domain.model.status.LikeStatus
 data class RecipeReaction(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val recipeId: String,
+    val ownerId: String,
     val liked: Boolean
 )
 

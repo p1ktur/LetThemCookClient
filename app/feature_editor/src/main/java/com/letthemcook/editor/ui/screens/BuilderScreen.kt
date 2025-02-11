@@ -105,8 +105,8 @@ fun BuilderScreen(
 
     val textMeasurer = rememberTextMeasurer()
     val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
-    val blockComponentNameTextStyle = MaterialTheme.typography.bodyLarge
-    val blockComponentContentTextStyle = MaterialTheme.typography.bodyMedium
+    val blockComponentNameTextStyle = MaterialTheme.typography.titleLarge
+    val blockComponentContentTextStyle = MaterialTheme.typography.bodyLarge
 
     val canvasDragAndDropManager = remember(uiState.unusedProducts, uiState.unusedBlockComponents, canvasGlobalPosition) {
         CanvasDragAndDropManager(

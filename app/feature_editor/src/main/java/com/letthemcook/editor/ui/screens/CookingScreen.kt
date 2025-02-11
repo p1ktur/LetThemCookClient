@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.rememberTextMeasurer
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiAction
 import com.letthemcook.editor.domain.viewModels.cooking.CookingUiState
 import com.letthemcook.editor.ui.components.canvas.CookingCanvas
@@ -36,11 +34,6 @@ fun CookingScreen(
         }
     }
 
-    val textMeasurer = rememberTextMeasurer()
-    val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
-    val blockComponentNameTextStyle = MaterialTheme.typography.bodyLarge
-    val blockComponentContentTextStyle = MaterialTheme.typography.bodyMedium
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,10 +49,6 @@ fun CookingScreen(
                 .weight(1f)
                 .clip(RectangleShape),
             uiState = uiState,
-            textMeasurer = textMeasurer,
-            blockComponentTitleTextStyle = blockComponentTitleTextStyle,
-            blockComponentNameTextStyle = blockComponentNameTextStyle,
-            blockComponentContentTextStyle = blockComponentContentTextStyle,
             onUiAction = onUiAction
         )
     }

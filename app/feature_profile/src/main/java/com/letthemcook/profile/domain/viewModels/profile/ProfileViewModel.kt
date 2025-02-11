@@ -6,8 +6,8 @@ import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
-import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -83,17 +83,17 @@ class ProfileViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             val perPage = 20
-            val reviews = recipeManager.getUserRecipes(
+            val recipes = recipeManager.getUserRecipes(
                 page = lastRecipePage++,
                 perPage = perPage,
                 userId = userId
             )
 
-            if (reviews.size < perPage) allRecipePagesReached = true
+            if (recipes.size < perPage) allRecipePagesReached = true
 
             _uiState.update {
                 it.copy(
-                    recipes = it.recipes + reviews,
+                    recipes = it.recipes + recipes,
                     loadingRecipes = false
                 )
             }
@@ -112,7 +112,12 @@ class ProfileViewModel(
                 _uiState.update {
                     it.copy(
                         user = it.user?.copy(
-                            isFollowed = !user.isFollowed
+                            isFollowed = !user.isFollowed,
+                            totalFollowers = if (user.isFollowed) {
+                                it.user.totalFollowers - 1
+                            } else {
+                                it.user.totalFollowers + 1
+                            }
                         )
                     )
                 }

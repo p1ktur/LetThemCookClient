@@ -1,5 +1,6 @@
 package com.letthemcook.feed.domain.viewModels.search
 
+import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -145,7 +146,14 @@ class SearchViewModel(
             allCategoryPagesReached = false
             true
         } else {
-            if (allCategoryPagesReached) return
+            if (allCategoryPagesReached) {
+                _uiState.update {
+                    it.copy(
+                        loadingCategories = false
+                    )
+                }
+                return
+            }
             false
         }
 
@@ -227,7 +235,14 @@ class SearchViewModel(
             allProductPagesReached = false
             true
         } else {
-            if (allProductPagesReached) return
+            if (allProductPagesReached) {
+                _uiState.update {
+                    it.copy(
+                        loadingProducts = false
+                    )
+                }
+                return
+            }
             false
         }
 
@@ -321,13 +336,21 @@ class SearchViewModel(
         }
 
         val currentSearchHashCode = uiState.value.searchHashCode()
+        Log.d("TAG", "$currentSearchHashCode $lastRecipeSearchHashCode")
         val isFilteringOn = if (currentSearchHashCode != lastRecipeSearchHashCode) {
             lastRecipeSearchHashCode = currentSearchHashCode
             lastRecipePage = 0
             allRecipePagesReached = false
             true
         } else {
-            if (allRecipePagesReached) return
+            if (allRecipePagesReached) {
+                _uiState.update {
+                    it.copy(
+                        loadingRecipes = false
+                    )
+                }
+                return
+            }
             false
         }
 
@@ -385,7 +408,14 @@ class SearchViewModel(
             allUserPagesReached = false
             true
         } else {
-            if (allUserPagesReached) return
+            if (allUserPagesReached) {
+                _uiState.update {
+                    it.copy(
+                        loadingUsers = false
+                    )
+                }
+                return
+            }
             false
         }
 

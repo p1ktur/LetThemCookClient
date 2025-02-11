@@ -25,6 +25,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import com.letthemcook.core.domain.model.file.FileType
@@ -55,6 +56,8 @@ fun RecipeCanvas(
     blockComponentContentTextStyle: TextStyle,
     onUiAction: (BuilderUiAction) -> Any?
 ) {
+    val context = LocalContext.current
+
     // Canvas
     val highlightColor = LocalAppTheme.current.highlightColor
     val warningHighlightColor = LocalAppTheme.current.warningHighlightColor
@@ -170,6 +173,7 @@ fun RecipeCanvas(
                         endComponent = uiState.endComponent,
                         canvasUiState = uiState.canvasUiState,
                         // Graphics
+                        context = context,
                         drawScope = this,
                         textMeasurer = textMeasurer,
                         titleTextStyle = blockComponentTitleTextStyle,

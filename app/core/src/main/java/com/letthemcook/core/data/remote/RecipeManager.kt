@@ -39,7 +39,7 @@ class RecipeManager(
 
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
-                        userId = authManager.getUser()?.id.toString(),
+                        userId = recipe.ownerId,
                         fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE
@@ -85,7 +85,7 @@ class RecipeManager(
 
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
-                        userId = authManager.getUser()?.id.toString(),
+                        userId = recipe.ownerId,
                         fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE
@@ -119,7 +119,7 @@ class RecipeManager(
 
                 recipes.map { recipe ->
                     val params = RemoteFileManager.RequestParams(
-                        userId = authManager.getUser()?.id.toString(),
+                        userId = recipe.ownerId,
                         fileId = recipe.bitmapId.toString(),
                         recipeId = recipe.id,
                         type = FileType.IMAGE

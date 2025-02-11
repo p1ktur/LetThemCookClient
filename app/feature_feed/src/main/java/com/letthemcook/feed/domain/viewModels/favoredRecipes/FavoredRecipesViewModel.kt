@@ -30,7 +30,9 @@ class FavoredRecipesViewModel(
                 .getFavoredRecipes()
                 .forEach { recipe ->
                     var currentRecipe = recipe
-                    val remoteRecipe = recipeManager.getRecipe(recipe.id)
+                    val remoteRecipe = recipeManager.getRecipe(recipe.id)?.apply {
+                        isFavored = true
+                    }
 
                     if (remoteRecipe != null && remoteRecipe.hashCode() != recipe.hashCode()) {
                         currentRecipe = remoteRecipe
@@ -73,6 +75,7 @@ class FavoredRecipesViewModel(
             FavoredRecipesUiAction.NavigateToFeed -> Unit
             FavoredRecipesUiAction.NavigateToNewRecipe -> Unit
             FavoredRecipesUiAction.NavigateToProfile -> Unit
+            is FavoredRecipesUiAction.NavigateToUser -> Unit
             is FavoredRecipesUiAction.NavigateToRecipe -> Unit
         }
     }

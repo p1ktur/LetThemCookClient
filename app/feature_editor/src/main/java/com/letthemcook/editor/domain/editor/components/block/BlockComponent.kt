@@ -33,6 +33,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.isVisible
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
+import com.letthemcook.editor.ui.drawing.LINE_STROKE_WIDTH
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
 import com.letthemcook.editor.ui.drawing.drawProductLabel
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
@@ -192,15 +193,8 @@ data class BlockComponent(
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2),
-            end = position.copy(x = position.x + size.width / 2, y = position.y + COMPONENT_PADDING),
-            strokeWidth = 4f
-        )
-
-        drawScope.drawLine(
-            color = frameColor,
-            start = position.copy(x = position.x + size.width / 2, y = position.y + size.height),
-            end = position.copy(x = position.x + size.width / 2, y = position.y + size.height - COMPONENT_PADDING),
-            strokeWidth = 4f
+            end = position.copy(x = position.x + size.width / 2, y = position.y + size.height),
+            strokeWidth = LINE_STROKE_WIDTH
         )
 
         drawScope.drawRoundRect(
@@ -283,7 +277,7 @@ data class BlockComponent(
         if (fileIcon != null) {
             with (fileIcon) {
                 val fileIconPosition = Offset(
-                    x = position.x + DRAW_PADDING * 2 + maxTextsWidth,
+                    x = position.x + DRAW_PADDING * 3 + maxTextsWidth,
                     y = position.y + size.height - COMPONENT_PADDING - DRAW_PADDING - iconSize
                 )
                 cachedFileIconPosition = fileIconPosition
@@ -437,7 +431,7 @@ data class BlockComponent(
         if (fileIcon != null) {
             with (fileIcon) {
                 drawScope.translate(
-                    left = position.x + DRAW_PADDING * 2 + maxTextsWidth,
+                    left = position.x + DRAW_PADDING * 3 + maxTextsWidth,
                     top = position.y + size.height - DRAW_PADDING - iconSize
                 ) {
                     drawScope.draw(

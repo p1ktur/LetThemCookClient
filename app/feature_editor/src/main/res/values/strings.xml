@@ -24,4 +24,6 @@
     <string name="waiting">Waiting...</string>
     <string name="cooking">Cooking...</string>
     <string name="done">Done</string>
+    <string name="end">End</string>
+    <string name="start">Start</string>
 </resources>

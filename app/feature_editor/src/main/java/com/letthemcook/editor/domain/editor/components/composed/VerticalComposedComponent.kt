@@ -15,6 +15,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.componentHashCo
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
+import com.letthemcook.editor.ui.drawing.LINE_STROKE_WIDTH
 import com.letthemcook.editor.ui.drawing.drawRoundRectQuarter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -63,24 +64,18 @@ data class VerticalComposedComponent(
             position -= Offset(size.width / 2, 0f)
         }
 
-//        drawScope.drawRect(
-//            color = Color.Blue.copy(alpha = 0.15f),
-//            topLeft = position,
-//            size = size
-//        )
-
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2),
             end = position.copy(x = position.x + size.width / 2, y = position.y + COMPONENT_PADDING),
-            strokeWidth = 4f
+            strokeWidth = LINE_STROKE_WIDTH
         )
 
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2, y = position.y + size.height),
             end = position.copy(x = position.x + size.width / 2, y = position.y + size.height - COMPONENT_PADDING),
-            strokeWidth = 4f
+            strokeWidth = LINE_STROKE_WIDTH
         )
 
         var cursorPosition = Offset(

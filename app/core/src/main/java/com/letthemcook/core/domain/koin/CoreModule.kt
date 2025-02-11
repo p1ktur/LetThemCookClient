@@ -22,7 +22,7 @@ val koinCoreModule = module {
     single { get<LocalDataDatabase>().getRecipeDao() }
     single { get<LocalDataDatabase>().getRecipeReactionDao() }
     single { get<LocalDataDatabase>().getReviewLikeDao() }
-    single { LocalDataManager(get(), get(), get()) }
+    single { LocalDataManager(get(), get(), get(), get()) }
 
     // Remote
     single { AuthManager(androidContext()) }

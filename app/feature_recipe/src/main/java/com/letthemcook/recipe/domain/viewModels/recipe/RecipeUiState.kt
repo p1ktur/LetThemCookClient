@@ -46,7 +46,8 @@ data class RecipeUiState(
         recipe: Recipe,
         bitmap: Bitmap?,
         isLiked: LikeStatus,
-        attachments: List<File>
+        attachments: List<File>,
+        isFavored: Boolean
     ): RecipeUiState {
         return copy(
             name = recipe.name ?: "",
@@ -66,11 +67,12 @@ data class RecipeUiState(
             recipeBitmap = bitmap,
             likeStatus = isLiked,
             publicationDate = recipe.publicationDate,
-            attachments = attachments
+            attachments = attachments,
+            isFavored = isFavored
         )
     }
 
-    fun toRecipe(): Recipe {
+    fun toRecipe(isFavored: Boolean = false): Recipe {
         return Recipe(
             id = recipeId,
             ownerId = ownerId,
@@ -89,7 +91,7 @@ data class RecipeUiState(
             categories = categories,
             attachmentIds = attachments.map { it.uid },
             publicationDate = publicationDate,
-            isFavored = false
+            isFavored = isFavored
         )
     }
 }

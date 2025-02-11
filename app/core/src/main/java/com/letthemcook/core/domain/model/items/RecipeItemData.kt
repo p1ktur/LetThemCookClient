@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 data class RecipeItemData(
     val id: String,
     val name: String,
+    val ownerId: String,
     val authorLogin: String,
     val likesAmount: Int,
     val dislikesAmount: Int,

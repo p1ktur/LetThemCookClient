@@ -1,6 +1,5 @@
 package com.letthemcook.core.data.remote
 
-import android.util.Log
 import com.letthemcook.core.domain.http.delete
 import com.letthemcook.core.domain.http.get
 import com.letthemcook.core.domain.http.postFile
@@ -66,9 +65,7 @@ class RemoteFileManager(
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")
             },
             onResponse = { true },
-            onError = {
-                Log.d("TAG", "$it")
-                false }
+            onError = { false }
         )
     }
 

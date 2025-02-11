@@ -16,8 +16,8 @@
     <string name="sorting_by_preparations">Сортування за приготуваннями</string>
     <string name="sorting_by_likes">Сортування за вподобайками</string>
     <string name="sorting_by_popularity">Сортування за популярністю</string>
-    <string name="followers">" підписників"</string>
-    <string name="saved_recipes">"Збережені Рецепти: "</string>
+    <string name="followers"> підписників</string>
+    <string name="saved_recipes">Збережені Рецепти: </string>
     <string name="your_feed_is_empty">Ваша стрічка порожня</string>
     <string name="try_to_search_new_recipes">спробуйте пошукати нові рецепти</string>
     <string name="or_follow_other_users">або підписатися на інших користувачів</string>

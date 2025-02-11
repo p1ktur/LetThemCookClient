@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components
 
+import android.content.Context
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextAlign
+import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
@@ -18,6 +20,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.isVisible
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
+import com.letthemcook.editor.ui.drawing.LINE_STROKE_WIDTH
 import com.letthemcook.editor.ui.drawing.ROUNDED_RECT_CORNER_RADIUS
 
 data class EndComponent(
@@ -32,6 +35,7 @@ data class EndComponent(
     // Graphics
 
     fun drawOn(
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         textColor: Color,
@@ -46,7 +50,7 @@ data class EndComponent(
         val sizeWasZero = size == Size.Zero
 
         val textLayout = textMeasurer.measure(
-            text = "End", // TODO Localize
+            text = context.getString(R.string.end),
             style = textStyle.copy(textAlign = TextAlign.Center)
         )
 
@@ -65,7 +69,7 @@ data class EndComponent(
             color = frameColor,
             start = position.copy(x = position.x + size.width / 2),
             end = position.copy(x = position.x + size.width / 2, y = position.y + COMPONENT_PADDING),
-            strokeWidth = 4f
+            strokeWidth = LINE_STROKE_WIDTH
         )
 
         drawScope.drawRoundRect(
@@ -93,11 +97,12 @@ data class EndComponent(
     }
 
     fun calculateSize(
+        context: Context,
         textMeasurer: TextMeasurer,
         textStyle: TextStyle
     ): Size {
         val textLayout = textMeasurer.measure(
-            text = "End", // TODO Localize
+            text = context.getString(R.string.end),
             style = textStyle.copy(textAlign = TextAlign.Center)
         )
         return Size(

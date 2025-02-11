@@ -8,7 +8,9 @@ import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.ReviewManager
+import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.extensions.toBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBytes
 import com.letthemcook.core.domain.model.remote.Review
 import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
@@ -104,12 +106,15 @@ class RecipeViewModel(
 
             val attachments = recipe.getAttachments(localFileManager, remoteFileManager)
 
+            val isFavored = localDataManager.getRecipe(recipe.id)?.isFavored == true
+
             _uiState.update {
                 it.fromRecipe(
                     recipe = recipe,
                     bitmap = bitmap,
                     isLiked = isLiked,
-                    attachments = attachments
+                    attachments = attachments,
+                    isFavored = isFavored
                 )
             }
 
@@ -125,24 +130,34 @@ class RecipeViewModel(
 
     private fun addToFavorites() {
         viewModelScope.launch(Dispatchers.IO) {
-            localDataManager.saveRecipe(uiState.value.toRecipe())
-
             _uiState.update {
                 it.copy(
                     isFavored = true
                 )
+            }
+
+            localDataManager.saveRecipe(uiState.value.toRecipe(true))
+            uiState.value.recipeBitmap?.let { bitmap ->
+                localFileManager.saveFile(bitmap.toBytes(), FileType.IMAGE, uiState.value.recipeBitmapId.toString())
             }
         }
     }
 
     private fun removeFromFavorites() {
         viewModelScope.launch(Dispatchers.IO) {
-            localDataManager.deleteRecipeById(uiState.value.recipeId)
-
             _uiState.update {
                 it.copy(
                     isFavored = false
                 )
+            }
+
+            if (!uiState.value.isOwner) {
+                localDataManager.deleteRecipeById(uiState.value.recipeId)
+                uiState.value.recipeBitmapId?.let { fileId ->
+                    localFileManager.getFileByUid(fileId)?.let { file ->
+                        localFileManager.deleteFile(file)
+                    }
+                }
             }
         }
     }
@@ -171,6 +186,7 @@ class RecipeViewModel(
             val recipeReaction = RecipeReaction(
                 id = prevRecipeReaction?.id ?: 0,
                 recipeId = uiState.value.recipeId,
+                ownerId = uiState.value.ownerId,
                 liked = true
             )
             localDataManager.saveRecipeReaction(recipeReaction)
@@ -180,7 +196,7 @@ class RecipeViewModel(
             recipe.likesAmount++
 
             if (recipeManager.reactOnRecipe(uiState.value.recipeId, prevLikeStatus, true)) {
-                localDataManager.saveRecipe(recipe)
+                if (uiState.value.isOwner || uiState.value.isFavored) localDataManager.saveRecipe(recipe)
                 _uiState.update {
                     it.copy(
                         dislikesAmount = recipe.dislikesAmount,
@@ -208,7 +224,7 @@ class RecipeViewModel(
             recipe.likesAmount--
 
             if (recipeManager.reactOnRecipe(uiState.value.recipeId, prevLikeStatus, null)) {
-                localDataManager.saveRecipe(recipe)
+                if (uiState.value.isOwner || uiState.value.isFavored) localDataManager.saveRecipe(recipe)
                 _uiState.update {
                     it.copy(
                         likeStatus = LikeStatus.NONE,
@@ -233,6 +249,7 @@ class RecipeViewModel(
             val recipeReaction = RecipeReaction(
                 id = prevRecipeReaction?.id ?: 0,
                 recipeId = uiState.value.recipeId,
+                ownerId = uiState.value.ownerId,
                 liked = false
             )
             localDataManager.saveRecipeReaction(recipeReaction)
@@ -242,7 +259,7 @@ class RecipeViewModel(
             recipe.dislikesAmount++
 
             if (recipeManager.reactOnRecipe(uiState.value.recipeId, prevLikeStatus, false)) {
-                localDataManager.saveRecipe(recipe)
+                if (uiState.value.isOwner || uiState.value.isFavored) localDataManager.saveRecipe(recipe)
                 _uiState.update {
                     it.copy(
                         likeStatus = LikeStatus.DISLIKED,
@@ -271,7 +288,7 @@ class RecipeViewModel(
             recipe.dislikesAmount--
 
             if (recipeManager.reactOnRecipe(uiState.value.recipeId, prevLikeStatus, null)) {
-                localDataManager.saveRecipe(recipe)
+                if (uiState.value.isOwner || uiState.value.isFavored) localDataManager.saveRecipe(recipe)
                 _uiState.update {
                     it.copy(
                         dislikesAmount = recipe.dislikesAmount
@@ -342,7 +359,10 @@ class RecipeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val review = uiState.value.reviews[index]
-                val reviewLike = ReviewLike(reviewId = review.id)
+                val reviewLike = ReviewLike(
+                    reviewId = review.id,
+                    ownerId = uiState.value.ownerId
+                )
 
                 localDataManager.saveReviewLike(reviewLike)
 

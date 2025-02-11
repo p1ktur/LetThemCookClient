@@ -16,8 +16,8 @@
     <string name="sorting_by_preparations">Sorting by preparations</string>
     <string name="sorting_by_likes">Sorting by likes</string>
     <string name="sorting_by_popularity">Sorting by popularity</string>
-    <string name="followers">" followers"</string>
-    <string name="saved_recipes">"Saved Recipes: "</string>
+    <string name="followers">followers</string>
+    <string name="saved_recipes">Saved Recipes: </string>
     <string name="your_feed_is_empty">Your feed is empty</string>
     <string name="try_to_search_new_recipes">try to search new recipes</string>
     <string name="or_follow_other_users">or follow other users</string>

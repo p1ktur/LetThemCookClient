@@ -39,6 +39,7 @@ fun NavGraphBuilder.addFeedRoutes(
             onUiAction = { action ->
                 when (action) {
                     FeedUiAction.NavigateToProfile -> navBarRoutes.navigateToProfile()
+                    is FeedUiAction.NavigateToUser -> navigateToProfile(action.userId)
                     FeedUiAction.NavigateToAddRecipe -> navBarRoutes.navigateToNewRecipe()
                     FeedUiAction.NavigateToSearch -> navController.navigate(FeedNavRoutes.Search)
                     FeedUiAction.NavigateToSavedRecipes -> navController.navigate(FeedNavRoutes.FavoredRecipes)
@@ -77,6 +78,7 @@ fun NavGraphBuilder.addFeedRoutes(
                     FavoredRecipesUiAction.NavigateBack -> navController.navigateUp()
                     FavoredRecipesUiAction.NavigateToFeed -> navBarRoutes.navigateToHome()
                     FavoredRecipesUiAction.NavigateToProfile -> navBarRoutes.navigateToProfile()
+                    is FavoredRecipesUiAction.NavigateToUser -> navigateToProfile(action.userId)
                     FavoredRecipesUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
                     is FavoredRecipesUiAction.NavigateToRecipe -> navigateToRecipe(action.recipeId)
                 }

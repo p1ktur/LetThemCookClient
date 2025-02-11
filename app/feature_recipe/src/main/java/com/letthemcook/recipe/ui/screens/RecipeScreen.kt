@@ -25,7 +25,7 @@ import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.RemoveRedEye
@@ -287,12 +287,11 @@ fun RecipeScreen(
                             imageVector = if (uiState.isFavored) {
                                 Icons.Filled.Bookmark
                             } else {
-                                Icons.Outlined.Bookmark
+                                Icons.Outlined.BookmarkBorder
                             },
                             contentDescription = "Favor Button",
                             tint = LocalAppTheme.current.text
                         )
-                        Spacer(modifier = Modifier.weight(1f))
                     }
                     Icon(
                         modifier = Modifier.size(32.dp),
@@ -450,6 +449,9 @@ fun RecipeScreen(
                         onUiAction(RecipeUiAction.UnlikeReview(index))
                     }
                 )
+            }
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
             }
         } else {
             item {

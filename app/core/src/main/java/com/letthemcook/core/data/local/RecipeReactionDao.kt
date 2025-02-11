@@ -9,8 +9,8 @@ import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
 @Dao
 interface RecipeReactionDao {
 
-    @Query("SELECT * FROM RecipeReaction WHERE recipeId = :recipeId LIMIT 1")
-    suspend fun getRecipeReactionByRecipeId(recipeId: String): RecipeReaction?
+    @Query("SELECT * FROM RecipeReaction WHERE recipeId = :recipeId AND ownerId = :userId LIMIT 1")
+    suspend fun getRecipeReactionByRecipeId(recipeId: String, userId: String): RecipeReaction?
 
     @Upsert
     suspend fun upsertRecipeReaction(recipeReaction: RecipeReaction)

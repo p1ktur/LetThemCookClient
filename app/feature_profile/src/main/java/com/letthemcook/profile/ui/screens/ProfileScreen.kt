@@ -216,6 +216,7 @@ fun ProfileScreen(
                         text = "@${uiState.user.login}" + stringResource(R.string.s_recipes),
                         style = LocalAppTheme.current.typography.bodyLarge
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
             recipesGrid(

@@ -8,9 +8,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
 
-const val DRAW_PADDING = 12f
+const val DRAW_PADDING = 16f
 const val COMPONENT_PADDING = 96f
 const val ROUNDED_RECT_CORNER_RADIUS = 32f
+const val LINE_STROKE_WIDTH = 8f
 
 fun DrawScope.drawCenterHelper(
     squareSize: Float,

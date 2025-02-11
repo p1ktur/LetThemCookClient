@@ -6,5 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class ReviewLike(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val reviewId: String
+    val reviewId: String,
+    val ownerId: String
 )

@@ -23,7 +23,7 @@ data class User(
     val totalRecipes: Int = 0,
     val totalPreparations: Int = 0,
     val totalFollowers: Int = 0,
-    val isFollowed: Boolean = false
+    var isFollowed: Boolean = false
 ) {
     fun birthDateString(): String? {
         val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.valueOf("yyyy.MM.dd"))

@@ -209,6 +209,9 @@ fun FeedScreen(
                             lastIndex = uiState.recipes.lastIndex,
                             onClick = {
                                 onUiAction(FeedUiAction.NavigateToRecipe(recipeItemData.id))
+                            },
+                            onUserLoginClick = {
+                                onUiAction(FeedUiAction.NavigateToUser(recipeItemData.ownerId))
                             }
                         )
                     }
