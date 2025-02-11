@@ -21,8 +21,8 @@
     <string name="blocks_menu">Меню блоків</string>
     <string name="cooking_tutorial">Навчання у готуванні</string>
     <string name="not_reached_yet">Ще не досягнутий</string>
-    <string name="waiting">Очікує...</string>
-    <string name="cooking">Готується...</string>
+    <string name="waiting">Очікує…</string>
+    <string name="cooking">Готується…</string>
     <string name="done">Готово</string>
     <string name="end">Кінець</string>
     <string name="start">Початок</string>

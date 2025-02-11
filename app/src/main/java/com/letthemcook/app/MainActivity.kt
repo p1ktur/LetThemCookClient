@@ -34,6 +34,7 @@ import com.letthemcook.auth.ui.navigation.AuthNavRoutes
 import com.letthemcook.auth.ui.navigation.addAuthRoutes
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.tokens.TokenCheckResult
+import com.letthemcook.core.domain.providers.GlobalLanguageProvider
 import com.letthemcook.editor.ui.navigation.EditorNavRoutes
 import com.letthemcook.editor.ui.navigation.addEditorRoutes
 import com.letthemcook.feed.ui.navigation.FeedNavRoutes
@@ -95,6 +96,7 @@ class MainActivity : ComponentActivity() {
             val mediaViewerAccess = remember { mutableStateOf(MediaViewerAccess.Dummy) }
 
             LaunchedEffect(Unit) {
+                GlobalLanguageProvider.language = languageStateProvider.getLastLanguage().toLanguageString()
                 languageStateProvider.onSetLanguageCallback = { language ->
                     setLocale(
                         when (language) {

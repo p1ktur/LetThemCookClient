@@ -92,13 +92,13 @@ data class HorizontalComposedComponent(
                 color = frameColor,
                 start = cursorPosition.copy(x = lineX, y = cursorPosition.y + COMPONENT_PADDING),
                 end = component.position.copy(x = lineX),
-                strokeWidth = 4f
+                strokeWidth = LINE_STROKE_WIDTH
             )
             drawScope.drawLine(
                 color = frameColor,
                 start = component.position.copy(x = lineX, y = component.position.y + component.size.height),
                 end = cursorPosition.copy(x = lineX, y = position.y + size.height - COMPONENT_PADDING),
-                strokeWidth = 4f
+                strokeWidth = LINE_STROKE_WIDTH
             )
 
             component.drawOn(
@@ -126,13 +126,13 @@ data class HorizontalComposedComponent(
             color = frameColor,
             start = position.copy(x = commonHorizontalLineStartX, y = position.y + COMPONENT_PADDING),
             end = position.copy(x = commonHorizontalLineEndX, y = position.y + COMPONENT_PADDING),
-            strokeWidth = 4f
+            strokeWidth = LINE_STROKE_WIDTH
         )
         drawScope.drawLine(
             color = frameColor,
             start = position.copy(x = commonHorizontalLineStartX, y = position.y + size.height - COMPONENT_PADDING),
             end = position.copy(x = commonHorizontalLineEndX, y = position.y + size.height - COMPONENT_PADDING),
-            strokeWidth = 4f
+            strokeWidth = LINE_STROKE_WIDTH
         )
 
         shadingQuarterForNextFrame?.let { containment ->

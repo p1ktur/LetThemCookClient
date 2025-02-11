@@ -249,7 +249,7 @@ fun EditedRecipeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     TextButton(
-                        modifier = Modifier.size(130.dp, 40.dp),
+                        modifier = Modifier.size(140.dp, 40.dp),
                         text = if (uiState.publicationDate != null) {
                             stringResource(R.string.unpublish)
                         } else {

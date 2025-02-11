@@ -367,13 +367,23 @@ fun BuilderScreen(
                     onUiAction(BuilderUiAction.AddUnusedComponent(newBlockComponent))
                 }
                 is BlockEditorState.EditingUnusedBlock -> {
-                    onUiAction(BuilderUiAction.UpdateUnusedComponent(uiState.blockEditorState.component, newBlockComponent))
+                    val oldComponent = uiState.blockEditorState.component
+                    onUiAction(BuilderUiAction.UpdateUnusedComponent(oldComponent, newBlockComponent.copy(id = oldComponent.id)))
                 }
                 is BlockEditorState.EditingBlock -> {
-                    onUiAction(BuilderUiAction.UpdateComponent(uiState.blockEditorState.component, newBlockComponent))
+                    val oldComponent = uiState.blockEditorState.component
+                    onUiAction(BuilderUiAction.UpdateComponent(oldComponent, newBlockComponent.copy(id = oldComponent.id)))
                 }
             }
 
+            onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
+        },
+        onDeleteBlock = { component ->
+            onUiAction(BuilderUiAction.DeleteBlock(component))
+            onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
+        },
+        onDeleteUnusedBlock = { component ->
+            onUiAction(BuilderUiAction.DeleteUnusedBlock(component))
             onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.Hidden))
         },
         onViewMediaFile = { file ->

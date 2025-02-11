@@ -1,9 +1,11 @@
 package com.letthemcook.editor.ui.components.popups
 
+import android.graphics.Paint.Align
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -87,6 +89,8 @@ fun BlockEditorPopup(
     anchorPosition: Offset,
     anchorSize: IntSize,
     onEdit: (String, String, Int, Int, Int, ColorOption, File?) -> Unit,
+    onDeleteUnusedBlock: (UnusedBlockComponent) -> Unit,
+    onDeleteBlock: (BlockComponent) -> Unit,
     onViewMediaFile: (File) -> Unit,
     onRestoreState: (BlockEditorState) -> Unit,
     onDismiss: () -> Unit
@@ -450,9 +454,9 @@ fun BlockEditorPopup(
                     )
                 }
             }
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                contentAlignment = Alignment.Center
             ) {
                 TextButton(
                     text = buttonText,
@@ -485,6 +489,30 @@ fun BlockEditorPopup(
                         }
                     }
                 )
+                if (state is BlockEditorState.EditingBlock || state is BlockEditorState.EditingUnusedBlock) {
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                when (state) {
+                                    BlockEditorState.Hidden -> Unit
+                                    BlockEditorState.Creating -> Unit
+                                    is BlockEditorState.EditingBlock -> {
+                                        onDeleteBlock(state.component)
+                                    }
+                                    is BlockEditorState.EditingUnusedBlock -> {
+                                        onDeleteUnusedBlock(state.component)
+                                    }
+                                }
+                            }
+                            .padding(4.dp)
+                            .align(Alignment.CenterStart),
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete Block Icon",
+                        tint = LocalAppTheme.current.text
+                    )
+                }
             }
         }
     }

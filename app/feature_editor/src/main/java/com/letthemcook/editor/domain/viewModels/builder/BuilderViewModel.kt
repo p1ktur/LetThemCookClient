@@ -64,6 +64,18 @@ class BuilderViewModel(
     var viewMediaFile: ((String, File) -> Unit)? = null
 
     init {
+        val unusedProducts = mutableListOf<WeightedProduct>()
+
+        weightedProducts.forEach { product ->
+            if (product.amount == 0) {
+                unusedProducts.add(product)
+            } else {
+                repeat(product.amount) {
+                    unusedProducts.add(product.copy(amount = 0))
+                }
+            }
+        }
+
         if (recipeJson != null) {
             viewModelScope.launch {
                 val centralComponent = recipeGraphSerializer.deserializeComponent(recipeJson)
@@ -72,18 +84,6 @@ class BuilderViewModel(
                     it.copy(
                         centralComponent = centralComponent
                     )
-                }
-
-                val unusedProducts = mutableListOf<WeightedProduct>()
-
-                weightedProducts.forEach { product ->
-                    if (product.amount == 0) {
-                        unusedProducts.add(product)
-                    } else {
-                        repeat(product.amount) {
-                            unusedProducts.add(product.copy(amount = 0))
-                        }
-                    }
                 }
 
                 components.doForEveryChild {
@@ -103,15 +103,15 @@ class BuilderViewModel(
                     }
                 }
 
-                _uiState.update {
-                    it.copy(
-                        unusedProducts = unusedProducts
-                    )
-                }
-
                 delay(100)
                 updateCanvasCounter()
             }
+        }
+
+        _uiState.update {
+            it.copy(
+                unusedProducts = unusedProducts
+            )
         }
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -146,10 +146,12 @@ class BuilderViewModel(
             // Components
             is BuilderUiAction.AddUnusedComponent -> addUnusedComponent(action.unusedBlockComponent)
             is BuilderUiAction.UpdateUnusedComponent -> updateUnusedComponent(action.oldComponent, action.newComponent)
+            is BuilderUiAction.DeleteUnusedBlock -> deleteUnusedBlock(action.component)
 
             is BuilderUiAction.AddComponent -> addComponent(action.unusedBlockComponent, action.blockComponent, action.position)
             is BuilderUiAction.UpdateComponent -> updateComponent(action.oldComponent, action.newComponent)
             is BuilderUiAction.RemoveComponent -> removeComponent()
+            is BuilderUiAction.DeleteBlock -> deleteBlock(action.component)
 
             // Canvas actions
             is BuilderUiAction.UpdateCanvasSize -> updateCanvasSize(action.size)
@@ -240,6 +242,18 @@ class BuilderViewModel(
         }
     }
 
+    private fun deleteUnusedBlock(component: UnusedBlockComponent) {
+        viewModelScope.launch(Dispatchers.IO) {
+            unusedBlocksDao.deleteById(component.id)
+        }
+
+        _uiState.update {
+            it.copy(
+                unusedBlockComponents = it.unusedBlockComponents.minus(component)
+            )
+        }
+    }
+
     private fun addComponent(unusedBlockComponent: UnusedBlockComponent, blockComponent: BlockComponent, position: Offset) {
         val component = when (uiState.value.centralComponent) {
             is ComposedComponent -> components.getPointerContainer(scaleAndTranslate(position))
@@ -310,8 +324,8 @@ class BuilderViewModel(
         }
     }
 
-    private fun removeComponent() {
-        val componentToRemove = (uiState.value.componentFocus as? ComponentFocus.Block)?.ref ?: return
+    private fun removeComponent(component: BlockComponent? = null) {
+        val componentToRemove = component ?: (uiState.value.componentFocus as? ComponentFocus.Block)?.ref ?: return
 
         if (!retainProductOnBlock) {
             _uiState.update {
@@ -352,6 +366,14 @@ class BuilderViewModel(
 
         updateCanvasCounter()
         clearComponentFocus()
+    }
+
+    private fun deleteBlock(component: BlockComponent) {
+        val componentId = component.id
+        removeComponent(component)
+
+        val unusedComponent = uiState.value.unusedBlockComponents.find { it.id == componentId } ?: return
+        deleteUnusedBlock(unusedComponent)
     }
 
     // Canvas actions

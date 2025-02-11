@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.letthemcook.core.domain.providers.GlobalLanguageProvider
 import com.letthemcook.theme.language.Language
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -30,6 +31,7 @@ class LanguageStateProvider(private val context: Context) {
     }
 
     suspend fun setLanguage(language: Language) {
+        GlobalLanguageProvider.language = language.toLanguageString()
         onSetLanguageCallback?.invoke(language)
         context.dataStore.edit { preferences ->
             preferences[languageKey] = language.toInt()

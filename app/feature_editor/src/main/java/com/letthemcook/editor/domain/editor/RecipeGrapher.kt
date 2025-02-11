@@ -18,6 +18,7 @@ import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
+import com.letthemcook.editor.ui.drawing.LINE_STROKE_WIDTH
 
 object RecipeGrapher {
     fun drawRecipeGraph(
@@ -80,7 +81,7 @@ object RecipeGrapher {
                 color = frameColor,
                 start = startComponent.position + Offset(startComponent.size.width / 2, startComponent.size.height),
                 end = circleCenter.copy(circleCenter.x, circleCenter.y - circleRadius),
-                strokeWidth = 4f
+                strokeWidth = LINE_STROKE_WIDTH
             )
             drawScope.drawCircle(
                 color = containerColor.copy(alpha = 0.5f),
@@ -89,16 +90,16 @@ object RecipeGrapher {
                 style = Fill
             )
             drawScope.drawCircle(
-                color = frameColor.copy(alpha = 0.5f),
+                color = frameColor,
                 center = circleCenter,
                 radius = circleRadius,
-                style = Stroke(4f)
+                style = Stroke(LINE_STROKE_WIDTH)
             )
             drawScope.drawLine(
                 color = frameColor,
                 start = circleCenter.copy(circleCenter.x, circleCenter.y + circleRadius),
                 end = endComponent.position + Offset(endComponent.size.width / 2f, 0f),
-                strokeWidth = 4f
+                strokeWidth = LINE_STROKE_WIDTH
             )
             drawScope.drawText(
                 textLayoutResult = circleTextLayout,
