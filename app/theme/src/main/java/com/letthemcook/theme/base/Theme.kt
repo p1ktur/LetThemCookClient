@@ -26,20 +26,10 @@ class AppTheme(val theme: Theme) {
         }
     )
 
-    val screenZero: Color
-        get() = when (theme) {
-            Theme.LIGHT -> screenZeroLight
-            Theme.DARK -> screenZeroDark
-        }
     val screenOne: Color
         get() = when (theme) {
             Theme.LIGHT -> screenOneLight
             Theme.DARK -> screenOneDark
-        }
-    val screenOneDimmed: Color
-        get() = when (theme) {
-            Theme.LIGHT -> screenOneDimmedLight
-            Theme.DARK -> screenOneDimmedDark
         }
     val screenTwo: Color
         get() = when (theme) {
@@ -56,30 +46,10 @@ class AppTheme(val theme: Theme) {
             Theme.LIGHT -> backgroundLight
             Theme.DARK -> backgroundDark
         }
-    val divider: Color
-        get() = when (theme) {
-            Theme.LIGHT -> dividerLight
-            Theme.DARK -> dividerDark
-        }
     val text: Color
         get() = when (theme) {
             Theme.LIGHT -> textLight
             Theme.DARK -> textDark
-        }
-    val textInverse: Color
-        get() = when (theme) {
-            Theme.LIGHT -> textInverseLight
-            Theme.DARK -> textInverseDark
-        }
-    val textDimmed: Color
-        get() = when (theme) {
-            Theme.LIGHT -> textDimmedLight
-            Theme.DARK -> textDimmedDark
-        }
-    val textDimmedInverse: Color
-        get() = when (theme) {
-            Theme.LIGHT -> textDimmedInverseLight
-            Theme.DARK -> textDimmedInverseDark
         }
     val container: Color
         get() = when (theme) {

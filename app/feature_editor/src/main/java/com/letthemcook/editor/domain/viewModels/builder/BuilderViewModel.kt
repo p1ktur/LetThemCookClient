@@ -137,7 +137,6 @@ class BuilderViewModel(
             is BuilderUiAction.ViewMediaFile -> viewMediaFile?.invoke(action.blockId, action.file)
 
             // Common
-            BuilderUiAction.SaveChanges -> Unit
             BuilderUiAction.TryDemoCooking -> Unit
 
             // Products

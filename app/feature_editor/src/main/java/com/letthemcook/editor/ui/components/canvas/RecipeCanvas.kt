@@ -192,6 +192,7 @@ fun RecipeCanvas(
                         ComponentFocus.None -> Unit
                         is ComponentFocus.Block -> run {
                             uiState.componentFocus.ref.drawDraggableOn(
+                                context = context,
                                 drawScope = this,
                                 textMeasurer = textMeasurer,
                                 nameTextStyle = blockComponentNameTextStyle,

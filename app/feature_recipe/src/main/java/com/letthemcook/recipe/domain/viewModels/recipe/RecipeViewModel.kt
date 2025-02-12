@@ -173,14 +173,14 @@ class RecipeViewModel(
     }
 
     private fun likeRecipe() {
-        _uiState.update {
-            it.copy(
-                likeStatus = LikeStatus.LIKED
-            )
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             val prevLikeStatus = uiState.value.likeStatus.toBoolean()
+            _uiState.update {
+                it.copy(
+                    likeStatus = LikeStatus.LIKED
+                )
+            }
+
             val prevRecipeReaction = localDataManager.getRecipeReaction(uiState.value.recipeId)
 
             val recipeReaction = RecipeReaction(
@@ -208,14 +208,14 @@ class RecipeViewModel(
     }
 
     private fun unlikeRecipe() {
-        _uiState.update {
-            it.copy(
-                likeStatus = LikeStatus.NONE
-            )
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             val prevLikeStatus = uiState.value.likeStatus.toBoolean()
+            _uiState.update {
+                it.copy(
+                    likeStatus = LikeStatus.NONE
+                )
+            }
+
             localDataManager.getRecipeReaction(uiState.value.recipeId)?.let { recipeReaction ->
                 localDataManager.deleteRecipeReaction(recipeReaction)
             }
@@ -236,14 +236,14 @@ class RecipeViewModel(
     }
 
     private fun dislikeRecipe() {
-        _uiState.update {
-            it.copy(
-                likeStatus = LikeStatus.DISLIKED
-            )
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             val prevLikeStatus = uiState.value.likeStatus.toBoolean()
+            _uiState.update {
+                it.copy(
+                    likeStatus = LikeStatus.DISLIKED
+                )
+            }
+
             val prevRecipeReaction = localDataManager.getRecipeReaction(uiState.value.recipeId)
 
             val recipeReaction = RecipeReaction(
@@ -272,14 +272,14 @@ class RecipeViewModel(
     }
 
     private fun unDislikeRecipe() {
-        _uiState.update {
-            it.copy(
-                likeStatus = LikeStatus.NONE
-            )
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             val prevLikeStatus = uiState.value.likeStatus.toBoolean()
+            _uiState.update {
+                it.copy(
+                    likeStatus = LikeStatus.NONE
+                )
+            }
+
             localDataManager.getRecipeReaction(uiState.value.recipeId)?.let { recipeReaction ->
                 localDataManager.deleteRecipeReaction(recipeReaction)
             }

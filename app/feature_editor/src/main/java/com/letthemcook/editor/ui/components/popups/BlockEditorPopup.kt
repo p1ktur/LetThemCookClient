@@ -1,6 +1,5 @@
 package com.letthemcook.editor.ui.components.popups
 
-import android.graphics.Paint.Align
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,7 +45,6 @@ import androidx.compose.ui.window.PopupProperties
 import com.letthemcook.core.domain.format.toHoursString
 import com.letthemcook.core.domain.format.toMinutesString
 import com.letthemcook.core.domain.format.toSecondsString
-import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.R
@@ -56,6 +54,7 @@ import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponen
 import com.letthemcook.editor.ui.components.colorChooser.ColorChooser
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.TextButton
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
 import com.letthemcook.theme.components.textFields.DigitsTextField
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.SingleLineTextField

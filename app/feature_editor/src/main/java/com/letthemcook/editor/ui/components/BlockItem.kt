@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.toShortTimeString
 import com.letthemcook.editor.domain.editor.color.ColorOption
@@ -32,6 +33,8 @@ fun BlockItem(
     contentColor: Color = LocalAppTheme.current.text,
     onClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
+
     val trimmedName = remember(name) { if (name.length > 20) name.substring(0, 17) + "..." else name }
     val trimmedDescription = remember(description) { if (description.length > 20) description.substring(0, 17) + "..." else description }
 
@@ -54,7 +57,7 @@ fun BlockItem(
             maxLines = 1
         )
         Text(
-            text = time.toShortTimeString(),
+            text = time.toShortTimeString(context),
             color = contentColor,
             style = LocalAppTheme.current.typography.bodySmall,
             maxLines = 1

@@ -34,6 +34,8 @@ sealed interface EditedRecipeUiAction {
 
     data object Publish : EditedRecipeUiAction
     data object Archive : EditedRecipeUiAction
+
+    data object NavigateToTutorial : EditedRecipeUiAction
     data class EditCooking(val recipeJson: String?) : EditedRecipeUiAction
     data class Cook(val recipeJson: String): EditedRecipeUiAction
 }

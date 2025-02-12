@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.block
 
+import android.content.Context
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.room.Entity
@@ -25,6 +26,7 @@ data class UnusedBlockComponent(
     // Other
 
     fun toBlockComponent(
+        context: Context,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,
         contentTextStyle: TextStyle
@@ -38,7 +40,7 @@ data class UnusedBlockComponent(
             colorOption = colorOption,
             file = file
         ).apply {
-            calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+            calculateSize(context, textMeasurer, nameTextStyle, contentTextStyle)
         }
     }
 }

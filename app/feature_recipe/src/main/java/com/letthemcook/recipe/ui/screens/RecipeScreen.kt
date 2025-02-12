@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,6 +84,8 @@ fun RecipeScreen(
             setOnNavigateToProfile { onUiAction(RecipeUiAction.NavigateToProfile) }
         }
     }
+
+    val context = LocalContext.current
 
     val reviewWriter = LocalScreenContainer.current.reviewWriter
 
@@ -191,7 +194,7 @@ fun RecipeScreen(
                         )
                         Text(
                             text = if (uiState.cookingTime != null) {
-                                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString()
+                                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString(context)
                             } else {
                                 stringResource(R.string.no_cooking_yet)
                             },

@@ -157,7 +157,10 @@ fun FeedScreen(
             var isRefreshing by remember { mutableStateOf(false) }
 
             LaunchedEffect(uiState.loading) {
-                if (!uiState.loading) isRefreshing = false
+                if (!uiState.loading && isRefreshing) {
+                    isRefreshing = false
+                    columnLazyListState.scrollToItem(0)
+                }
             }
 
             PullToRefreshBox(

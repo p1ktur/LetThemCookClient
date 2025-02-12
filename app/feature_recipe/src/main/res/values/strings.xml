@@ -9,12 +9,12 @@
     <string name="exit_recipe_editing">Exit recipe editing?</string>
     <string name="there_are_may_be_unsaved_changes_are_you_sure_you_want_to_exit">There are may be unsaved changes. Are you sure you want to exit?</string>
     <string name="not_saved">Not saved</string>
-    <string name="saving">Saving...</string>
+    <string name="saving">Saving…</string>
     <string name="saved">Saved</string>
     <string name="name">Name</string>
     <string name="type_name">Type name</string>
     <string name="archived">Archived</string>
-    <string name="published">"Published: "</string>
+    <string name="published_1">"Published: "</string>
     <string name="unpublish">Unpublish</string>
     <string name="publish">Publish</string>
     <string name="cooking_time">"Cooking time: "</string>

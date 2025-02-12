@@ -74,6 +74,9 @@ class MainActivity : ComponentActivity() {
         },
         navigateToCooking = { ownerId, recipeId, recipeJson, recipeName ->
             navController.navigate(EditorNavRoutes.Cooking(ownerId, recipeId, recipeJson, recipeName))
+        },
+        navigateToTutorial = {
+            navController.navigate(EditorNavRoutes.Tutorial)
         }
     )
 

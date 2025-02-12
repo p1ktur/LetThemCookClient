@@ -1,5 +1,6 @@
 package com.letthemcook.profile.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -123,6 +124,10 @@ fun EditedProfileScreen(
 
     LaunchedEffect(Unit) {
         onUiAction(EditedProfileUiAction.LoadRecipes)
+    }
+
+    BackHandler {
+        onUiAction(EditedProfileUiAction.NavigateBack)
     }
 
     LazyColumn(

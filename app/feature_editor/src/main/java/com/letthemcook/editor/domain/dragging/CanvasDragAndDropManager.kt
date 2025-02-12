@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.dragging
 
+import android.content.Context
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
@@ -12,6 +13,7 @@ import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponen
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
 
 class CanvasDragAndDropManager(
+    private val context: Context,
     private val canvasGlobalPosition: Offset,
     private val unusedProducts: List<WeightedProduct>,
     private val unusedBlockComponents: List<UnusedBlockComponent>,
@@ -46,7 +48,7 @@ class CanvasDragAndDropManager(
                     unusedProducts.find { it.data.id == productId }?.let {
                         val productBlock = onUiAction(BuilderUiAction.AddProduct(it, position)) as? BlockComponent
 
-                        productBlock?.calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+                        productBlock?.calculateSize(context, textMeasurer, nameTextStyle, contentTextStyle)
                     }
                 }
             }
@@ -55,7 +57,7 @@ class CanvasDragAndDropManager(
 
                 blockHashcode?.let {
                     unusedBlockComponents.find { it.hashCode() == blockHashcode }?.let {
-                        val component = it.toBlockComponent(textMeasurer, nameTextStyle, contentTextStyle)
+                        val component = it.toBlockComponent(context, textMeasurer, nameTextStyle, contentTextStyle)
                         onUiAction(BuilderUiAction.AddComponent(it, component, position))
                     }
                 }

@@ -1,5 +1,8 @@
 package com.letthemcook.core.domain.format
 
+import android.content.Context
+import com.letthemcook.core.R
+
 fun getLongTime(hours: Int = 0, minutes: Int = 0, seconds: Int = 0): Long {
     return hours * 60 * 60 * 1000L + minutes * 60 * 1000L + seconds * 1000L
 }
@@ -12,12 +15,12 @@ fun Long.isLongTime(): Boolean {
     return hours > 0
 }
 
-fun Long.toShortTimeString(canInstant: Boolean = true): String {
+fun Long.toShortTimeString(context: Context, canInstant: Boolean = true): String {
     val seconds = this / 1000
     val minutes = seconds / 60
     val hours = minutes / 60
 
-    if (this == 0L && canInstant) return "Instant"
+    if (this == 0L && canInstant) return context.getString(R.string.instant)
 
     val secondsText = (seconds % 60).appendToTwoPlaces()
     val minutesText = (minutes % 60).appendToTwoPlaces()
@@ -29,12 +32,12 @@ fun Long.toShortTimeString(canInstant: Boolean = true): String {
     }
 }
 
-fun Long.toTimeString(canInstant: Boolean = true): String {
+fun Long.toTimeString(context: Context, canInstant: Boolean = true): String {
     val seconds = this / 1000
     val minutes = seconds / 60
     val hours = minutes / 60
 
-    if (this == 0L && canInstant) return "Instant"
+    if (this == 0L && canInstant) return context.getString(R.string.instant)
 
     val secondsText = (seconds % 60).appendToTwoPlaces()
     val minutesText = (minutes % 60).appendToTwoPlaces()

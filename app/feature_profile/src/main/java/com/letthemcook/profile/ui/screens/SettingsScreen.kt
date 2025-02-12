@@ -39,8 +39,6 @@ import com.letthemcook.theme.components.buttons.SwitchButton
 import com.letthemcook.theme.language.Language
 import com.letthemcook.theme.screensContainer.LocalScreenContainer
 
-// TODO check dark theme for feed and editor and cooking!
-
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,

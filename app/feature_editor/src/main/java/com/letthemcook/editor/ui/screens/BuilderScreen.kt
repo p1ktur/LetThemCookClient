@@ -3,6 +3,7 @@ package com.letthemcook.editor.ui.screens
 import android.content.ClipData
 import android.content.ClipDescription
 import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -51,6 +52,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
@@ -93,6 +95,8 @@ fun BuilderScreen(
         }
     }
 
+    val context = LocalContext.current
+
     val mediaFilePicker = LocalScreenContainer.current.mediaFilePicker
 
     var isBlocksMenuVisible by remember { mutableStateOf(true) }
@@ -110,6 +114,7 @@ fun BuilderScreen(
 
     val canvasDragAndDropManager = remember(uiState.unusedProducts, uiState.unusedBlockComponents, canvasGlobalPosition) {
         CanvasDragAndDropManager(
+            context = context,
             canvasGlobalPosition = canvasGlobalPosition,
             unusedProducts = uiState.unusedProducts,
             unusedBlockComponents = uiState.unusedBlockComponents,
@@ -126,6 +131,12 @@ fun BuilderScreen(
     val canAddBlocks by remember {
         derivedStateOf {
             uiState.centralComponent.countBlocks() + uiState.unusedBlockComponents.size < 30
+        }
+    }
+
+    BackHandler {
+        if (uiState.blockEditorState == BlockEditorState.Hidden) {
+            onUiAction(BuilderUiAction.NavigateBack)
         }
     }
 

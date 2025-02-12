@@ -120,7 +120,7 @@ fun BlockInfo(
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                         Text(
-                            text = selectedBlock.time.toShortTimeString(),
+                            text = selectedBlock.time.toShortTimeString(context),
                             style = LocalAppTheme.current.typography.bodyLarge
                         )
                     }

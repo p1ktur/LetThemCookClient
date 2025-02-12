@@ -22,8 +22,16 @@
     <string name="cooking_tutorial">Cooking Tutorial</string>
     <string name="not_reached_yet">Not reached yet</string>
     <string name="waiting">Waiting…</string>
-    <string name="cooking">Cooking...</string>
+    <string name="cooking">Cooking…</string>
     <string name="done">Done</string>
     <string name="end">End</string>
     <string name="start">Start</string>
+    <string name="drag_block_here">Drag Block Here</string>
+    <string name="tutorial_1">Hello, this is a tutorial for cooking and building recipes. Here you will be introduced to this concept so that you may research it yourself and gain experience. The process of building recipes is quite easy. Recipes consist of blocks. There may be only maximum of 30 blocks per recipe.</string>
+    <string name="tutorial_2">You may create block, customize it and later drag it onto the building canvas. You can also attach files to blocks. You can also drag blocks onto other blocks so that they connect into a sequence. Blocks can follow each other or go in parallel. Try it yourself!</string>
+    <string name="tutorial_3">Block itself represent state or action, so better name it like \"Frying\" instead of \"Fry\". You can also drag products, specified earlier in you recipe, onto other blocks so that the one who cooks can see on which block he may need such product.</string>
+    <string name="tutorial_4">After you finished building recipe you may try it in demo and see how it cooks. You can also access cooking on recipe page.</string>
+    <string name="tutorial_5">When on cooking page you can start cooking and see the blocks displayed on top. You can finish the blocks one by one. If blocks go in parallel and one block is finished it must wait for other to finish to go to the next block in sequence.</string>
+    <string name="tutorial_6">You can also pause cooking so that timer which displays total cooking time will be paused. You can also stop cooking to reset it.</string>
+    <string name="tutorial_7">This is how cooking appears when all blocks are done.</string>
 </resources>

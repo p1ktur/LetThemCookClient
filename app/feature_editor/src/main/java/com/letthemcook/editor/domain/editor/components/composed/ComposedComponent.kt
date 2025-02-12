@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.composed
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.vector.VectorPainter
@@ -14,6 +15,7 @@ interface ComposedComponent : Component {
     val components: MutableList<Component>
 
     fun drawOn(
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,

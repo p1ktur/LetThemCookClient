@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.block
 
+import android.content.Context
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -92,6 +93,8 @@ data class BlockComponent(
     @Transient
     private var cachedSizeCalculationHashcode: Int = 0
     @Transient
+    private var localContext: Context? = null
+    @Transient
     private var localTextMeasurer: TextMeasurer? = null
     @Transient
     private var localNameTextStyle: TextStyle? = null
@@ -104,6 +107,7 @@ data class BlockComponent(
     // Graphics
 
     fun drawOn(
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,
@@ -119,7 +123,7 @@ data class BlockComponent(
         canvasUiState: CanvasUiState
     ) {
         if (!isVisible(canvasUiState)) {
-            calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+            calculateSize(context, textMeasurer, nameTextStyle, contentTextStyle)
             return
         }
 
@@ -158,7 +162,7 @@ data class BlockComponent(
         contentHeightSum += descriptionTextLayout.size.height
 
         val timeTextLayout = textMeasurer.measure(
-            text = time.toShortTimeString(),
+            text = time.toShortTimeString(context),
             style = contentTextStyle,
             constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
         )
@@ -316,6 +320,7 @@ data class BlockComponent(
     }
 
     fun drawDraggableOn(
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,
@@ -347,7 +352,7 @@ data class BlockComponent(
         )
 
         val timeTextLayout = textMeasurer.measure(
-            text = time.toShortTimeString(),
+            text = time.toShortTimeString(context),
             style = contentTextStyle,
             constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
         )
@@ -464,6 +469,7 @@ data class BlockComponent(
     }
 
     fun calculateSize(
+        context: Context,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,
         contentTextStyle: TextStyle
@@ -472,6 +478,7 @@ data class BlockComponent(
 
         cachedSizeCalculationHashcode = hashCode()
 
+        localContext = context
         localTextMeasurer = textMeasurer
         localNameTextStyle = nameTextStyle
         localContentTextStyle = contentTextStyle
@@ -496,7 +503,7 @@ data class BlockComponent(
         contentHeightSum += descriptionTextLayout.size.height
 
         val timeTextLayout = textMeasurer.measure(
-            text = time.toShortTimeString(),
+            text = time.toShortTimeString(context),
             style = contentTextStyle,
             constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
         )
@@ -529,16 +536,18 @@ data class BlockComponent(
     }
 
     override fun tryRecalculateSize() {
+        val context = localContext
         val textMeasurer = localTextMeasurer
         val nameTextStyle = localNameTextStyle
         val contentTextStyle = localContentTextStyle
 
+        if (context == null) return
         if (textMeasurer == null) return
         if (nameTextStyle == null) return
         if (contentTextStyle == null) return
 
         try {
-            calculateSize(textMeasurer, nameTextStyle, contentTextStyle)
+            calculateSize(context, textMeasurer, nameTextStyle, contentTextStyle)
         } catch (_: Exception) {}
     }
 

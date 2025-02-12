@@ -131,6 +131,7 @@ fun NavGraphBuilder.addRecipeRoutes(
 
                     EditedRecipeUiAction.DeleteRecipe -> navController.popBackStack(rawProfileRoute, false)
 
+                    EditedRecipeUiAction.NavigateToTutorial -> cookingRoutes.navigateToTutorial()
                     is EditedRecipeUiAction.EditCooking -> {
                         cookingRoutes.navigateToEditor(
                             uiState.ownerId,

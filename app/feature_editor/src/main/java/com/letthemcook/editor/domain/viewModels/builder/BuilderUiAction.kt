@@ -16,7 +16,6 @@ sealed interface BuilderUiAction {
     data class ViewMediaFile(val blockId: String, val file: File) : BuilderUiAction
 
     // Common
-    data object SaveChanges : BuilderUiAction
     data object TryDemoCooking : BuilderUiAction
 
     // Products

@@ -11,6 +11,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
@@ -56,7 +57,7 @@ object RecipeGrapher {
             )
 
             val circleTextLayout = textMeasurer.measure(
-                text = "Drag Block Here",
+                text = context.getString(R.string.drag_block_here),
                 style = titleTextStyle
             )
 
@@ -141,6 +142,7 @@ object RecipeGrapher {
 
             centralComponent.position = cursorPosition
             centralComponent.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 nameTextStyle = nameTextStyle,

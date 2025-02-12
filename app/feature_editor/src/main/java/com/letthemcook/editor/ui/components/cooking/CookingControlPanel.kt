@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.isLongTime
 import com.letthemcook.core.domain.format.toShortTimeString
@@ -41,15 +42,17 @@ fun CookingControlPanel(
     uiState: CookingUiState,
     onUiAction: (CookingUiAction) -> Unit
 ) {
+    val context = LocalContext.current
+
     val totalTimeText = remember(uiState.totalCookingTime) {
-        uiState.totalCookingTime.toShortTimeString(canInstant = false)
+        uiState.totalCookingTime.toShortTimeString(context, canInstant = false)
     }
 
     val leftTimeText = remember(uiState.totalCookingTime, uiState.cookingTimeLeft) {
         if (uiState.totalCookingTime.isLongTime()) {
-            uiState.cookingTimeLeft.toTimeString(canInstant = false)
+            uiState.cookingTimeLeft.toTimeString(context, canInstant = false)
         } else {
-            uiState.cookingTimeLeft.toShortTimeString(canInstant = false)
+            uiState.cookingTimeLeft.toShortTimeString(context, canInstant = false)
         }
     }
 

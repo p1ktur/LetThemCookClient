@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.composed
 
+import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -46,6 +47,7 @@ data class HorizontalComposedComponent(
     // Graphics
 
     override fun drawOn(
+        context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
         nameTextStyle: TextStyle,
@@ -102,6 +104,7 @@ data class HorizontalComposedComponent(
             )
 
             component.drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 nameTextStyle = nameTextStyle,

@@ -81,14 +81,14 @@ fun VideoViewer(
     var totalDuration by remember { mutableLongStateOf(0L) }
 
     val totalTimeText = remember(totalDuration) {
-        totalDuration.toShortTimeString(canInstant = false)
+        totalDuration.toShortTimeString(context, canInstant = false)
     }
 
     val leftTimeText = remember(playerProgress, totalDuration) {
         if (totalDuration.isLongTime()) {
-            playerProgress.toTimeString(canInstant = false)
+            playerProgress.toTimeString(context, canInstant = false)
         } else {
-            playerProgress.toShortTimeString(canInstant = false)
+            playerProgress.toShortTimeString(context, canInstant = false)
         }
     }
 

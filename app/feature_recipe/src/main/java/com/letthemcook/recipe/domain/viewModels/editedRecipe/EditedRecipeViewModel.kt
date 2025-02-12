@@ -183,6 +183,8 @@ class EditedRecipeViewModel(
 
             EditedRecipeUiAction.Publish -> publish()
             EditedRecipeUiAction.Archive -> archive()
+
+            EditedRecipeUiAction.NavigateToTutorial -> Unit
             is EditedRecipeUiAction.EditCooking -> Unit
             is EditedRecipeUiAction.Cook -> Unit
         }

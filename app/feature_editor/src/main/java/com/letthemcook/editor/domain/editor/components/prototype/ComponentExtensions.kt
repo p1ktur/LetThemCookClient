@@ -1,5 +1,6 @@
 package com.letthemcook.editor.domain.editor.components.prototype
 
+import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -23,6 +24,7 @@ import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 // Graphics
 
 fun Component.drawOn(
+    context: Context,
     drawScope: DrawScope,
     textMeasurer: TextMeasurer,
     nameTextStyle: TextStyle,
@@ -40,6 +42,7 @@ fun Component.drawOn(
     when (this) {
         is BlockComponent -> {
             drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 nameTextStyle = nameTextStyle,
@@ -57,6 +60,7 @@ fun Component.drawOn(
         }
         is HorizontalComposedComponent -> {
             drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 nameTextStyle = nameTextStyle,
@@ -74,6 +78,7 @@ fun Component.drawOn(
         }
         is VerticalComposedComponent -> {
             drawOn(
+                context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
                 nameTextStyle = nameTextStyle,

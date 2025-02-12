@@ -1,5 +1,6 @@
 package com.letthemcook.recipe.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilePresent
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RemoveRedEye
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.SoupKitchen
@@ -46,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.letthemcook.core.domain.format.cute
@@ -80,6 +83,7 @@ fun EditedRecipeScreen(
     uiState: EditedRecipeUiState,
     onUiAction: (EditedRecipeUiAction) -> Unit
 ) {
+    val context = LocalContext.current
     val wasPublished = remember { uiState.publicationDate != null }
 
     // Save Dialog
@@ -185,6 +189,12 @@ fun EditedRecipeScreen(
         }
     }
 
+    BackHandler {
+        if (areYouSureDialogConfig == null) {
+            onUiAction(EditedRecipeUiAction.NavigateBack)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -239,7 +249,7 @@ fun EditedRecipeScreen(
                     text = if (uiState.publicationDate == null) {
                         stringResource(R.string.archived)
                     } else {
-                        stringResource(R.string.published) + uiState.publicationDate.prettyString()
+                        stringResource(R.string.published_1) + uiState.publicationDate.prettyString()
                     },
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
@@ -287,7 +297,7 @@ fun EditedRecipeScreen(
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),
             text = if (uiState.cookingTime != null) {
-                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString()
+                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString(context)
             } else {
                 stringResource(R.string.no_cooking_yet)
             },
@@ -300,6 +310,17 @@ fun EditedRecipeScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Icon(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable {
+                        onUiAction(EditedRecipeUiAction.NavigateToTutorial)
+                    },
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Info Icon",
+                tint = LocalAppTheme.current.text
+            )
             TextButton(
                 modifier = Modifier.size(130.dp, 40.dp),
                 text = stringResource(R.string.edit),

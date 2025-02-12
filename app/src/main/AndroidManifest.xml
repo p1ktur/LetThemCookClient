@@ -44,7 +44,10 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.LetThemCook">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LetThemCook"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
+            <!-- Fixed orientation for now because it is not in priority -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

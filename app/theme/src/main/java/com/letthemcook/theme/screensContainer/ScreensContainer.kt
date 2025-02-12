@@ -157,13 +157,15 @@ fun ScreensContainer(
     val mediaFilePicker = koinInject<MediaFilePickerManager>()
     mediaFilePicker.RegisterLaunchers()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(toolBarColor, navigationBarColor) {
         screenContainer.apply {
             setToolBarColor(toolBarColor)
             setNavigationBarColor(navigationBarColor)
-
-            setMediaFilePicker(mediaFilePicker)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        screenContainer.setMediaFilePicker(mediaFilePicker)
     }
 
     Column(

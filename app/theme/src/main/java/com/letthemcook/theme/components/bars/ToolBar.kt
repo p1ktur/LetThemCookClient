@@ -1,6 +1,7 @@
 package com.letthemcook.theme.components.bars
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -98,6 +99,7 @@ fun ToolBar(
             )
         } else {
             Text(
+                modifier = Modifier.basicMarquee(),
                 text = statusText ?: stringResource(com.letthemcook.theme.R.string.app_name),
                 style = LocalAppTheme.current.typography.titleMedium,
                 fontFamily = if (statusText == null) FontFamily(Font(com.letthemcook.theme.R.font.kaushan_script)) else null
