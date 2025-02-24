@@ -119,7 +119,7 @@ fun SingleLineTextField(
             Icon(
                 modifier = Modifier
                     .height((textStyle.lineHeight.value + 14).dp)
-                    .padding(bottom = 4.dp, end = 4.dp)
+                    .padding(end = 4.dp)
                     .clip(CircleShape)
                     .clickable {
                         passwordIsShown = !passwordIsShown

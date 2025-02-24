@@ -46,7 +46,10 @@ import com.letthemcook.profile.ui.navigation.addProfileRoutes
 import com.letthemcook.recipe.ui.navigation.RecipeNavRoutes
 import com.letthemcook.recipe.ui.navigation.addRecipeRoutes
 import com.letthemcook.theme.base.LetThemCookTheme
+import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.base.Theme
+import com.letthemcook.theme.components.spacers.BottomInsetSpacer
+import com.letthemcook.theme.components.spacers.TopInsetSpacer
 import com.letthemcook.theme.language.Language
 import com.letthemcook.theme.providers.LanguageStateProvider
 import com.letthemcook.theme.providers.ThemeStateProvider
@@ -114,9 +117,11 @@ class MainActivity : ComponentActivity() {
                 mediaViewerAccess.value.stopViewing()
 
                 try {
-                    val route = currentBackStackEntry?.toRoute<MediaNavRoutes.MediaViewerForLocal>()
+                    val route = currentBackStackEntry?.toRoute<MediaNavRoutes.MediaViewerForLocal>().let {
+                        it ?: currentBackStackEntry?.toRoute<MediaNavRoutes.MediaViewerImage>()
+                    }
 
-                    if (route is MediaNavRoutes.MediaViewerForLocal) {
+                    if (route is MediaNavRoutes.MediaViewerForLocal || route is MediaNavRoutes.MediaViewerImage) {
                         enableEdgeToEdge(
                             statusBarStyle = SystemBarStyle.dark(Color.BLACK)
                         )
@@ -185,7 +190,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     null -> {
-                         LoadingScreen()
+                        TopInsetSpacer(color = LocalAppTheme.current.background)
+                        LoadingScreen()
+                        BottomInsetSpacer(color = LocalAppTheme.current.background)
                     }
                 }
             }

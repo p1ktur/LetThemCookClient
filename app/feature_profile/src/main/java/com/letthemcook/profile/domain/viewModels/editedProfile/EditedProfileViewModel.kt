@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
+//TODO if loggen in on other device the profile photo must be loaded and saved
+
 class EditedProfileViewModel(
     private val user: User,
     private val authManager: AuthManager,
@@ -58,9 +60,25 @@ class EditedProfileViewModel(
     private fun loadRecipes() {
         viewModelScope.launch(Dispatchers.IO) {
             val allRecipes = localDataManager.getRecipes().map { recipe ->
-                val recipeBitmap = recipe.bitmapId?.let {
-                    localFileManager.getFileByUid(it)?.let { file ->
-                        localFileManager.getFileBytes(file)?.toBitmap()
+                val recipeBitmap = recipe.bitmapId?.let { fileId ->
+                    val localFile = localFileManager.getFileByUid(fileId)
+
+                    if (localFile != null) {
+                        localFileManager.getFileBytes(localFile)?.toBitmap()
+                    } else {
+                        val params = RemoteFileManager.RequestParams(
+                            userId = uiState.value.user.id,
+                            fileId = fileId,
+                            recipeId = recipe.id,
+                            type = FileType.IMAGE
+                        )
+                        val remoteFile = remoteFileManager.getFile(params)
+
+                        if (remoteFile != null) {
+                            localFileManager.saveFile(remoteFile, FileType.IMAGE, fileId)
+                        }
+
+                        remoteFile?.toBitmap()
                     }
                 }
 

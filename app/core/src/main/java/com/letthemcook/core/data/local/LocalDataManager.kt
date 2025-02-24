@@ -1,10 +1,9 @@
 package com.letthemcook.core.data.local
 
-import android.util.Log
 import com.letthemcook.core.data.remote.AuthManager
+import com.letthemcook.core.domain.model.remote.Recipe
 import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
-import com.letthemcook.core.domain.model.remote.Recipe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -41,7 +40,6 @@ class LocalDataManager(
     }
 
     suspend fun saveRecipe(recipe: Recipe) {
-        Log.d("TAG", "$recipe")
         recipeDao.upsertRecipe(recipe)
     }
 
