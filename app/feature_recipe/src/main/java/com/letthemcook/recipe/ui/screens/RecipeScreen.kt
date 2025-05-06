@@ -370,26 +370,32 @@ fun RecipeScreen(
                         }
                     }
                 }
-                HorizontalDivider(color = LocalAppTheme.current.text)
+                if (categoryLabelNames.isNotEmpty() && productLabelNames.isNotEmpty()) {
+                    HorizontalDivider(color = LocalAppTheme.current.text)
+                }
                 Column {
-                    LabelContainer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp),
-                        name = stringResource(R.string.categories),
-                        labels = categoryLabelNames,
-                        maxRows = 2,
-                        onLabelClick = {}
-                    )
-                    LabelContainer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp),
-                        name = stringResource(R.string.products),
-                        labels = productLabelNames,
-                        maxRows = 2,
-                        onLabelClick = {}
-                    )
+                    if (categoryLabelNames.isNotEmpty()) {
+                        LabelContainer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            name = stringResource(R.string.categories),
+                            labels = categoryLabelNames,
+                            maxRows = 2,
+                            onLabelClick = {}
+                        )
+                    }
+                    if (productLabelNames.isNotEmpty()) {
+                        LabelContainer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            name = stringResource(R.string.products),
+                            labels = productLabelNames,
+                            maxRows = 2,
+                            onLabelClick = {}
+                        )
+                    }
                 }
             }
         }
