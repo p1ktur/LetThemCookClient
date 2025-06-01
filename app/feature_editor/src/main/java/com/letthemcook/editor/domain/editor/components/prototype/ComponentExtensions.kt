@@ -599,7 +599,6 @@ fun Component.definePointRelation(pointPosition: Offset): Relation {
         x0 > x1 && x0 < x2 -> Relation.Top
         x0 > x1 && x0 > x2 -> Relation.Right
         else -> Relation.Bottom
-
     }
 }
 

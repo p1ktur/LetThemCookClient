@@ -1,6 +1,5 @@
 package com.letthemcook.feed.domain.viewModels.search
 
-import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +26,8 @@ class SearchViewModel(
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var firstSearch = true
 
     // Recipes
     private var lastRecipePage = 0
@@ -99,7 +100,11 @@ class SearchViewModel(
             is SearchUiAction.RemoveProduct -> removeProduct(action.index)
 
             SearchUiAction.LoadNextPage -> viewModelScope.launch(Dispatchers.IO) {
-                when (uiState.value.searchClass) {
+                if (firstSearch) {
+                    searchUsers()
+                    searchRecipes()
+                    firstSearch = false
+                } else when (uiState.value.searchClass) {
                     SearchUiState.SearchClass.USER -> searchUsers()
                     SearchUiState.SearchClass.RECIPE -> searchRecipes()
                 }
@@ -327,7 +332,6 @@ class SearchViewModel(
     // Not actions
     private suspend fun searchRecipes(searchText: String? = null) {
         val text = searchText ?: uiState.value.searchText.text.toString()
-        if (lastRecipePage == 0 && text.isEmpty()) return
 
         _uiState.update {
             it.copy(
@@ -336,7 +340,7 @@ class SearchViewModel(
         }
 
         val currentSearchHashCode = uiState.value.searchHashCode()
-        Log.d("TAG", "$currentSearchHashCode $lastRecipeSearchHashCode")
+
         val isFilteringOn = if (currentSearchHashCode != lastRecipeSearchHashCode) {
             lastRecipeSearchHashCode = currentSearchHashCode
             lastRecipePage = 0
@@ -394,7 +398,6 @@ class SearchViewModel(
 
     private suspend fun searchUsers(searchText: String? = null) {
         val text = searchText ?: uiState.value.searchText.text.toString()
-        if (lastUserPage == 0 && text.isEmpty()) return
 
         _uiState.update {
             it.copy(

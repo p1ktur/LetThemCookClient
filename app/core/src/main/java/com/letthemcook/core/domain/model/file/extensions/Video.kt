@@ -4,12 +4,13 @@ import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.ReturnCode
+//import com.arthenica.ffmpegkit.FFmpegKit
+//import com.arthenica.ffmpegkit.ReturnCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
+//TODO due to library stop existing VIDEO COMPRESSION MUST BE REMADE
 suspend fun compressVideoWithSizeLimit(context: Context, videoUri: Uri, maxSizeMB: Int = 20): ByteArray? {
     var inputPath: String? = null
     val projection = arrayOf(MediaStore.Images.Media.DATA)
@@ -40,13 +41,17 @@ suspend fun compressVideoWithSizeLimit(context: Context, videoUri: Uri, maxSizeM
 
     val command = "-i $inputPath -b:v ${targetBitrate}k -preset slow -c:a copy ${outputFile.absolutePath}"
 
-    val session = FFmpegKit.execute(command)
+//    val session = FFmpegKit.execute(command)
+//
+//    return if (ReturnCode.isSuccess(session.returnCode)) {
+//        val bytes = outputFile.readBytes()
+//        outputFile.delete()
+//        return bytes
+//    } else {
+//        null
+//    }
 
-    return if (ReturnCode.isSuccess(session.returnCode)) {
-        val bytes = outputFile.readBytes()
-        outputFile.delete()
-        return bytes
-    } else {
-        null
-    }
+    val bytes = outputFile.readBytes()
+    outputFile.delete()
+    return bytes
 }

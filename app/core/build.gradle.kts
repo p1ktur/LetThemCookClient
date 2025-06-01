@@ -88,7 +88,4 @@ dependencies {
     implementation(libs.junit)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.junit)
-
-    // Video Compression
-    implementation(libs.ffmpeg.kit.full)
 }

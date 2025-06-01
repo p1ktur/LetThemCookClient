@@ -33,6 +33,7 @@ fun LabelItem(
     modifier: Modifier = Modifier,
     text: String,
     icon: LabelIcon = LabelIcon.REMOVE,
+    isBig: Boolean = false,
     containerColor: Color = LocalAppTheme.current.text,
     contentColor: Color = LocalAppTheme.current.background,
     onClick: (() -> Unit)? = null,
@@ -45,13 +46,23 @@ fun LabelItem(
             .run {
                 onClick?.let { clickable(onClick = it) } ?: this
             }
-            .padding(vertical = 4.dp, horizontal = 8.dp),
+            .run {
+                if (isBig) {
+                    this.padding(vertical = 8.dp, horizontal = 16.dp)
+                } else {
+                    this.padding(vertical = 4.dp, horizontal = 8.dp)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = text,
-            style = LocalAppTheme.current.typography.bodySmall,
+            style = if (isBig) {
+                LocalAppTheme.current.typography.bodyLarge
+            } else {
+                LocalAppTheme.current.typography.bodySmall
+            },
             color = contentColor,
             maxLines = 1
         )

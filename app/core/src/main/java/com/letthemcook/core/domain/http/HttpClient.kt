@@ -20,7 +20,7 @@ val ClientJson = Json {
 
 val HttpClient = HttpClient(Android) {
     install(DefaultRequest) {
-        host = "192.168.0.101"
+        host = "192.168.0.103"
         port = 8080
     }
     install(ContentNegotiation) {

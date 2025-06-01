@@ -127,8 +127,12 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 } catch (_: Exception) {
-                    enableEdgeToEdge()
+                    setSystemBarStyle(theme)
                 }
+            }
+
+            LaunchedEffect(theme) {
+                setSystemBarStyle(theme)
             }
 
             SetAuthChecker(isLoggedIn)
@@ -220,6 +224,17 @@ class MainActivity : ComponentActivity() {
             config.setLocales(LocaleList(Locale(language)))
             @Suppress("DEPRECATION")
             resources.updateConfiguration(config, resources.displayMetrics)
+        }
+    }
+
+    private fun setSystemBarStyle(theme: Theme) {
+        when (theme) {
+            Theme.LIGHT -> {
+                enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT))
+            }
+            Theme.DARK -> {
+                enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
+            }
         }
     }
 

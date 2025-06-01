@@ -8,6 +8,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -61,6 +62,7 @@ import com.letthemcook.core.domain.format.getLongTime
 import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
+import com.letthemcook.editor.domain.editor.components.EmptyComponent.position
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.prototype.countBlocks
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
@@ -69,6 +71,9 @@ import com.letthemcook.editor.ui.components.BlockItem
 import com.letthemcook.editor.ui.components.canvas.RecipeCanvas
 import com.letthemcook.editor.ui.components.popups.BlockEditorPopup
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
+import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
+import com.letthemcook.editor.ui.drawing.DRAW_PADDING
+import com.letthemcook.editor.ui.drawing.drawProductLabel
 import com.letthemcook.editor.ui.modifier.rowScrollbar
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.buttons.IconButton
@@ -111,6 +116,9 @@ fun BuilderScreen(
     val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
     val blockComponentNameTextStyle = MaterialTheme.typography.titleLarge
     val blockComponentContentTextStyle = MaterialTheme.typography.bodyLarge
+    val frameColor = LocalAppTheme.current.text
+    val containerColor = LocalAppTheme.current.container
+    val componentTextColor = LocalAppTheme.current.text
 
     val canvasDragAndDropManager = remember(uiState.unusedProducts, uiState.unusedBlockComponents, canvasGlobalPosition) {
         CanvasDragAndDropManager(
@@ -198,19 +206,30 @@ fun BuilderScreen(
                         uiState.unusedProducts.forEach { product ->
                             key(product.data.id) {
                                 LabelItem(
-                                    modifier = Modifier.dragAndDropSource {
-                                        detectTapGestures(onLongPress = {
-                                            onUiAction(BuilderUiAction.SetDraggingState(DraggingState.PRODUCT))
-                                            startTransfer(
-                                                DragAndDropTransferData(
-                                                    clipData = ClipData.newPlainText("Product", product.data.id.toString()),
-                                                    flags = View.DRAG_FLAG_GLOBAL
-                                                )
+                                    modifier = Modifier.dragAndDropSource(
+                                        drawDragDecoration = {
+                                            drawProductLabel(
+                                                textLayout = textMeasurer.measure(
+                                                    text = product.toString(),
+                                                    style = blockComponentContentTextStyle
+                                                ),
+                                                topLeft = Offset.Zero,
+                                                padding = DRAW_PADDING,
+                                                color = componentTextColor,
+                                                textColor = containerColor
                                             )
-                                        })
-                                    },
+                                        },
+                                        transferData = { _->
+                                            onUiAction(BuilderUiAction.SetDraggingState(DraggingState.PRODUCT))
+                                            DragAndDropTransferData(
+                                                clipData = ClipData.newPlainText("Product", product.data.id.toString()),
+                                                flags = View.DRAG_FLAG_GLOBAL
+                                            )
+                                        }
+                                    ),
                                     text = product.toString(),
-                                    icon = LabelIcon.NONE
+                                    icon = LabelIcon.NONE,
+                                    isBig = true
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -258,22 +277,39 @@ fun BuilderScreen(
                             key(block.hashCode()) {
                                 BlockItem(
                                     modifier = Modifier
-                                        .dragAndDropSource {
-                                            detectTapGestures(
-                                                onTap = {
-                                                    onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.EditingUnusedBlock(block)))
-                                                },
-                                                onLongPress = {
-                                                    onUiAction(BuilderUiAction.SetDraggingState(DraggingState.BLOCK))
-                                                    startTransfer(
-                                                        DragAndDropTransferData(
-                                                            clipData = ClipData.newPlainText("Block", block.hashCode().toString()),
-                                                            flags = View.DRAG_FLAG_GLOBAL
-                                                        )
-                                                    )
-                                                }
-                                            )
-                                        },
+                                        .clickable {
+                                            onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.EditingUnusedBlock(block)))
+                                        }
+                                        .dragAndDropSource(
+                                            drawDragDecoration = {
+                                                val blockComponent = block.toBlockComponent(
+                                                    context,
+                                                    textMeasurer,
+                                                    blockComponentNameTextStyle,
+                                                    blockComponentContentTextStyle
+                                                )
+
+                                                blockComponent.drawDraggableOn(
+                                                    context = context,
+                                                    drawScope = this,
+                                                    textMeasurer = textMeasurer,
+                                                    nameTextStyle = blockComponentNameTextStyle,
+                                                    contentTextStyle = blockComponentContentTextStyle,
+                                                    frameColor = frameColor,
+                                                    containerColor = containerColor,
+                                                    textColor = componentTextColor,
+                                                    centerPosition = center,
+                                                    fileIcons = emptyMap()
+                                                )
+                                            },
+                                            transferData = { _->
+                                                onUiAction(BuilderUiAction.SetDraggingState(DraggingState.BLOCK))
+                                                DragAndDropTransferData(
+                                                    clipData = ClipData.newPlainText("Block", block.hashCode().toString()),
+                                                    flags = View.DRAG_FLAG_GLOBAL
+                                                )
+                                            }
+                                        ),
                                     name = block.name,
                                     time = block.time,
                                     description = block.description,

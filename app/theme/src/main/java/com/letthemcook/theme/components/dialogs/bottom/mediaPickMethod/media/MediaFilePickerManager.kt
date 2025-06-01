@@ -272,6 +272,7 @@ class MediaFilePickerManager(
             val bytes = context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val bytes = inputStream.readBytes()
                 if (bytes.size > 20 * 1024 * 1024) {
+                    //currently not working
                     compressVideoWithSizeLimit(context, uri)
                 } else {
                     bytes
