@@ -27,7 +27,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LetThemCook"
-        android:windowSoftInputMode="adjustResize"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
@@ -46,6 +45,7 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.LetThemCook"
+            android:windowSoftInputMode="adjustResize"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <!-- Fixed orientation for now because it is not in priority -->
             <intent-filter>

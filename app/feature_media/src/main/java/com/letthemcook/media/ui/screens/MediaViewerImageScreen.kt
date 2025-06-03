@@ -50,6 +50,10 @@ fun MediaViewerImageScreen(
                 onClick = {}
             )
     ) {
+        ImageViewer(
+            modifier = Modifier.fillMaxSize(),
+            bitmap = uiState.bitmap
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,9 +81,5 @@ fun MediaViewerImageScreen(
                 color = Color.White
             )
         }
-        ImageViewer(
-            modifier = Modifier.fillMaxSize(),
-            bitmap = uiState.bitmap
-        )
     }
 }

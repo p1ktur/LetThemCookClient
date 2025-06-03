@@ -7,6 +7,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,22 +32,8 @@ import kotlin.reflect.typeOf
 
 sealed interface MediaNavRoutes {
     @Serializable data object None : MediaNavRoutes
-    @Serializable data class MediaViewerForLocal(val file: File, val params: RemoteFileManager.RequestParams?) :
-        MediaNavRoutes
-    @Serializable data class MediaViewerImage(val bitmapBytes: ByteArray) : MediaNavRoutes {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as MediaViewerImage
-
-            return bitmapBytes.contentEquals(other.bitmapBytes)
-        }
-
-        override fun hashCode(): Int {
-            return bitmapBytes.contentHashCode()
-        }
-    }
+    @Serializable data class MediaViewerForLocal(val file: File, val params: RemoteFileManager.RequestParams?) : MediaNavRoutes
+    @Serializable data object MediaViewerImage : MediaNavRoutes
 }
 
 @Composable
@@ -53,6 +42,8 @@ fun MediaViewerHost(
 ) {
     val navController = rememberNavController()
     val screenContainer = LocalScreenContainer.current
+
+    var transitionedBytes: ByteArray? by remember { mutableStateOf(null) }
 
     LaunchedEffect(Unit) {
         mediaViewerAccessState.value = MediaViewerAccess(
@@ -65,7 +56,8 @@ fun MediaViewerHost(
                 screenContainer.setViewingMedia(true)
             },
             viewBitmap = {
-                navController.navigate(MediaNavRoutes.MediaViewerImage(it.toBytes()))
+                transitionedBytes = it.toBytes()
+                navController.navigate(MediaNavRoutes.MediaViewerImage)
                 screenContainer.setViewingMedia(true)
             }
         )
@@ -110,11 +102,8 @@ fun MediaViewerHost(
             typeMap = mapOf(
                 typeOf<ByteArray>() to ByteArrayNavType
             )
-        ) { navBackStackEntry ->
-            val route = navBackStackEntry.toRoute<MediaNavRoutes.MediaViewerImage>()
-            val bitmapBytes = route.bitmapBytes
-
-            val viewModel = koinViewModel<MediaViewerImageViewModel>(parameters = { parametersOf(bitmapBytes) })
+        ) {
+            val viewModel = koinViewModel<MediaViewerImageViewModel>(parameters = { parametersOf(transitionedBytes) })
             val uiState by viewModel.uiState.collectAsState()
 
             MediaViewerImageScreen(

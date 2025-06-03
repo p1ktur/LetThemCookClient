@@ -54,6 +54,26 @@ fun MediaViewerScreen(
             ),
         contentAlignment = Alignment.Center
     ) {
+        when (val mediaFile = uiState.viewedMediaFile) {
+            is MediaFile.Image -> {
+                ImageViewer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 56.dp),
+                    bitmap = mediaFile.bitmap
+                )
+            }
+            is MediaFile.Video -> {
+                VideoViewer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 56.dp),
+                    canPlay = canPlayVideo,
+                    uri = mediaFile.file.uri
+                )
+            }
+            null -> Unit
+        }
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 color = Color.White,
@@ -91,26 +111,6 @@ fun MediaViewerScreen(
                 style = LocalAppTheme.current.typography.titleSmall,
                 color = Color.White
             )
-        }
-        when (val mediaFile = uiState.viewedMediaFile) {
-            is MediaFile.Image -> {
-                ImageViewer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 56.dp),
-                    bitmap = mediaFile.bitmap
-                )
-            }
-            is MediaFile.Video -> {
-                VideoViewer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 56.dp),
-                    canPlay = canPlayVideo,
-                    uri = mediaFile.file.uri
-                )
-            }
-            null -> Unit
         }
     }
 }
