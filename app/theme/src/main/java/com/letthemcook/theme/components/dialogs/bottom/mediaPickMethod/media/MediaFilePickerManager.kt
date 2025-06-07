@@ -25,12 +25,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
 import com.letthemcook.core.data.local.files.LocalFileManager
-import com.letthemcook.core.domain.model.file.extensions.compressBitmap
-import com.letthemcook.core.domain.model.file.extensions.compressVideoWithSizeLimit
-import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.file.File
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.core.domain.model.file.MediaFile
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
+import com.letthemcook.core.domain.model.file.extensions.compressVideoWithSizeLimit
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File as JFile

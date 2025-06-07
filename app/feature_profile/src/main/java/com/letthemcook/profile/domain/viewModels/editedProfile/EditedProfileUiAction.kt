@@ -21,5 +21,5 @@ sealed interface EditedProfileUiAction {
     data class SetBirthDate(val date: LocalDateTime) : EditedProfileUiAction
 
     data object UpdateUserData : EditedProfileUiAction
-    data class UpdateProfileBitmap(val fileId: String, val bitmap: Bitmap) : EditedProfileUiAction
+    data class UpdateProfileBitmap(val fileId: String, val bitmap: Bitmap?) : EditedProfileUiAction
 }

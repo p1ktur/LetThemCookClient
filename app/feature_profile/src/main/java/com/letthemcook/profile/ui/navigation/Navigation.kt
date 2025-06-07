@@ -10,7 +10,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.domain.model.auth.passwordChange.PasswordChangeResult
-import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileUiAction
 import com.letthemcook.profile.domain.viewModels.editedProfile.EditedProfileViewModel
 import com.letthemcook.profile.domain.viewModels.passwordChange.PasswordChangeUiAction
@@ -24,6 +23,7 @@ import com.letthemcook.profile.ui.screens.PasswordChangeScreen
 import com.letthemcook.profile.ui.screens.ProfileScreen
 import com.letthemcook.profile.ui.screens.SettingsScreen
 import com.letthemcook.theme.ui.navigation.MediaViewerAccess
+import com.letthemcook.theme.ui.navigation.NavBarRoutes
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject

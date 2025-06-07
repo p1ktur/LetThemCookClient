@@ -71,10 +71,12 @@ fun EditedProfileScreen(
     LaunchedEffect(uiState.user.profileBitmapId) {
         uiState.user.profileBitmapId?.let { fileId ->
             withContext(Dispatchers.IO) {
-                mediaFilePicker.getStoredFile(fileId) {
-                    (it as? MediaFile.Image)?.let { mediaFile ->
-                        onUiAction(EditedProfileUiAction.UpdateProfileBitmap(fileId, mediaFile.bitmap))
-                    }
+                val getResult = mediaFilePicker.getStoredFile(fileId) {
+                    onUiAction(EditedProfileUiAction.UpdateProfileBitmap(fileId, (it as MediaFile.Image).bitmap))
+                }
+
+                if (!getResult) {
+                    onUiAction(EditedProfileUiAction.UpdateProfileBitmap(fileId, null))
                 }
             }
         }

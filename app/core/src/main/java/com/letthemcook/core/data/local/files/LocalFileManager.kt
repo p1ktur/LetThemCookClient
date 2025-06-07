@@ -98,11 +98,15 @@ class LocalFileManager(
         )
     }
 
-    fun updateFile(file: File, bytes: ByteArray): File {
+    suspend fun updateFile(file: File, bytes: ByteArray): File {
         val resolver = context.contentResolver
 
-        resolver.openOutputStream(file.uri)?.use { outputStream ->
-            outputStream.write(bytes)
+        try {
+            resolver.openOutputStream(file.uri)?.use { outputStream ->
+                outputStream.write(bytes)
+            }
+        } catch (_: Exception) {
+            saveFile(bytes, file.type, file.uid)
         }
 
         return file

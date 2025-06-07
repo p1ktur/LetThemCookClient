@@ -8,10 +8,10 @@ import com.letthemcook.core.data.local.files.LocalFileManager
 import com.letthemcook.core.data.remote.AuthManager
 import com.letthemcook.core.data.remote.RemoteFileManager
 import com.letthemcook.core.data.remote.UserManager
-import com.letthemcook.core.domain.model.file.extensions.compressBitmap
-import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.auth.User
 import com.letthemcook.core.domain.model.file.FileType
+import com.letthemcook.core.domain.model.file.extensions.compressBitmap
+import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.remote.reactions.toLikeStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-
-//TODO if loggen in on other device the profile photo must be loaded and saved
 
 class EditedProfileViewModel(
     private val user: User,
@@ -136,24 +134,45 @@ class EditedProfileViewModel(
         }
     }
 
-    private fun updateProfileBitmap(fileId: String, bitmap: Bitmap) {
-        if (uiState.value.user.profileBitmapId == null || uiState.value.userBitmap == null) {
-            _uiState.update {
-                it.copy(
-                    user = it.user.copy(profileBitmapId = fileId),
-                    userBitmap = bitmap
-                )
-            }
-        }
-
+    private fun updateProfileBitmap(fileId: String, inBitmap: Bitmap?) {
         viewModelScope.launch(Dispatchers.IO) {
+            val bitmap = if (inBitmap == null) {
+                val params = RemoteFileManager.RequestParams(
+                    userId = uiState.value.user.id,
+                    fileId = fileId,
+                    type = FileType.IMAGE
+                )
+
+                remoteFileManager.getFile(params)?.apply {
+                    val localFile = localFileManager.getFileByUid(fileId)
+                    if (localFile == null) {
+                        localFileManager.saveFile(this, FileType.IMAGE, fileId)
+                    } else {
+                        localFileManager.updateFile(localFile, this)
+                    }
+                }?.toBitmap()
+            } else {
+                inBitmap
+            }
+
+            if (bitmap == null) return@launch
+
+            if (uiState.value.user.profileBitmapId == null || uiState.value.userBitmap == null) {
+                _uiState.update {
+                    it.copy(
+                        user = it.user.copy(profileBitmapId = fileId),
+                        userBitmap = bitmap
+                    )
+                }
+            }
+
             val params = RemoteFileManager.RequestParams(
                 userId = uiState.value.user.id,
                 fileId = fileId,
                 type = FileType.IMAGE
             )
 
-            if (!remoteFileManager.uploadFile(params, bitmap.compressBitmap())) return@launch
+            if (inBitmap != null && !remoteFileManager.uploadFile(params, bitmap.compressBitmap())) return@launch
             if (!userManager.updateUser(uiState.value.user)) return@launch
 
             authManager.setUser(uiState.value.user)
