@@ -12,11 +12,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import com.letthemcook.core.domain.model.file.FileType
 import com.letthemcook.editor.R
+import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.components.EmptyComponent
 import com.letthemcook.editor.domain.editor.components.EndComponent
 import com.letthemcook.editor.domain.editor.components.StartComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.drawOn
+import com.letthemcook.editor.domain.editor.components.prototype.firstInHierarchy
+import com.letthemcook.editor.domain.editor.components.prototype.getFirstBlockCookingState
+import com.letthemcook.editor.domain.editor.components.prototype.getLastBlockCookingState
+import com.letthemcook.editor.domain.editor.components.prototype.isHighlighted
+import com.letthemcook.editor.domain.editor.components.prototype.lastInHierarchy
 import com.letthemcook.editor.domain.viewModels.canvas.CanvasUiState
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.LINE_STROKE_WIDTH
@@ -72,9 +78,14 @@ object RecipeGrapher {
                 context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
-                textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
+                textColor = textColor,
+                highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
+                highlighting = false,
+                firstBlockCookingState = BlockCookingState.NOT_REACHED,
                 textStyle = titleTextStyle,
                 canvasUiState = canvasUiState
             )
@@ -114,6 +125,11 @@ object RecipeGrapher {
                 textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
+                highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
+                highlighting = false,
+                firstBlockCookingState = BlockCookingState.NOT_REACHED,
                 textStyle = titleTextStyle,
                 canvasUiState = canvasUiState
             )
@@ -131,9 +147,14 @@ object RecipeGrapher {
                 context = context,
                 drawScope = drawScope,
                 textMeasurer = textMeasurer,
-                textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
+                textColor = textColor,
+                highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
+                highlighting = centralComponent.firstInHierarchy().isHighlighted(),
+                firstBlockCookingState = centralComponent.getFirstBlockCookingState(),
                 textStyle = titleTextStyle,
                 canvasUiState = canvasUiState
             )
@@ -167,7 +188,12 @@ object RecipeGrapher {
                 textColor = textColor,
                 containerColor = containerColor,
                 frameColor = frameColor,
+                highlightColor = highlightColor,
+                warningHighlightColor = warningHighlightColor,
+                goodHighlightColor = goodHighlightColor,
                 textStyle = titleTextStyle,
+                highlighting = centralComponent.lastInHierarchy().isHighlighted(),
+                firstBlockCookingState = centralComponent.getLastBlockCookingState(),
                 positionXIsCentral = true,
                 canvasUiState = canvasUiState
             )

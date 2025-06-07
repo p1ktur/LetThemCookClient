@@ -86,9 +86,11 @@ data class BlockComponent(
     @Transient
     private var shadingQuarterForNextFrame: Relation? = null
     @Transient
-    private var highlightingForNextFrame: Boolean = false
+    var highlightingForNextFrame: Boolean = false
+        private set
     @Transient
-    private var highlighting: Boolean = false
+    var highlighting: Boolean = false
+        private set
 
     @Transient
     private var localContext: Context? = null

@@ -318,6 +318,13 @@ fun Component.firstInHierarchy(): Component {
     }
 }
 
+fun Component.lastInHierarchy(): Component {
+    return when (this) {
+        is VerticalComposedComponent -> components.last().lastInHierarchy()
+        else -> this
+    }
+}
+
 fun Component.nextInHierarchy(): Component? {
     return when (val parent = parentComponent) {
         is HorizontalComposedComponent -> parent.nextInHierarchy()
@@ -571,6 +578,32 @@ fun Component.countFinishedAndTotal(): Pair<Int, Int> {
     return cooked to total
 }
 
+fun Component.getFirstBlockCookingState(): BlockCookingState {
+    return when (val firstComponent = firstInHierarchy()) {
+        is HorizontalComposedComponent -> when {
+            firstComponent.isFinished() -> BlockCookingState.DONE
+            firstComponent.isCooking() -> BlockCookingState.COOKING
+            firstComponent.isWaiting() -> BlockCookingState.WAITING
+            else -> BlockCookingState.NOT_REACHED
+        }
+        is BlockComponent -> firstComponent.cookingState
+        else -> BlockCookingState.NOT_REACHED
+    }
+}
+
+fun Component.getLastBlockCookingState(): BlockCookingState {
+    return when (val lastComponent = lastInHierarchy()) {
+        is HorizontalComposedComponent -> when {
+            lastComponent.isFinished() -> BlockCookingState.DONE
+            lastComponent.isCooking() -> BlockCookingState.COOKING
+            lastComponent.isWaiting() -> BlockCookingState.WAITING
+            else -> BlockCookingState.NOT_REACHED
+        }
+        is BlockComponent -> lastComponent.cookingState
+        else -> BlockCookingState.NOT_REACHED
+    }
+}
+
 // Geometry
 
 fun Component.pointInBounds(point: Offset): Boolean {
@@ -661,4 +694,12 @@ fun Component.asComposed(): ComposedComponent? {
 
 fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
     return first + other.first to second + other.second
+}
+
+fun Component.isHighlighted(): Boolean {
+    return when (this) {
+        is BlockComponent -> highlighting || highlightingForNextFrame
+        is ComposedComponent -> components.all { isHighlighted() }
+        else -> false
+    }
 }

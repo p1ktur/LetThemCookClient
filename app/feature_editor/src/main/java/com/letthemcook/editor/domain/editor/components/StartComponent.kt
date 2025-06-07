@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextAlign
 import com.letthemcook.editor.R
+import com.letthemcook.editor.domain.cooking.BlockCookingState
 import com.letthemcook.editor.domain.editor.components.composed.ComposedComponent
 import com.letthemcook.editor.domain.editor.components.prototype.Component
 import com.letthemcook.editor.domain.editor.components.prototype.Relation
@@ -38,14 +40,33 @@ data class StartComponent(
         context: Context,
         drawScope: DrawScope,
         textMeasurer: TextMeasurer,
-        textColor: Color,
         containerColor: Color,
         frameColor: Color,
+        textColor: Color,
+        highlightColor: Color,
+        warningHighlightColor: Color,
+        goodHighlightColor: Color,
+        highlighting: Boolean,
+        firstBlockCookingState: BlockCookingState,
         textStyle: TextStyle,
         positionXIsCentral: Boolean = false,
         canvasUiState: CanvasUiState
     ) {
         if (!isVisible(canvasUiState)) return
+
+        val currentFrameColor = if (highlighting) {
+            highlightColor
+        } else {
+            frameColor
+        }
+        val currentContainerColor = if (highlighting) {
+            highlightColor.copy(0.25f).compositeOver(containerColor)
+        } else when (firstBlockCookingState) {
+            BlockCookingState.NOT_REACHED -> containerColor
+            BlockCookingState.WAITING -> warningHighlightColor
+            BlockCookingState.COOKING -> highlightColor.copy(0.25f).compositeOver(containerColor)
+            BlockCookingState.DONE -> goodHighlightColor
+        }
 
         val sizeWasZero = size == Size.Zero
 
@@ -73,14 +94,14 @@ data class StartComponent(
         )
 
         drawScope.drawRoundRect(
-            color = containerColor,
+            color = currentContainerColor,
             topLeft = afterLinePosition,
             size = size.copy(height = size.height - COMPONENT_PADDING),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS,ROUNDED_RECT_CORNER_RADIUS),
             style = Fill
         )
         drawScope.drawRoundRect(
-            color = textColor,
+            color = currentFrameColor,
             topLeft = afterLinePosition,
             size = size.copy(height = size.height - COMPONENT_PADDING),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS,ROUNDED_RECT_CORNER_RADIUS),
