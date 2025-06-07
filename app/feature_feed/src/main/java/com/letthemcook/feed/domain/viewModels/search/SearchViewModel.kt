@@ -1,5 +1,6 @@
 package com.letthemcook.feed.domain.viewModels.search
 
+import android.util.Log
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -53,7 +55,11 @@ class SearchViewModel(
                 .debounce(500)
                 .collectLatest { text ->
                     withContext(Dispatchers.IO) {
-                        when (uiState.value.searchClass) {
+                        if (firstSearch) {
+                            viewModelScope.launch(Dispatchers.IO) { searchUsers() }
+                            viewModelScope.launch(Dispatchers.IO) { searchRecipes() }
+                            firstSearch = false
+                        } else when (uiState.value.searchClass) {
                             SearchUiState.SearchClass.USER -> searchUsers(text.toString())
                             SearchUiState.SearchClass.RECIPE -> searchRecipes(text.toString())
                         }
@@ -100,11 +106,7 @@ class SearchViewModel(
             is SearchUiAction.RemoveProduct -> removeProduct(action.index)
 
             SearchUiAction.LoadNextPage -> viewModelScope.launch(Dispatchers.IO) {
-                if (firstSearch) {
-                    searchUsers()
-                    searchRecipes()
-                    firstSearch = false
-                } else when (uiState.value.searchClass) {
+                when (uiState.value.searchClass) {
                     SearchUiState.SearchClass.USER -> searchUsers()
                     SearchUiState.SearchClass.RECIPE -> searchRecipes()
                 }
