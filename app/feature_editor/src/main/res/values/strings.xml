@@ -34,4 +34,12 @@
     <string name="tutorial_5">When on cooking page you can start cooking and see the blocks displayed on top. You can finish the blocks one by one. If blocks go in parallel and one block is finished it must wait for other to finish to go to the next block in sequence.</string>
     <string name="tutorial_6">You can also pause cooking so that timer which displays total cooking time will be paused. You can also stop cooking to reset it.</string>
     <string name="tutorial_7">This is how cooking appears when all blocks are done.</string>
+    <string name="white">White</string>
+    <string name="pink">Pink</string>
+    <string name="red">Red</string>
+    <string name="blue">Blue</string>
+    <string name="light_blue">Light blue</string>
+    <string name="green">Green</string>
+    <string name="yellow">Yellow</string>
+    <string name="orange">Orange</string>
 </resources>

@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -94,6 +95,7 @@ fun BlockEditorPopup(
     onRestoreState: (BlockEditorState) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
     val screenContainer = LocalScreenContainer.current
 
     var lastBlockEditorFields: BlockEditorFields? by remember { mutableStateOf(null) }
@@ -278,7 +280,7 @@ fun BlockEditorPopup(
                     style = LocalAppTheme.current.typography.bodyLarge
                 )
                 Text(
-                    text = colorOption.toString(),
+                    text = colorOption.toString(context),
                     style = LocalAppTheme.current.typography.bodyMedium
                 )
             }
