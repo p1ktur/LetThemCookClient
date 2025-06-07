@@ -81,13 +81,7 @@ fun EditedProfileScreen(
     }
 
     var selectedOptionSelectedManually by remember { mutableStateOf(false) }
-    var selectedOption by remember {
-        if (uiState.archivedRecipes.isNotEmpty()) {
-            mutableStateOf(PageOption.ARCHIVED)
-        } else {
-            mutableStateOf(PageOption.PUBLISHED)
-        }
-    }
+    var selectedOption by remember { mutableStateOf(PageOption.PUBLISHED) }
 
     val recipesByThree by remember(selectedOption, uiState.publishedRecipes, uiState.archivedRecipes) {
         if (!selectedOptionSelectedManually) {

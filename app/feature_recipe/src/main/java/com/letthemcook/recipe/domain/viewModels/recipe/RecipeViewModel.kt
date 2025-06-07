@@ -16,6 +16,7 @@ import com.letthemcook.core.domain.model.remote.reactions.RecipeReaction
 import com.letthemcook.core.domain.model.remote.reactions.ReviewLike
 import com.letthemcook.core.domain.model.status.LikeStatus
 import com.letthemcook.recipe.domain.model.LoadingStatus
+import com.letthemcook.theme.providers.LanguageStateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +31,8 @@ class RecipeViewModel(
     private val localFileManager: LocalFileManager,
     private val remoteFileManager: RemoteFileManager,
     private val recipeManager: RecipeManager,
-    private val reviewManager: ReviewManager
+    private val reviewManager: ReviewManager,
+    private val languageStateProvider: LanguageStateProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeUiState(recipeId = recipeId))
@@ -72,8 +74,9 @@ class RecipeViewModel(
 
     private fun loadData() {
         viewModelScope.launch(Dispatchers.IO) {
+            val language = languageStateProvider.getLastLanguage().toLanguageString()
             val userId = authManager.getUser()?.id
-            val recipe = recipeManager.getRecipe(recipeId)
+            val recipe = recipeManager.getRecipe(recipeId, language)
 
             if (userId != null && recipe?.ownerId == userId) {
                 _uiState.update {

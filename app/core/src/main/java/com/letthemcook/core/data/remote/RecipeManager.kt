@@ -135,13 +135,14 @@ class RecipeManager(
         )
     }
 
-    suspend fun getRecipe(recipeId: String): Recipe? {
+    suspend fun getRecipe(recipeId: String, language: String): Recipe? {
         if (!authManager.checkAccessTokenAndTryRefresh()) return null
 
         return get(
             urlString = "/recipe",
             params = StringValues.build {
                 append("recipeId", recipeId)
+                append("language", language)
             },
             headers = StringValues.build {
                 append("Authorization", "Bearer ${authManager.getAccessToken()}")

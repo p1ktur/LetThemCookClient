@@ -6,7 +6,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val koinRecipeModule = module {
-    viewModel { RecipeViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { RecipeViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (recipeId: String?) ->
         EditedRecipeViewModel(recipeId, get(), get(), get(), get(), get(), get(), get())
     }

@@ -8,6 +8,7 @@ import com.letthemcook.core.data.remote.RecipeManager
 import com.letthemcook.core.domain.model.file.extensions.toBitmap
 import com.letthemcook.core.domain.model.items.RecipeItemData
 import com.letthemcook.core.domain.model.remote.reactions.toLikeStatus
+import com.letthemcook.theme.providers.LanguageStateProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 class FavoredRecipesViewModel(
     localDataManager: LocalDataManager,
     localFileManager: LocalFileManager,
-    recipeManager: RecipeManager
+    recipeManager: RecipeManager,
+    languageStateProvider: LanguageStateProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoredRecipesUiState())
@@ -25,12 +27,14 @@ class FavoredRecipesViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            val language = languageStateProvider.getLastLanguage().toLanguageString()
             val recipes = mutableListOf<RecipeItemData>()
+
             localDataManager
                 .getFavoredRecipes()
                 .forEach { recipe ->
                     var currentRecipe = recipe
-                    val remoteRecipe = recipeManager.getRecipe(recipe.id)?.apply {
+                    val remoteRecipe = recipeManager.getRecipe(recipe.id, language)?.apply {
                         isFavored = true
                     }
 

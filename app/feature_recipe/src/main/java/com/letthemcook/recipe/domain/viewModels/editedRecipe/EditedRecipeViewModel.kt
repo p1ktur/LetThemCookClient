@@ -73,15 +73,17 @@ class EditedRecipeViewModel(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            val language = languageStateProvider.getLastLanguage().toLanguageString()
+
             if (recipeId != null) {
                 var recipe = localDataManager.getRecipe(recipeId)
 
                 if (recipe == null) {
-                    val remoteRecipe = recipeManager.getRecipe(recipeId)
+                    val remoteRecipe = recipeManager.getRecipe(recipeId, language)
 
                     recipe = remoteRecipe
                 } else if (recipe.publicationDate != null) {
-                    recipe.updateUserInteractionsData(recipeManager)
+                    recipe.updateUserInteractionsData(recipeManager, language)
                 }
 
                 if (recipe == null) return@launch

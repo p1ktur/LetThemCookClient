@@ -57,8 +57,8 @@ data class Recipe(
         )
     }
 
-    suspend fun updateUserInteractionsData(recipeManager: RecipeManager) {
-        recipeManager.getRecipe(id)?.let { remoteRecipe ->
+    suspend fun updateUserInteractionsData(recipeManager: RecipeManager, language: String) {
+        recipeManager.getRecipe(id, language)?.let { remoteRecipe ->
             likesAmount = remoteRecipe.likesAmount
             dislikesAmount = remoteRecipe.dislikesAmount
             preparationsAmount = remoteRecipe.preparationsAmount
