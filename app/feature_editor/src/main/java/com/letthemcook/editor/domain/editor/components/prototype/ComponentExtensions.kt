@@ -699,7 +699,7 @@ fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> {
 fun Component.isHighlighted(): Boolean {
     return when (this) {
         is BlockComponent -> highlighting || highlightingForNextFrame
-        is ComposedComponent -> components.all { isHighlighted() }
+        is ComposedComponent -> components.all { it.isHighlighted() }
         else -> false
     }
 }
