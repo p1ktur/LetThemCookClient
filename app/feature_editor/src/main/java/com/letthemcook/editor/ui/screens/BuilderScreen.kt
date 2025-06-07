@@ -8,10 +8,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,7 +60,6 @@ import com.letthemcook.core.domain.format.getLongTime
 import com.letthemcook.editor.R
 import com.letthemcook.editor.domain.dragging.CanvasDragAndDropManager
 import com.letthemcook.editor.domain.dragging.DraggingState
-import com.letthemcook.editor.domain.editor.components.EmptyComponent.position
 import com.letthemcook.editor.domain.editor.components.block.UnusedBlockComponent
 import com.letthemcook.editor.domain.editor.components.prototype.countBlocks
 import com.letthemcook.editor.domain.viewModels.builder.BuilderUiAction
@@ -71,7 +68,6 @@ import com.letthemcook.editor.ui.components.BlockItem
 import com.letthemcook.editor.ui.components.canvas.RecipeCanvas
 import com.letthemcook.editor.ui.components.popups.BlockEditorPopup
 import com.letthemcook.editor.ui.components.popups.BlockEditorState
-import com.letthemcook.editor.ui.drawing.COMPONENT_PADDING
 import com.letthemcook.editor.ui.drawing.DRAW_PADDING
 import com.letthemcook.editor.ui.drawing.drawProductLabel
 import com.letthemcook.editor.ui.modifier.rowScrollbar
@@ -274,22 +270,26 @@ fun BuilderScreen(
                     } else {
                         Spacer(modifier = Modifier.width(8.dp))
                         uiState.unusedBlockComponents.forEach { block ->
+                            val blockAsComponentForDrag = remember(block) {
+                                block.run {
+                                    copy(
+                                        name = if (name.length > 20) name.substring(0, 17) + "..." else name,
+                                        description = if (description.length > 20) description.substring(0, 17) + "..." else description
+                                    )
+                                }.toBlockComponent(
+                                    context,
+                                    textMeasurer,
+                                    blockComponentNameTextStyle,
+                                    blockComponentContentTextStyle
+                                )
+                            }
+
                             key(block.hashCode()) {
                                 BlockItem(
                                     modifier = Modifier
-                                        .clickable {
-                                            onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.EditingUnusedBlock(block)))
-                                        }
                                         .dragAndDropSource(
                                             drawDragDecoration = {
-                                                val blockComponent = block.toBlockComponent(
-                                                    context,
-                                                    textMeasurer,
-                                                    blockComponentNameTextStyle,
-                                                    blockComponentContentTextStyle
-                                                )
-
-                                                blockComponent.drawDraggableOn(
+                                                blockAsComponentForDrag.drawDraggableOn(
                                                     context = context,
                                                     drawScope = this,
                                                     textMeasurer = textMeasurer,
@@ -313,7 +313,10 @@ fun BuilderScreen(
                                     name = block.name,
                                     time = block.time,
                                     description = block.description,
-                                    colorOption = block.colorOption
+                                    colorOption = block.colorOption,
+                                    onEditClick = {
+                                        onUiAction(BuilderUiAction.SetBlockEditorState(BlockEditorState.EditingUnusedBlock(block)))
+                                    }
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
