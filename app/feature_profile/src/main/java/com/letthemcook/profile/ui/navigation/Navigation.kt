@@ -110,7 +110,11 @@ fun NavGraphBuilder.addProfileRoutes(
                     SettingsUiAction.NavigateToHome -> navBarRoutes.navigateToHome()
                     SettingsUiAction.NavigateToNewRecipe -> navBarRoutes.navigateToNewRecipe()
                     SettingsUiAction.NavigateToProfile -> navController.navigateUp()
-                    SettingsUiAction.LogOut -> navController.navigate(logOutRoute)
+                    SettingsUiAction.LogOut -> navController.navigate(logOutRoute) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                        restoreState = false
+                    }
                     else -> Unit
                 }
                 viewModel.onUiAction(action)
