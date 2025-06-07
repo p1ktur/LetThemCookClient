@@ -157,13 +157,11 @@ class EditedProfileViewModel(
 
             if (bitmap == null) return@launch
 
-            if (uiState.value.user.profileBitmapId == null || uiState.value.userBitmap == null) {
-                _uiState.update {
-                    it.copy(
-                        user = it.user.copy(profileBitmapId = fileId),
-                        userBitmap = bitmap
-                    )
-                }
+            _uiState.update {
+                it.copy(
+                    user = it.user.copy(profileBitmapId = fileId),
+                    userBitmap = bitmap
+                )
             }
 
             val params = RemoteFileManager.RequestParams(
