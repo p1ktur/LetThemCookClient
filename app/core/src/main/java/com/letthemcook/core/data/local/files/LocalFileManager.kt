@@ -22,13 +22,13 @@ class LocalFileManager(
     fun getFileBytes(file: File): ByteArray? {
         val resolver = context.contentResolver
 
-        var bytes: ByteArray? = null
-
-        resolver.openInputStream(file.uri)?.use { inputStream ->
-            bytes = inputStream.readBytes()
+        return try {
+            resolver.openInputStream(file.uri)?.use { inputStream ->
+                inputStream.readBytes()
+            }
+        } catch (_: Exception) {
+            null
         }
-
-        return bytes
     }
 
     suspend fun getFileByUid(uid: String): File? {
