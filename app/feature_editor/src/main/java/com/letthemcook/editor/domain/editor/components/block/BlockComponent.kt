@@ -91,8 +91,6 @@ data class BlockComponent(
     private var highlighting: Boolean = false
 
     @Transient
-    private var cachedSizeCalculationHashcode: Int = 0
-    @Transient
     private var localContext: Context? = null
     @Transient
     private var localTextMeasurer: TextMeasurer? = null
@@ -122,10 +120,10 @@ data class BlockComponent(
         positionXIsCentral: Boolean = false,
         canvasUiState: CanvasUiState
     ) {
-        if (!isVisible(canvasUiState)) {
-            calculateSize(context, textMeasurer, nameTextStyle, contentTextStyle)
-            return
-        }
+        localContext = context
+        localTextMeasurer = textMeasurer
+        localNameTextStyle = nameTextStyle
+        localContentTextStyle = contentTextStyle
 
         val currentFrameColor = if (highlightingForNextFrame || highlighting) {
             highlightColor
@@ -194,6 +192,9 @@ data class BlockComponent(
             width = max(MIN_WIDTH, widthValue),
             height = max(MIN_HEIGHT, comparedHeight) + COMPONENT_PADDING * 2
         )
+
+        if (!isVisible(canvasUiState)) return
+
         if (positionXIsCentral) {
             position -= Offset(size.width / 2, 0f)
         }
@@ -482,10 +483,6 @@ data class BlockComponent(
         nameTextStyle: TextStyle,
         contentTextStyle: TextStyle
     ): Size {
-        if (cachedSizeCalculationHashcode == hashCode()) return size
-
-        cachedSizeCalculationHashcode = hashCode()
-
         localContext = context
         localTextMeasurer = textMeasurer
         localNameTextStyle = nameTextStyle
@@ -523,7 +520,7 @@ data class BlockComponent(
 
         val productTextLayouts = products.map {
             textMeasurer.measure(
-                text = it.data.name,
+                text = it.toString(),
                 style = contentTextStyle
             ).apply {
                 productsContentHeightSum += size.height + DRAW_PADDING * 3
@@ -536,8 +533,8 @@ data class BlockComponent(
         }
 
         val comparedHeight = max(contentHeightSum + DRAW_PADDING * 2, productsContentHeightSum)
-        val maxTextWidth = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width)
-        val widthValue = maxTextWidth + DRAW_PADDING * 4 + productsTopWidth + iconSize + if (iconSize > 0f) DRAW_PADDING else 0f
+        val maxTextsWidth = max(max(descriptionTextLayout.size.width, nameTextLayout.size.width), timeTextLayout.size.width)
+        val widthValue = maxTextsWidth + DRAW_PADDING * 4 + productsTopWidth + iconSize + if (iconSize > 0f) DRAW_PADDING else 0f
 
         size = size.copy(
             width = max(MIN_WIDTH, widthValue),

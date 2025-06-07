@@ -560,7 +560,7 @@ class BuilderViewModel(
         _uiState.update {
             it.copy(
                 canvasUiState = it.canvasUiState.copy(
-                    zoom = (it.canvasUiState.zoom * zoom).limit(0.8f, 1.8f)
+                    zoom = (it.canvasUiState.zoom * zoom).limit(0.4f, 1.8f)
                 )
             )
         }
@@ -699,11 +699,22 @@ class BuilderViewModel(
                         containerBlockComponent.highlightForNextFrame()
                     }
                 } else {
-                    val relation = containerBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
+                    val closestBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset)) ?: uiState.value.centralComponent
+                    val relation = closestBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
 
-                    if (containerBlockComponent is BlockComponent) {
-                        containerBlockComponent.shadeQuarterForNextFrame(relation)
-                        containerBlockComponent.highlightForNextFrame()
+                    when (closestBlockComponent) {
+                        is BlockComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
+                        is HorizontalComposedComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
+                        is VerticalComposedComponent -> {
+                            closestBlockComponent.shadeQuarterForNextFrame(relation)
+                            closestBlockComponent.highlightForNextFrame()
+                        }
                     }
                 }
 
