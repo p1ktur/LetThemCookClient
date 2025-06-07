@@ -77,12 +77,14 @@ fun BlockItem(
                 style = LocalAppTheme.current.typography.bodySmall,
                 maxLines = 1
             )
-            Text(
-                text = trimmedDescription,
-                style = LocalAppTheme.current.typography.bodyMedium,
-                color = contentColor,
-                maxLines = 1
-            )
+            if (trimmedDescription.isNotBlank()) {
+                Text(
+                    text = trimmedDescription,
+                    style = LocalAppTheme.current.typography.bodyMedium,
+                    color = contentColor,
+                    maxLines = 1
+                )
+            }
         }
         Column(
             modifier = Modifier.padding(bottom = 4.dp)

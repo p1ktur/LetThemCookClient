@@ -157,7 +157,11 @@ data class BlockComponent(
         val descriptionTextLayout = textMeasurer.measure(
             text = description,
             style = contentTextStyle,
-            constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
+            constraints = if (description.isNotBlank()) {
+                Constraints(maxWidth = MAX_WIDTH.toInt())
+            } else {
+                Constraints(maxHeight = 0)
+            }
         )
         contentHeightSum += descriptionTextLayout.size.height
 
@@ -348,7 +352,11 @@ data class BlockComponent(
         val descriptionTextLayout = textMeasurer.measure(
             text = description,
             style = contentTextStyle,
-            constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
+            constraints = if (description.isNotBlank()) {
+                Constraints(maxWidth = MAX_WIDTH.toInt())
+            } else {
+                Constraints(maxHeight = 0)
+            }
         )
 
         val timeTextLayout = textMeasurer.measure(
@@ -498,7 +506,11 @@ data class BlockComponent(
         val descriptionTextLayout = textMeasurer.measure(
             text = description,
             style = contentTextStyle,
-            constraints = Constraints(maxWidth = MAX_WIDTH.toInt())
+            constraints = if (description.isNotBlank()) {
+                Constraints(maxWidth = MAX_WIDTH.toInt())
+            } else {
+                Constraints(maxHeight = 0)
+            }
         )
         contentHeightSum += descriptionTextLayout.size.height
 

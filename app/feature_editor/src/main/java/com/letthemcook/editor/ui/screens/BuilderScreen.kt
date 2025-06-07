@@ -111,7 +111,9 @@ fun BuilderScreen(
     val textMeasurer = rememberTextMeasurer()
     val blockComponentTitleTextStyle = MaterialTheme.typography.titleLarge
     val blockComponentNameTextStyle = MaterialTheme.typography.titleLarge
+    val unusedBlockComponentNameTextStyle = MaterialTheme.typography.titleMedium
     val blockComponentContentTextStyle = MaterialTheme.typography.bodyLarge
+    val unusedBlockComponentContentTextStyle = MaterialTheme.typography.bodyMedium
     val frameColor = LocalAppTheme.current.text
     val containerColor = LocalAppTheme.current.container
     val componentTextColor = LocalAppTheme.current.text
@@ -279,8 +281,8 @@ fun BuilderScreen(
                                 }.toBlockComponent(
                                     context,
                                     textMeasurer,
-                                    blockComponentNameTextStyle,
-                                    blockComponentContentTextStyle
+                                    unusedBlockComponentNameTextStyle,
+                                    unusedBlockComponentContentTextStyle
                                 )
                             }
 
@@ -293,8 +295,8 @@ fun BuilderScreen(
                                                     context = context,
                                                     drawScope = this,
                                                     textMeasurer = textMeasurer,
-                                                    nameTextStyle = blockComponentNameTextStyle,
-                                                    contentTextStyle = blockComponentContentTextStyle,
+                                                    nameTextStyle = unusedBlockComponentNameTextStyle,
+                                                    contentTextStyle = unusedBlockComponentContentTextStyle,
                                                     frameColor = frameColor,
                                                     containerColor = containerColor,
                                                     textColor = componentTextColor,
