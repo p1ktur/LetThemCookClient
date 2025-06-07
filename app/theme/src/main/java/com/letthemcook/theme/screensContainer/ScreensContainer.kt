@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -15,13 +18,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.EmptyMediaFilePicker
-import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
-import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePickerManager
+import androidx.compose.ui.platform.LocalDensity
 import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.bars.NavBar
 import com.letthemcook.theme.components.bars.ToolBar
 import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.MediaPickMethodDialog
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.EmptyMediaFilePicker
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePicker
+import com.letthemcook.theme.components.dialogs.bottom.mediaPickMethod.media.MediaFilePickerManager
 import com.letthemcook.theme.components.dialogs.bottom.writeReview.ReviewWriter
 import com.letthemcook.theme.components.dialogs.bottom.writeReview.WriteReviewDialog
 import com.letthemcook.theme.components.spacers.BottomInsetSpacer
@@ -154,6 +158,8 @@ fun ScreensContainer(
     val toolBarColor = LocalAppTheme.current.screenThree
     val navigationBarColor = LocalAppTheme.current.background
 
+    val keyboardIsShowing = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+
     val mediaFilePicker = koinInject<MediaFilePickerManager>()
     mediaFilePicker.RegisterLaunchers()
 
@@ -188,22 +194,25 @@ fun ScreensContainer(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .imePadding()
                 .background(LocalAppTheme.current.background),
             contentAlignment = Alignment.Center,
             content = {
                 content()
             }
         )
-        if (LocalScreenContainer.current.showNavigationBar) {
-            NavBar(
-                modifier = Modifier.fillMaxWidth(),
-                color = LocalScreenContainer.current.navigationBarColor,
-                onHomeClick = LocalScreenContainer.current.onNavigateToHome,
-                onNewRecipeClick = LocalScreenContainer.current.onNavigateToNewRecipe,
-                onProfileClick = LocalScreenContainer.current.onNavigateToProfile
-            )
+        if (!keyboardIsShowing) {
+            if (LocalScreenContainer.current.showNavigationBar) {
+                NavBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = LocalScreenContainer.current.navigationBarColor,
+                    onHomeClick = LocalScreenContainer.current.onNavigateToHome,
+                    onNewRecipeClick = LocalScreenContainer.current.onNavigateToNewRecipe,
+                    onProfileClick = LocalScreenContainer.current.onNavigateToProfile
+                )
+            }
+            BottomInsetSpacer(LocalScreenContainer.current.navigationBarColor)
         }
-        BottomInsetSpacer(LocalScreenContainer.current.navigationBarColor)
     }
 
     MediaPickMethodDialog(mediaFilePicker)

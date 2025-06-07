@@ -40,6 +40,8 @@ import com.letthemcook.theme.base.LocalAppTheme
 import com.letthemcook.theme.components.dialogs.DatePickerDialog
 import com.letthemcook.theme.components.textFields.MultiLineTextField
 import com.letthemcook.theme.components.textFields.ValidatedTextField
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 @Composable
 fun ProfileEditedData(
@@ -249,6 +251,7 @@ fun ProfileEditedData(
 
     DatePickerDialog(
         isShown = isBirthDateDialogShown,
+        defaultDate = uiState.birthDate?.toEpochSecond(ZoneOffset.of(ZoneId.systemDefault().id))?.times(1000L),
         onDateSelected = { date ->
             onUiAction(EditedProfileUiAction.SetBirthDate(date))
 

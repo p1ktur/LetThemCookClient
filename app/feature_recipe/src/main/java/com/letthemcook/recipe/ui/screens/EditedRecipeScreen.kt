@@ -245,14 +245,44 @@ fun EditedRecipeScreen(
                     labelText = stringResource(R.string.name),
                     placeholderText = stringResource(R.string.type_name)
                 )
-                Text(
-                    text = if (uiState.publicationDate == null) {
-                        stringResource(R.string.archived)
-                    } else {
-                        stringResource(R.string.published_1) + uiState.publicationDate.prettyString()
-                    },
-                    style = LocalAppTheme.current.typography.bodyLarge
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (uiState.publicationDate == null) {
+                            stringResource(R.string.archived)
+                        } else {
+                            stringResource(R.string.published_1) + uiState.publicationDate.prettyString()
+                        },
+                        style = LocalAppTheme.current.typography.bodyLarge
+                    )
+                    if (uiState.publicationDate == null) {
+                        val deleteThisRecipe = stringResource(R.string.delete_this_recipe)
+                        val ifYouDeleteThisRecipe = stringResource(R.string.if_you_delete_this_recipe_all_your_work_will_be_gone_forever_are_you_sure_you_want_to_proceed)
+
+                        Icon(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable {
+                                    areYouSureDialogConfig = AreYouSureDialogConfig(
+                                        titleText = deleteThisRecipe,
+                                        bodyText = ifYouDeleteThisRecipe,
+                                        onOk = {
+                                            areYouSureDialogConfig = null
+                                            onUiAction(EditedRecipeUiAction.DeleteRecipe)
+                                        },
+                                        onDismiss = { areYouSureDialogConfig = null }
+                                    )
+                                },
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "Delete Icon",
+                            tint = LocalAppTheme.current.text
+                        )
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -294,25 +324,24 @@ fun EditedRecipeScreen(
                 }
             }
         }
-        Text(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            text = if (uiState.cookingTime != null) {
-                stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString(context)
-            } else {
-                stringResource(R.string.no_cooking_yet)
-            },
-            style = LocalAppTheme.current.typography.bodyLarge
-        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Text(
+                text = if (uiState.cookingTime != null) {
+                    stringResource(R.string.cooking_time) + uiState.cookingTime.toShortTimeString(context)
+                } else {
+                    stringResource(R.string.no_cooking_yet)
+                },
+                style = LocalAppTheme.current.typography.bodyLarge
+            )
             Icon(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(32.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .clickable {
                         onUiAction(EditedRecipeUiAction.NavigateToTutorial)
@@ -321,6 +350,14 @@ fun EditedRecipeScreen(
                 contentDescription = "Info Icon",
                 tint = LocalAppTheme.current.text
             )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             TextButton(
                 modifier = Modifier.size(130.dp, 40.dp),
                 text = stringResource(R.string.edit),
@@ -335,31 +372,6 @@ fun EditedRecipeScreen(
                     onClick = {
                         onUiAction(EditedRecipeUiAction.Cook(uiState.recipeJson))
                     }
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            if (uiState.publicationDate == null) {
-                val deleteThisRecipe = stringResource(R.string.delete_this_recipe)
-                val ifYouDeleteThisRecipe = stringResource(R.string.if_you_delete_this_recipe_all_your_work_will_be_gone_forever_are_you_sure_you_want_to_proceed)
-
-                Icon(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable {
-                            areYouSureDialogConfig = AreYouSureDialogConfig(
-                                titleText = deleteThisRecipe,
-                                bodyText = ifYouDeleteThisRecipe,
-                                onOk = {
-                                    areYouSureDialogConfig = null
-                                    onUiAction(EditedRecipeUiAction.DeleteRecipe)
-                                },
-                                onDismiss = { areYouSureDialogConfig = null }
-                            )
-                        },
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Delete Icon",
-                    tint = LocalAppTheme.current.text
                 )
             }
         }

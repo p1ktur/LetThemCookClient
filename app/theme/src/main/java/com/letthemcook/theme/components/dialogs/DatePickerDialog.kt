@@ -23,12 +23,16 @@ import java.time.ZoneId
 @Composable
 fun DatePickerDialog(
     isShown: Boolean,
+    defaultDate: Long?,
     onDateSelected: (LocalDateTime) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (!isShown) return
 
-    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = defaultDate,
+        initialDisplayMode = DisplayMode.Input
+    )
 
     val colors = DatePickerDefaults.colors(
         titleContentColor = LocalAppTheme.current.text,
