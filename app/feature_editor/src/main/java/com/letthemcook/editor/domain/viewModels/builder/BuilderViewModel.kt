@@ -264,18 +264,10 @@ class BuilderViewModel(
                 val relation = component.definePointRelation(scaleAndTranslate(position))
 
                 val newComponent = when (relation) {
-                    Relation.Left -> {
-                        component.insertLeftComponent(blockComponent)
-                    }
-                    Relation.Top -> {
-                        component.insertTopComponent(blockComponent)
-                    }
-                    Relation.Right -> {
-                        component.insertRightComponent(blockComponent)
-                    }
-                    Relation.Bottom -> {
-                        component.insertBottomComponent(blockComponent)
-                    }
+                    Relation.Left -> component.insertLeftComponent(blockComponent)
+                    Relation.Top -> component.insertTopComponent(blockComponent)
+                    Relation.Right -> component.insertRightComponent(blockComponent)
+                    Relation.Bottom -> component.insertBottomComponent(blockComponent)
                 }
 
                 if (uiState.value.centralComponent == component) {
@@ -502,7 +494,7 @@ class BuilderViewModel(
         when {
             componentFocus is ComponentFocus.Block && uiState.value.centralComponent !is EmptyComponent -> {
                 val pointerMoveOffset = uiState.value.canvasUiState.pointerMoveOffset ?: Offset.Zero
-                val containerBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset), true)
+                val containerBlockComponent = components.getPointerContainer(scaleAndTranslate(pointerMoveOffset))
 
                 if (containerBlockComponent != null && containerBlockComponent != componentFocus.ref) {
                     val relation = containerBlockComponent.definePointRelation(scaleAndTranslate(pointerMoveOffset))
@@ -595,29 +587,19 @@ class BuilderViewModel(
         if (uiState.value.centralComponent is EmptyComponent) return
         val blockToInsert = (uiState.value.componentFocus as? ComponentFocus.Block)?.ref ?: return
 
-        if (target is BlockComponent) {
-            val newComponent = when (relation) {
-                Relation.Left -> {
-                    target.insertLeftComponent(blockToInsert)
-                }
-                Relation.Top -> {
-                    target.insertTopComponent(blockToInsert)
-                }
-                Relation.Right -> {
-                    target.insertRightComponent(blockToInsert)
-                }
-                Relation.Bottom -> {
-                    target.insertBottomComponent(blockToInsert)
-                }
-            }
+        val newComponent = when (relation) {
+            Relation.Left -> target.insertLeftComponent(blockToInsert)
+            Relation.Top -> target.insertTopComponent(blockToInsert)
+            Relation.Right -> target.insertRightComponent(blockToInsert)
+            Relation.Bottom -> target.insertBottomComponent(blockToInsert)
+        }
 
-            if (uiState.value.centralComponent == target) {
-                newComponent?.let { com ->
-                    _uiState.update {
-                        it.copy(
-                            centralComponent = com
-                        )
-                    }
+        if (uiState.value.centralComponent == target) {
+            newComponent?.let { com ->
+                _uiState.update {
+                    it.copy(
+                        centralComponent = com
+                    )
                 }
             }
         }

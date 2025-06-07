@@ -101,7 +101,7 @@ data class EndComponent(
             style = Fill
         )
         drawScope.drawRoundRect(
-            color = currentContainerColor,
+            color = currentFrameColor,
             topLeft = afterLinePosition,
             size = size.copy(height = size.height - COMPONENT_PADDING),
             cornerRadius = CornerRadius(ROUNDED_RECT_CORNER_RADIUS, ROUNDED_RECT_CORNER_RADIUS),
