@@ -77,9 +77,11 @@ class LocalFileManager(
                 outputStream.write(bytes)
             }
 
-            File(uid = uid, uri = it, type = type).apply {
-                dao.upsertFile(this)
-            }
+            val file = File(dao.getFileByUid(uid)?.id ?: 0, uid, it, type)
+
+            dao.upsertFile(file)
+
+            file
         }
     }
 
